@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050e03">
+  <title>KUKADES - Preparado para lo Inesperado</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green: #39ff14;
+      --green-dim: #1a7a0a;
+      --green-dark: #0d3d05;
+      --green-glow: rgba(57, 255, 20, 0.3);
+      --amber: #ffb000;
+      --red: #ff2222;
+      --bg: #050e03;
+      --bg2: #0a1f07;
+      --panel: #0a1f07;
+      --border: #1e4a12;
+      --text: #a8e89c;
+      --font-mono: 'Courier New', 'Share Tech Mono', monospace;
+      --font-display: 'Segoe UI', 'Orbitron', monospace;
+      --font-size-base: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: var(--font-size-base);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: all 0.3s ease;
+    }
+
+    body.font-small { --font-size-base: 12px; }
+    body.font-medium { --font-size-base: 16px; }
+    body.font-large { --font-size-base: 20px; }
+    body.font-xlarge { --font-size-base: 24px; }
+
+    .app-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--green-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid var(--green);
+    }
+
+    .header-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--green);
+    }
+
+    .header-subtitle {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+    }
+
+    .header-status {
+      margin-left: auto;
+      font-size: 0.6rem;
+      text-align: right;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .lang-btn, .theme-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--green-dark);
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 2s infinite;
+      margin-right: 4px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 4px;
+      gap: 4px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: var(--green-dim);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      transition: all 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--green);
+      text-shadow: 0 0 8px var(--green-glow);
+    }
+
+    .app-content {
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--green);
+    }
+
+    .section-badge {
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 0.6rem;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+      margin-top: 4px;
+    }
+
+    .dash-level-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .dash-level-value {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green-glow);
+    }
+
+    .dash-level-bar-wrap {
+      background: var(--bg2);
+      height: 8px;
+      border-radius: 4px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .dash-level-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .product-list, .material-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .product-card, .material-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+
+    .product-card.status-danger, .material-card.status-danger {
+      border-left: 3px solid var(--red);
+    }
+
+    .product-card.status-warn, .material-card.status-warn {
+      border-left: 3px solid var(--amber);
+    }
+
+    .product-photo {
+      width: 60px;
+      height: 60px;
+      background: var(--bg2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .product-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .product-cat {
+      display: inline-block;
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      font-size: 0.6rem;
+      color: var(--green-dim);
+    }
+
+    .exp-date.danger {
+      color: var(--red);
+    }
+
+    .exp-date.warn {
+      color: var(--amber);
+    }
+
+    .dependency-warning {
+      background: rgba(255, 34, 34, 0.1);
+      border: 1px solid var(--red);
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin-top: 6px;
+      font-size: 0.55rem;
+      color: var(--red);
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--green);
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 76px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+      background: var(--green-dark);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      color: var(--green);
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 99;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--green-dim);
+      margin-bottom: 6px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .deps-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .dep-tag {
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dep-tag-remove {
+      color: var(--red);
+      cursor: pointer;
+    }
+
+    .photo-upload {
+      width: 100%;
+      height: 120px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      background: var(--panel);
+      position: relative;
+    }
+
+    .photo-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .photo-preview {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      border: 1px solid;
+    }
+
+    .btn-primary {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--green-dim);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--green-dim);
+    }
+
+    .toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--green);
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-overlay.open {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--bg2);
+      border: 1px solid var(--red);
+      border-radius: 12px;
+      padding: 24px;
+      width: 280px;
+      text-align: center;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      padding-bottom: 4px;
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .settings-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .settings-block-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .person-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .menu-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .menu-meal {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-status {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <div class="header-logo">K</div>
+    <div>
+      <div class="header-title">KUKADES</div>
+      <div class="header-subtitle">PREPARADO PARA LO INESPERADO</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div><span class="status-dot"></span> SISTEMA ACTIVO</div>
+    <div>
+      <button class="lang-btn active" onclick="setLanguage('es')">ES</button>
+      <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-content">
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="section-header">
+      <div class="section-title">// ESTADO GENERAL</div>
+    </div>
+
+    <div class="dash-level-card">
+      <div class="dash-level-value" id="dashLevel">0%</div>
+      <div class="dash-level-bar-wrap">
+        <div class="dash-level-bar" id="dashBar"></div>
+      </div>
+      <div id="dashStatus">EVALUANDO...</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="statProducts">0</div><div class="stat-label">PRODUCTOS</div></div>
+      <div class="stat-card"><div class="stat-value" id="statMaterials">0</div><div class="stat-label">MATERIALES</div></div>
+      <div class="stat-card"><div class="stat-value" id="statDepsMissing">0</div><div class="stat-label">DEPENDENCIAS FALTANTES</div></div>
+      <div class="stat-card"><div class="stat-value" id="statAutonomyDays">0</div><div class="stat-label">DÍAS DE AUTONOMÍA</div></div>
+    </div>
+
+    <div id="activeAlerts" style="margin-bottom: 20px;"></div>
+
+    <div class="section-header"><div class="section-title">// MÓDULOS</div></div>
+    <div style="display: grid; gap: 12px;">
+      <button class="settings-block" onclick="showScreen('despensa')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🥫</div><div style="font-weight: bold;">DESPENSA</div><div style="font-size: 0.6rem; color: var(--green-dim);">Alimentos y suministros</div></button>
+      <button class="settings-block" onclick="showScreen('materiales')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🔧</div><div style="font-weight: bold;">MATERIALES</div><div style="font-size: 0.6rem; color: var(--green-dim);">Equipamiento y herramientas</div></button>
+      <button class="settings-block" onclick="showScreen('personas')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">👥</div><div style="font-weight: bold;">PERSONAS</div><div style="font-size: 0.6rem; color: var(--green-dim);">Perfiles y necesidades calóricas</div></button>
+      <button class="settings-block" onclick="showScreen('nutricion')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🥗</div><div style="font-weight: bold;">NUTRICIÓN Y MENÚS</div><div style="font-size: 0.6rem; color: var(--green-dim);">Calorías, macros y planificación</div></button>
+      <button class="settings-block" onclick="showScreen('guias')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">📖</div><div style="font-weight: bold;">GUÍAS</div><div style="font-size: 0.6rem; color: var(--green-dim);">Supervivencia y primeros auxilios</div></button>
+      <button class="settings-block" onclick="showScreen('ajustes')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">⚙️</div><div style="font-weight: bold;">AJUSTES</div><div style="font-size: 0.6rem; color: var(--green-dim);">Configuración</div></button>
+    </div>
+  </div>
+
+  <!-- DESPENSA -->
+  <div class="screen" id="screen-despensa">
+    <div class="section-header"><div class="section-title">// DESPENSA</div><div class="section-badge" id="despensaCount">0 items</div></div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="despensaTotal">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-value" id="despensaWarn" style="color: var(--amber);">0</div><div class="stat-label">Aviso</div></div>
+      <div class="stat-card"><div class="stat-value" id="despensaDanger" style="color: var(--red);">0</div><div class="stat-label">Caducados</div></div>
+      <div class="stat-card"><div class="stat-value" id="despensaLowStock">0</div><div class="stat-label">Stock bajo</div></div>
+    </div>
+    <div class="filter-tabs" id="productFilters">
+      <button class="filter-tab active" data-filter="all">TODOS</button>
+      <button class="filter-tab" data-filter="ALIMENTOS">🥫 ALIMENTOS</button>
+      <button class="filter-tab" data-filter="AGUA">💧 AGUA</button>
+      <button class="filter-tab" data-filter="MEDICINAS">💊 MEDICINAS</button>
+      <button class="filter-tab" data-filter="HIGIENE">🧼 HIGIENE</button>
+    </div>
+    <div id="productList" class="product-list"></div>
+  </div>
+
+  <!-- MATERIALES -->
+  <div class="screen" id="screen-materiales">
+    <div class="section-header"><div class="section-title">// MATERIALES</div><div class="section-badge" id="materialesCount">0 items</div></div>
+    <div class="filter-tabs" id="materialFilters">
+      <button class="filter-tab active" data-filter="all">TODOS</button>
+      <button class="filter-tab" data-filter="ILUMINACIÓN">💡 ILUMINACIÓN</button>
+      <button class="filter-tab" data-filter="HERRAMIENTAS">🔧 HERRAMIENTAS</button>
+      <button class="filter-tab" data-filter="ENERGÍA">⚡ ENERGÍA</button>
+      <button class="filter-tab" data-filter="COMUNICACIÓN">📻 COMUNICACIÓN</button>
+    </div>
+    <div id="materialList" class="product-list"></div>
+  </div>
+
+  <!-- PERSONAS -->
+  <div class="screen" id="screen-personas">
+    <div class="section-header"><div class="section-title">// PERSONAS</div><div class="section-badge" id="personasCount">0 personas</div></div>
+    <div id="personasList"></div>
+    <button class="btn btn-secondary" onclick="addPerson()" style="width: 100%;">+ AÑADIR PERSONA</button>
+  </div>
+
+  <!-- NUTRICIÓN Y MENÚS -->
+  <div class="screen" id="screen-nutricion">
+    <div class="section-header"><div class="section-title">// NUTRICIÓN Y MENÚS</div><div class="section-badge" id="nutBadge">0 KCAL</div></div>
+    
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="nutTotalKcal">0</div><div class="stat-label">Kcal totales</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutDailyNeeds">0</div><div class="stat-label">Kcal/día necesarias</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutAutonomyDays">0</div><div class="stat-label">Días de autonomía</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutRationLevel">100%</div><div class="stat-label">Racionamiento</div></div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">⚙️ CONFIGURACIÓN DE RACIONAMIENTO</div>
+      <div class="field">
+        <label>NIVEL DE RACIONAMIENTO</label>
+        <select id="rationSelect" onchange="updateRationLevel()">
+          <option value="100">Normal (100%)</option>
+          <option value="75">Racionamiento leve (75%)</option>
+          <option value="50">Racionamiento severo (50%)</option>
+          <option value="33">Supervivencia (33%)</option>
+          <option value="25">Mínimo vital (25%)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-header"><div class="section-title">// MACRONUTRIENTES TOTALES</div></div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="macroProtein">0</div><div class="stat-label">Proteínas (g)</div></div>
+      <div class="stat-card"><div class="stat-value" id="macroFat">0</div><div class="stat-label">Grasas (g)</div></div>
+      <div class="stat-card"><div class="stat-value" id="macroCarbs">0</div><div class="stat-label">Carbohidratos (g)</div></div>
+      <div class="stat-card"><div class="stat-value" id="macroFiber">0</div><div class="stat-label">Fibra (g)</div></div>
+    </div>
+
+    <div class="section-header"><div class="section-title">// MENÚ SUGERIDO (DÍA 1)</div></div>
+    <div id="menuContainer"></div>
+    <div style="display: flex; gap: 10px; margin-top: 12px;">
+      <button class="btn btn-secondary" onclick="changeMenuDay(-1)">◀ DÍA ANTERIOR</button>
+      <button class="btn btn-secondary" onclick="changeMenuDay(1)">SIGUIENTE DÍA ▶</button>
+    </div>
+  </div>
+
+  <!-- GUÍAS -->
+  <div class="screen" id="screen-guias">
+    <div class="section-header"><div class="section-title">// GUÍAS DE SUPERVIVENCIA</div></div>
+    <div style="display: grid; gap: 12px;">
+      <button class="settings-block" onclick="showGuide('fuego')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🔥</div><div style="font-weight: bold;">CÓMO HACER FUEGO</div><div style="font-size: 0.6rem; color: var(--green-dim);">Métodos de ignición sin cerillas</div></button>
+      <button class="settings-block" onclick="showGuide('orientacion')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🧭</div><div style="font-weight: bold;">ORIENTACIÓN SIN BRÚJULA</div><div style="font-size: 0.6rem; color: var(--green-dim);">Sol, estrellas y naturaleza</div></button>
+      <button class="settings-block" onclick="showGuide('primeros')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🩹</div><div style="font-weight: bold;">PRIMEROS AUXILIOS</div><div style="font-size: 0.6rem; color: var(--green-dim);">Heridas, RCP, quemaduras</div></button>
+      <button class="settings-block" onclick="showGuide('codigo')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">📻</div><div style="font-weight: bold;">CÓDIGO MORSE Y COMUNICACIÓN</div><div style="font-size: 0.6rem; color: var(--green-dim);">Señales de emergencia</div></button>
+      <button class="settings-block" onclick="showGuide('agua')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">💧</div><div style="font-weight: bold;">PURIFICACIÓN DE AGUA</div><div style="font-size: 0.6rem; color: var(--green-dim);">Métodos para obtener agua potable</div></button>
+      <button class="settings-block" onclick="showGuide('refugio')" style="text-align: left; cursor: pointer;"><div style="font-size: 1.2rem;">🏠</div><div style="font-weight: bold;">REFUGIO Y ABRIGO</div><div style="font-size: 0.6rem; color: var(--green-dim);">Construcción de refugios</div></button>
+    </div>
+    <div id="guideContent" style="margin-top: 20px; display: none;"></div>
+  </div>
+
+  <!-- AJUSTES -->
+  <div class="screen" id="screen-ajustes">
+    <div class="section-header"><div class="section-title">// AJUSTES</div></div>
+    <div class="settings-block"><div class="settings-block-title">🎨 APARIENCIA</div>
+      <div class="field"><label>TAMAÑO DE TEXTO</label><div><button class="filter-tab" onclick="setFontSize('small')">PEQUEÑO</button><button class="filter-tab" onclick="setFontSize('medium')">MEDIANO</button><button class="filter-tab" onclick="setFontSize('large')">GRANDE</button><button class="filter-tab" onclick="setFontSize('xlarge')">MUY GRANDE</button></div></div>
+      <div class="field"><label>COLOR PRINCIPAL</label><input type="color" id="accentColorPicker" value="#39ff14" onchange="setAccentColor(this.value)"></div>
+      <div class="field"><label>TEMA</label><div><button class="filter-tab" onclick="setTheme('dark')">OSCURO</button><button class="filter-tab" onclick="setTheme('light')">CLARO</button><button class="filter-tab" onclick="setTheme('highContrast')">ALTO CONTRASTE</button></div></div>
+    </div>
+    <div class="settings-block"><div class="settings-block-title">🔔 ALERTAS</div>
+      <div class="field"><label>DÍAS DE ANTELACIÓN CADUCIDAD</label><div><button class="filter-tab" onclick="setWarnDays(30)">30 DÍAS</button><button class="filter-tab" onclick="setWarnDays(60)">60 DÍAS</button><button class="filter-tab" onclick="setWarnDays(90)">90 DÍAS</button></div></div>
+    </div>
+    <div class="settings-block"><div class="settings-block-title">💾 DATOS</div>
+      <button class="btn btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 8px;">📤 EXPORTAR DATOS</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%; margin-bottom: 8px;">📥 IMPORTAR DATOS</button>
+      <button class="btn btn-secondary" onclick="resetAllData()" style="width: 100%; background: rgba(255,34,34,0.1); border-color: var(--red); color: var(--red);">🗑️ RESTABLECER TODO</button>
+    </div>
+    <div style="text-align: center; margin-top: 20px; font-size: 0.55rem; color: var(--green-dim);">KUKADES v4.0 - Preparado para lo Inesperado</div>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showScreen('dashboard', this)">🏠 INICIO</button>
+  <button class="nav-item" onclick="showScreen('despensa', this)">🥫 DESPENSA</button>
+  <button class="nav-item" onclick="showScreen('materiales', this)">🔧 MATERIALES</button>
+  <button class="nav-item" onclick="showScreen('ajustes', this)">⚙️ AJUSTES</button>
+</nav>
+
+<!-- MODAL PRODUCTO -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">AÑADIR PRODUCTO</div>
+    <div class="field"><label>FOTO</label><div class="photo-upload" id="productPhotoArea" onclick="triggerProductPhoto()"><input type="file" id="productPhotoInput" accept="image/*" capture="environment" onchange="handleProductPhoto(event)"><div class="photo-upload-icon">📷</div><div class="photo-upload-text">Tomar foto o seleccionar de galería</div></div><div id="productPhotoPreviewWrap" style="display:none;"><img class="photo-preview" id="productPhotoPreview"><div style="display:flex;gap:8px;margin-top:8px;"><button class="btn btn-secondary" onclick="triggerProductPhoto()">📷 CAMBIAR</button><button class="btn btn-secondary" onclick="removeProductPhoto()">🗑️ QUITAR</button></div></div></div>
+    <div class="field"><label>NOMBRE *</label><input type="text" id="productName" placeholder="Ej: Atún en aceite"></div>
+    <div class="field-row"><div class="field"><label>CATEGORÍA</label><select id="productCat" onchange="toggleProductFields()"><option value="ALIMENTOS">🥫 ALIMENTOS</option><option value="AGUA">💧 AGUA</option><option value="MEDICINAS">💊 MEDICINAS</option><option value="HIGIENE">🧼 HIGIENE</option></select></div><div class="field"><label>CANTIDAD</label><input type="number" id="productQty" value="1" step="any"></div></div>
+    <div class="field-row"><div class="field"><label>UNIDAD</label><select id="productUnit"><option value="uds">uds</option><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option><option value="latas">latas</option></select></div><div class="field"><label>STOCK MÍNIMO</label><input type="number" id="productMinQty" step="any"></div></div>
+    <div class="field-row"><div class="field"><label>FECHA CADUCIDAD</label><input type="date" id="productExp"></div><div class="field"><label>UBICACIÓN</label><input type="text" id="productLoc"></div></div>
+    
+    <div id="nutritionBlock" style="display:none;">
+      <div style="font-size:0.65rem;color:var(--green);margin:12px 0 8px;border-bottom:1px solid var(--border);">🥗 DATOS NUTRICIONALES (por 100g/ml)</div>
+      <button class="btn btn-secondary" onclick="autoFillNutrition()" style="margin-bottom:12px;width:100%;">🤖 RELLENAR AUTOMÁTICAMENTE CON IA</button>
+      <div class="field-row"><div class="field"><label>PESO NETO (g)</label><input type="number" id="productNetWeight" step="any"></div><div class="field"><label>CALORÍAS (kcal)</label><input type="number" id="productKcal" step="any"></div></div>
+      <div class="field-row"><div class="field"><label>PROTEÍNAS (g)</label><input type="number" id="productProtein" step="0.1"></div><div class="field"><label>GRASAS (g)</label><input type="number" id="productFat" step="0.1"></div></div>
+      <div class="field-row"><div class="field"><label>CARBOHIDRATOS (g)</label><input type="number" id="productCarbs" step="0.1"></div><div class="field"><label>FIBRA (g)</label><input type="number" id="productFiber" step="0.1"></div></div>
+    </div>
+    
+    <div id="medicineBlock" style="display:none;">
+      <div style="font-size:0.65rem;color:var(--green);margin:12px 0 8px;border-bottom:1px solid var(--border);">💊 INFORMACIÓN MÉDICA</div>
+      <div class="field"><label>PARA QUÉ SIRVE</label><input type="text" id="productMedFor" placeholder="Ej: Analgésico, antiinflamatorio"></div>
+      <div class="field"><label>CÓMO TOMAR</label><input type="text" id="productMedHow" placeholder="Ej: 1 comprimido cada 8h"></div>
+      <div class="field"><label>EFECTOS SECUNDARIOS</label><textarea id="productMedSide" rows="2" placeholder="Ej: Somnolencia, náuseas..."></textarea></div>
+      <div class="field"><label>CONTRAINDICACIONES</label><textarea id="productMedContra" rows="2" placeholder="Ej: No tomar con alcohol, embarazo..."></textarea></div>
+    </div>
+    
+    <div class="field"><label>NOTAS</label><textarea id="productNotes" rows="2"></textarea></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()">CANCELAR</button><button class="btn btn-primary" onclick="saveProduct()">GUARDAR</button></div>
+  </div>
+</div>
+
+<!-- MODAL MATERIAL -->
+<div class="modal-overlay" id="materialModal">
+  <div class="modal">
+    <div class="modal-title" id="matModalTitle">AÑADIR MATERIAL</div>
+    <div class="field"><label>FOTO</label><div class="photo-upload" id="materialPhotoArea" onclick="triggerMaterialPhoto()"><input type="file" id="materialPhotoInput" accept="image/*" capture="environment" onchange="handleMaterialPhoto(event)"><div class="photo-upload-icon">📷</div><div class="photo-upload-text">Tomar foto o seleccionar de galería</div></div><div id="materialPhotoPreviewWrap" style="display:none;"><img class="photo-preview" id="materialPhotoPreview"><div style="display:flex;gap:8px;margin-top:8px;"><button class="btn btn-secondary" onclick="triggerMaterialPhoto()">📷 CAMBIAR</button><button class="btn btn-secondary" onclick="removeMaterialPhoto()">🗑️ QUITAR</button></div></div></div>
+    <div class="field"><label>NOMBRE *</label><input type="text" id="materialName" placeholder="Ej: Linterna frontal"></div>
+    <div class="field-row"><div class="field"><label>CATEGORÍA</label><select id="materialCat" onchange="toggleMaterialFields()"><option value="ILUMINACIÓN">💡 ILUMINACIÓN</option><option value="HERRAMIENTAS">🔧 HERRAMIENTAS</option><option value="ENERGÍA">⚡ ENERGÍA</option><option value="COMUNICACIÓN">📻 COMUNICACIÓN</option></select></div><div class="field"><label>ESTADO</label><select id="materialStatus"><option value="OPERATIVO">✅ OPERATIVO</option><option value="REVISAR">⚠️ REVISAR</option><option value="AVERÍA">❌ AVERÍA</option></select></div></div>
+    <div class="field-row"><div class="field"><label>CANTIDAD</label><input type="number" id="materialQty" value="1"></div><div class="field"><label>UBICACIÓN</label><input type="text" id="materialLoc"></div></div>
+    
+    <div class="field"><label>DEPENDENCIAS (qué necesita este material)</label><div style="display:flex;gap:8px;"><input type="text" id="depSearch" class="search-input" placeholder="Buscar material existente..." style="flex:1;" oninput="searchDependencies(this.value)"><button class="btn btn-secondary" onclick="addCustomDependency()">➕ NUEVA</button></div><div id="depResults" class="deps-list" style="flex-wrap:wrap;margin-top:8px;"></div><div id="selectedDeps" class="deps-list"></div></div>
+    
+    <div id="batteryBlock" style="display:none;">
+      <div style="font-size:0.65rem;color:var(--green);margin:12px 0 8px;border-bottom:1px solid var(--border);">🔋 INFORMACIÓN DE BATERÍA</div>
+      <div class="field-row"><div class="field"><label>ÚLTIMA RECARGA</label><input type="date" id="materialLastCharge"></div><div class="field"><label>RECARGAR CADA (días)</label><input type="number" id="materialChargeInterval" value="90"></div></div>
+      <div class="field"><label>TIPO DE BATERÍA</label><input type="text" id="materialBatteryType" placeholder="Ej: 18650, AAA, AA, 12V"></div>
+    </div>
+    
+    <div class="field"><label>INSTRUCCIONES</label><textarea id="materialInstructions" rows="2"></textarea></div>
+    <div class="field"><label>NOTAS</label><textarea id="materialNotes" rows="2"></textarea></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="closeMatModal()">CANCELAR</button><button class="btn btn-primary" onclick="saveMaterial()">GUARDAR</button></div>
+  </div>
+</div>
+
+<!-- MODAL PERSONA -->
+<div class="modal-overlay" id="personModal">
+  <div class="modal">
+    <div class="modal-title" id="personModalTitle">AÑADIR PERSONA</div>
+    <div class="field"><label>NOMBRE</label><input type="text" id="personName" placeholder="Ej: Juan"></div>
+    <div class="field"><label>EDAD</label><select id="personAge"><option value="child">👶 Niño (menos de 20 años)</option><option value="adult">🧑 Adulto (20-50 años)</option><option value="senior">👴 Anciano (más de 50 años)</option></select></div>
+    <div class="field"><label>PESO (kg, opcional)</label><input type="number" id="personWeight" step="any" placeholder="Ej: 70"></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="closePersonModal()">CANCELAR</button><button class="btn btn-primary" onclick="savePerson()">GUARDAR</button></div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="modal-title" style="color:var(--red);">⚠ CONFIRMAR</div><div id="confirmText">¿Estás seguro?</div><div class="btn-row" style="margin-top:20px;"><button class="btn btn-secondary" onclick="closeConfirm()">CANCELAR</button><button class="btn btn-primary" id="confirmBtn" onclick="executeConfirm()">ACEPTAR</button></div></div></div>
+
+<div class="toast" id="toast">Mensaje</div>
+
+<script>
+  // ============ BASE DE DATOS IA ============
+  const NUTRITION_DB = {
+    'arroz': { kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, fiber: 0.4 },
+    'lentejas': { kcal: 116, protein: 9, fat: 0.4, carbs: 20, fiber: 8 },
+    'garbanzos': { kcal: 139, protein: 8.9, fat: 2.6, carbs: 23, fiber: 7.6 },
+    'atun': { kcal: 184, protein: 23, fat: 10, carbs: 0, fiber: 0 },
+    'pollo': { kcal: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0 },
+    'huevo': { kcal: 155, protein: 13, fat: 11, carbs: 1.1, fiber: 0 },
+    'leche': { kcal: 42, protein: 3.4, fat: 1, carbs: 4.8, fiber: 0 },
+    'pan': { kcal: 265, protein: 9, fat: 3.2, carbs: 49, fiber: 2.7 },
+    'pasta': { kcal: 131, protein: 5, fat: 1.1, carbs: 25, fiber: 1.8 },
+    'avena': { kcal: 389, protein: 16.9, fat: 6.9, carbs: 66, fiber: 10.6 }
+  };
+
+  const MEDICINE_DB = {
+    'ibuprofeno': { for: 'Dolor, fiebre, inflamación', how: '1 comprimido (400mg) cada 8h', side: 'Molestias estomacales, náuseas', contra: 'Úlceras, problemas renales, asma' },
+    'paracetamol': { for: 'Dolor, fiebre', how: '1 comprimido (500mg) cada 6-8h', side: 'Raro, posible daño hepático en sobredosis', contra: 'Enfermedad hepática' },
+    'aspirina': { for: 'Dolor, fiebre, antiagregante', how: '1 comprimido (500mg) cada 8h', side: 'Irritación gástrica, sangrado', contra: 'Úlceras, hemofilia, niños' }
+  };
+
+  async function autoFillNutrition() {
+    const name = document.getElementById('productName').value.toLowerCase().trim();
+    if (!name) { showToast('⚠ Introduce el nombre del producto primero', true); return; }
+    showToast('🤖 Buscando datos nutricionales...');
+    let found = null;
+    for (let [key, data] of Object.entries(NUTRITION_DB)) {
+      if (name.includes(key) || key.includes(name)) { found = data; break; }
+    }
+    if (found) {
+      document.getElementById('productNetWeight').value = 100;
+      document.getElementById('productKcal').value = found.kcal;
+      document.getElementById('productProtein').value = found.protein;
+      document.getElementById('productFat').value = found.fat;
+      document.getElementById('productCarbs').value = found.carbs;
+      document.getElementById('productFiber').value = found.fiber || 0;
+      showToast('✅ Datos nutricionales cargados automáticamente');
+    } else showToast('❌ Producto no encontrado', true);
+  }
+
+  async function autoFillMedicine() {
+    const name = document.getElementById('productName').value.toLowerCase().trim();
+    if (!name) { showToast('⚠ Introduce el nombre del medicamento', true); return; }
+    let found = null;
+    for (let [key, data] of Object.entries(MEDICINE_DB)) {
+      if (name.includes(key) || key.includes(name)) { found = data; break; }
+    }
+    if (found) {
+      document.getElementById('productMedFor').value = found.for;
+      document.getElementById('productMedHow').value = found.how;
+      document.getElementById('productMedSide').value = found.side;
+      document.getElementById('productMedContra').value = found.contra;
+      showToast('✅ Información médica cargada automáticamente');
+    } else showToast('❌ Medicamento no encontrado', true);
+  }
+
+  // ============ TRADUCCIONES ============
+  const translations = {
+    es: { appName: 'KUKADES', subtitle: 'PREPARADO PARA LO INESPERADO', systemActive: 'SISTEMA ACTIVO' },
+    en: { appName: 'KUKADES', subtitle: 'READY FOR THE UNEXPECTED', systemActive: 'SYSTEM ACTIVE' }
+  };
+  let currentLang = 'es';
+  function t(key) { return translations[currentLang]?.[key] || translations.es[key] || key; }
+  function setLanguage(lang) { currentLang = lang; localStorage.setItem('kukades_lang', lang); document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); showToast('Idioma cambiado a ' + lang); }
+
+  // ============ DATOS ============
+  let products = [], materials = [], persons = [];
+  let currentFilter = 'all', currentMatFilter = 'all';
+  let editingProductId = null, editingMaterialId = null, editingPersonId = null;
+  let pendingAction = null;
+  let productPhotoData = null, materialPhotoData = null;
+  let currentMenuDay = 1;
+  let rationLevel = 100;
+  
+  let config = { personCount: 1, warnDays: 60 };
+
+  function loadData() {
+    const savedProducts = localStorage.getItem('kukades_products');
+    if (savedProducts) products = JSON.parse(savedProducts);
+    else products = [
+      { id: Date.now()+1, name: 'Agua embotellada', cat: 'AGUA', qty: 12, unit: 'L', exp: '', loc: 'Trastero', minQty: 10 },
+      { id: Date.now()+2, name: 'Arroz', cat: 'ALIMENTOS', qty: 5, unit: 'kg', exp: '', loc: 'Despensa', minQty: 2, netWeight: 1000, kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, fiber: 0.4 },
+      { id: Date.now()+3, name: 'Atún', cat: 'ALIMENTOS', qty: 24, unit: 'latas', exp: '', loc: 'Despensa', minQty: 12, netWeight: 150, kcal: 184, protein: 23, fat: 10 },
+      { id: Date.now()+4, name: 'Ibuprofeno', cat: 'MEDICINAS', qty: 2, unit: 'cajas', exp: '', loc: 'Botiquín', minQty: 1, medFor: 'Dolor y fiebre', medHow: '1 cada 8h', medSide: 'Molestias estomacales', medContra: 'No con alcohol' }
+    ];
+    
+    const savedMaterials = localStorage.getItem('kukades_materials');
+    if (savedMaterials) materials = JSON.parse(savedMaterials);
+    else materials = [
+      { id: Date.now()+100, name: 'Linterna LED', cat: 'ILUMINACIÓN', status: 'OPERATIVO', qty: 2, loc: 'Cajón', dependencies: [{ name: 'Pilas AAA', required: 3, rechargeable: false, expiryDate: '' }] },
+      { id: Date.now()+101, name: 'Pilas AAA', cat: 'ENERGÍA', status: 'OPERATIVO', qty: 12, loc: 'Cajón', batteryType: 'AAA', isBattery: true, expiryDate: '2028-12-31' },
+      { id: Date.now()+102, name: 'Batería 18650', cat: 'ENERGÍA', status: 'OPERATIVO', qty: 4, loc: 'Cajón', batteryType: '18650', isBattery: true, rechargeable: true, lastCharge: new Date().toISOString().split('T')[0], chargeInterval: 90 },
+      { id: Date.now()+103, name: 'Cargador solar 20W', cat: 'ENERGÍA', status: 'OPERATIVO', qty: 1, loc: 'Mochila', canCharge: ['Batería 18650', 'Power bank'] }
+    ];
+    
+    const savedPersons = localStorage.getItem('kukades_persons');
+    if (savedPersons) persons = JSON.parse(savedPersons);
+    else persons = [
+      { id: Date.now()+200, name: 'Adulto 1', ageGroup: 'adult', weight: 75, dailyCalories: 2200 },
+      { id: Date.now()+201, name: 'Adulto 2', ageGroup: 'adult', weight: 65, dailyCalories: 2000 }
+    ];
+    
+    const savedConfig = localStorage.getItem('kukades_config');
+    if (savedConfig) config = JSON.parse(savedConfig);
+    
+    updateAll();
+  }
+
+  function saveProducts() { localStorage.setItem('kukades_products', JSON.stringify(products)); }
+  function saveMaterials() { localStorage.setItem('kukades_materials', JSON.stringify(materials)); }
+  function savePersons() { localStorage.setItem('kukades_persons', JSON.stringify(persons)); }
+  function saveConfig() { localStorage.setItem('kukades_config', JSON.stringify(config)); }
+
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function getExpStatus(expDate) {
+    if (!expDate) return 'ok';
+    const diff = Math.floor((new Date(expDate) - new Date()) / (1000*60*60*24));
+    if (diff < 0) return 'danger';
+    if (diff <= config.warnDays) return 'warn';
+    return 'ok';
+  }
+
+  function getBatteryStatus(mat) {
+    if (!mat.lastCharge || !mat.chargeInterval) return null;
+    const daysSince = Math.floor((new Date() - new Date(mat.lastCharge)) / (1000*60*60*24));
+    if (daysSince > mat.chargeInterval) return { status: 'danger', message: `🔴 Recarga pendiente (${daysSince - mat.chargeInterval} días tarde)` };
+    if (daysSince > mat.chargeInterval * 0.7) return { status: 'warn', message: `🟡 Recargar en ${mat.chargeInterval - daysSince} días` };
+    return null;
+  }
+
+  function checkDependencies(material) {
+    if (!material.dependencies || material.dependencies.length === 0) return [];
+    const missing = [];
+    for (let dep of material.dependencies) {
+      const battery = materials.find(m => m.name === dep.name || m.batteryType === dep.name);
+      if (!battery) missing.push({ name: dep.name, required: dep.required, available: 0 });
+      else if (battery.qty < dep.required) missing.push({ name: dep.name, required: dep.required, available: battery.qty });
+    }
+    return missing;
+  }
+
+  function getTotalCalories() {
+    return products.filter(p => p.cat === 'ALIMENTOS' && p.kcal && p.netWeight)
+      .reduce((sum, p) => sum + (p.kcal * (p.netWeight / 100) * p.qty), 0);
+  }
+
+  function getTotalMacros() {
+    let macros = { protein: 0, fat: 0, carbs: 0, fiber: 0 };
+    products.filter(p => p.cat === 'ALIMENTOS').forEach(p => {
+      if (p.netWeight && p.qty) {
+        const factor = (p.netWeight * p.qty) / 100;
+        macros.protein += (p.protein || 0) * factor;
+        macros.fat += (p.fat || 0) * factor;
+        macros.carbs += (p.carbs || 0) * factor;
+        macros.fiber += (p.fiber || 0) * factor;
+      }
+    });
+    return macros;
+  }
+
+  function getDailyNeeds() {
+    return persons.reduce((sum, p) => {
+      if (p.ageGroup === 'child') return sum + 1800;
+      if (p.ageGroup === 'senior') return sum + 1900;
+      return sum + (p.dailyCalories || 2200);
+    }, 0);
+  }
+
+  function getAutonomyDays() {
+    const totalCal = getTotalCalories();
+    const daily = getDailyNeeds() * (rationLevel / 100);
+    return daily > 0 ? Math.floor(totalCal / daily) : 0;
+  }
+
+  function getMissingDependenciesCount() {
+    return materials.reduce((sum, m) => sum + checkDependencies(m).length, 0);
+  }
+
+  function generateMenu(day) {
+    const foods = products.filter(p => p.cat === 'ALIMENTOS' && p.kcal && p.netWeight);
+    if (foods.length === 0) return '<div class="empty-state">🥗 Añade alimentos con datos nutricionales</div>';
+    
+    const dailyNeeds = getDailyNeeds() * (rationLevel / 100);
+    const meals = [{ name: '🌅 DESAYUNO', pct: 0.25 }, { name: '☀️ ALMUERZO', pct: 0.35 }, { name: '🌙 CENA', pct: 0.3 }, { name: '🍎 SNACK', pct: 0.1 }];
+    let html = '';
+    let idx = (day * 7) % foods.length;
+    
+    for (let meal of meals) {
+      const mealKcal = dailyNeeds * meal.pct;
+      let assigned = [], accumulated = 0;
+      for (let i = 0; i < 3 && accumulated < mealKcal * 0.8; i++) {
+        const food = foods[(idx + i) % foods.length];
+        const kcalPer100 = food.kcal;
+        const portionG = Math.min(200, Math.round((mealKcal * 0.3) / kcalPer100 * 100));
+        if (portionG > 0) {
+          assigned.push({ name: food.name, grams: portionG, kcal: Math.round((portionG / 100) * kcalPer100) });
+          accumulated += portionG;
+        }
+      }
+      html += `<div class="menu-item"><div class="menu-meal">${meal.name} · ~${Math.round(mealKcal)} kcal</div>${assigned.map(i => `<div>${i.name} · ${i.grams}g (${i.kcal} kcal)</div>`).join('')}</div>`;
+    }
+    return html;
+  }
+
+  function renderDashboard() {
+    const totalProducts = products.length;
+    const totalMaterials = materials.length;
+    const missingDeps = getMissingDependenciesCount();
+    const autonomyDays = getAutonomyDays();
+    const expired = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    
+    let score = 100;
+    if (totalProducts > 0) score -= (expired / totalProducts) * 30;
+    if (totalMaterials > 0) score -= (missingDeps / totalMaterials) * 30;
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    
+    document.getElementById('dashLevel').innerText = score + '%';
+    document.getElementById('dashBar').style.width = score + '%';
+    document.getElementById('statProducts').innerText = totalProducts;
+    document.getElementById('statMaterials').innerText = totalMaterials;
+    document.getElementById('statDepsMissing').innerText = missingDeps;
+    document.getElementById('statAutonomyDays').innerText = autonomyDays;
+    
+    const alerts = [];
+    if (expired > 0) alerts.push(`<div class="stat-card" style="border-left-color:var(--red);"><span style="color:var(--red);">⚠️ ${expired} producto(s) caducados</span></div>`);
+    if (missingDeps > 0) alerts.push(`<div class="stat-card" style="border-left-color:var(--red);"><span style="color:var(--red);">🔗 ${missingDeps} dependencia(s) insatisfechas</span></div>`);
+    document.getElementById('activeAlerts').innerHTML = alerts.length ? `<div class="section-header"><div class="section-title">// ALERTAS ACTIVAS</div></div><div class="stats-bar">${alerts.join('')}</div>` : '';
+  }
+
+  function renderProducts() {
+    let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+    const expired = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const lowStock = products.filter(p => p.minQty && p.qty < p.minQty).length;
+    document.getElementById('despensaTotal').innerText = products.length;
+    document.getElementById('despensaWarn').innerText = warn;
+    document.getElementById('despensaDanger').innerText = expired;
+    document.getElementById('despensaLowStock').innerText = lowStock;
+    document.getElementById('despensaCount').innerText = filtered.length + ' items';
+    
+    const container = document.getElementById('productList');
+    if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">📦 No hay productos<br>Presiona + para añadir</div>'; return; }
+    container.innerHTML = filtered.map(p => `<div class="product-card status-${getExpStatus(p.exp)}"><div class="product-photo">${p.photo ? `<img src="${p.photo}">` : (p.cat === 'ALIMENTOS' ? '🥫' : p.cat === 'AGUA' ? '💧' : p.cat === 'MEDICINAS' ? '💊' : '🧼')}</div><div class="product-info"><div class="product-cat">${p.cat}${p.minQty && p.qty < p.minQty ? '<span class="alert-badge" style="margin-left:6px;">⚠ STOCK BAJO</span>' : ''}</div><div class="product-name">${p.name}</div><div class="product-meta">${p.qty} ${p.unit}${p.loc ? ` · 📍 ${p.loc}` : ''}</div><div class="exp-date ${getExpStatus(p.exp)}">${p.exp ? (getExpStatus(p.exp) === 'danger' ? '⛔ CADUCADO' : getExpStatus(p.exp) === 'warn' ? '⚠️ PRÓXIMO A CADUCAR' : '🟢 Válido') : 'Sin fecha'}</div>${p.notes ? `<div class="product-meta">📝 ${p.notes.substring(0,50)}</div>` : ''}</div><div><button class="btn-icon" onclick="editProduct(${p.id})">✏️</button><button class="btn-icon" onclick="deleteProduct(${p.id})" style="margin-left:4px;">🗑️</button></div></div>`).join('');
+  }
+
+  function renderMaterials() {
+    let filtered = currentMatFilter === 'all' ? materials : materials.filter(m => m.cat === currentMatFilter);
+    document.getElementById('materialesCount').innerText = filtered.length + ' items';
+    const container = document.getElementById('materialList');
+    if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">🔧 No hay materiales<br>Presiona + para añadir</div>'; return; }
+    container.innerHTML = filtered.map(m => {
+      const batteryStatus = getBatteryStatus(m);
+      const missingDeps = checkDependencies(m);
+      let statusClass = m.status === 'AVERÍA' ? 'danger' : (m.status === 'REVISAR' ? 'warn' : 'ok');
+      if (batteryStatus) statusClass = batteryStatus.status;
+      return `<div class="material-card status-${statusClass}"><div class="product-photo">${m.photo ? `<img src="${m.photo}">` : (m.cat === 'ILUMINACIÓN' ? '💡' : m.cat === 'HERRAMIENTAS' ? '🔧' : '⚡')}</div><div class="product-info"><div class="product-cat">${m.cat}</div><div class="product-name">${m.name}</div><div class="product-meta">${m.qty} uds · ${m.status}${m.loc ? ` · 📍 ${m.loc}` : ''}</div>${batteryStatus ? `<div class="exp-date ${batteryStatus.status}">${batteryStatus.message}</div>` : ''}${missingDeps.length ? `<div class="dependency-warning">⚠️ Falta: ${missingDeps.map(d => `${d.name} (${d.available}/${d.required})`).join(', ')}</div>` : ''}</div><div><button class="btn-icon" onclick="editMaterial(${m.id})">✏️</button><button class="btn-icon" onclick="deleteMaterial(${m.id})" style="margin-left:4px;">🗑️</button></div></div>`;
+    }).join('');
+  }
+
+  function renderPersons() {
+    document.getElementById('personasCount').innerText = persons.length + ' personas';
+    const container = document.getElementById('personasList');
+    if (persons.length === 0) { container.innerHTML = '<div class="empty-state">👥 No hay personas<br>Presiona + AÑADIR PERSONA</div>'; return; }
+    container.innerHTML = persons.map(p => `<div class="person-card"><div><strong>${p.name}</strong> · ${p.ageGroup === 'child' ? '👶 Niño' : p.ageGroup === 'senior' ? '👴 Anciano' : '🧑 Adulto'} · ${p.dailyCalories} kcal/día</div><div style="margin-top:8px;"><button class="btn-icon" onclick="editPerson(${p.id})">✏️</button><button class="btn-icon" onclick="deletePerson(${p.id})" style="margin-left:4px;">🗑️</button></div></div>`).join('');
+  }
+
+  function renderNutrition() {
+    const totalKcal = getTotalCalories();
+    const dailyNeeds = getDailyNeeds();
+    const autonomy = getAutonomyDays();
+    const macros = getTotalMacros();
+    document.getElementById('nutTotalKcal').innerText = Math.round(totalKcal).toLocaleString();
+    document.getElementById('nutDailyNeeds').innerText = Math.round(dailyNeeds * (rationLevel/100)).toLocaleString();
+    document.getElementById('nutAutonomyDays').innerText = autonomy;
+    document.getElementById('nutRationLevel').innerText = rationLevel + '%';
+    document.getElementById('macroProtein').innerText = Math.round(macros.protein);
+    document.getElementById('macroFat').innerText = Math.round(macros.fat);
+    document.getElementById('macroCarbs').innerText = Math.round(macros.carbs);
+    document.getElementById('macroFiber').innerText = Math.round(macros.fiber);
+    document.getElementById('menuContainer').innerHTML = generateMenu(currentMenuDay);
+  }
+
+  function updateRationLevel() { rationLevel = parseInt(document.getElementById('rationSelect').value); localStorage.setItem('kukades_ration', rationLevel); renderNutrition(); renderDashboard(); }
+  function changeMenuDay(delta) { currentMenuDay += delta; if (currentMenuDay < 1) currentMenuDay = 1; renderNutrition(); }
+
+  function updateAll() { renderDashboard(); renderProducts(); renderMaterials(); renderPersons(); renderNutrition(); }
+
+  // ============ CRUD PRODUCTOS ============
+  function openAddModal() {
+    if (document.getElementById('screen-despensa').classList.contains('active')) {
+      editingProductId = null; productPhotoData = null; removeProductPhoto();
+      document.getElementById('modalTitle').innerHTML = 'AÑADIR PRODUCTO';
+      document.getElementById('productName').value = ''; document.getElementById('productCat').value = 'ALIMENTOS';
+      document.getElementById('productQty').value = '1'; document.getElementById('productUnit').value = 'uds';
+      document.getElementById('productMinQty').value = ''; document.getElementById('productExp').value = '';
+      document.getElementById('productLoc').value = ''; document.getElementById('productNotes').value = '';
+      document.getElementById('productNetWeight').value = ''; document.getElementById('productKcal').value = '';
+      document.getElementById('productProtein').value = ''; document.getElementById('productFat').value = '';
+      document.getElementById('productCarbs').value = ''; document.getElementById('productFiber').value = '';
+      document.getElementById('productMedFor').value = ''; document.getElementById('productMedHow').value = '';
+      document.getElementById('productMedSide').value = ''; document.getElementById('productMedContra').value = '';
+      toggleProductFields(); document.getElementById('productModal').classList.add('open');
+    } else if (document.getElementById('screen-materiales').classList.contains('active')) openMatModal();
+  }
+
+  function toggleProductFields() {
+    const cat = document.getElementById('productCat').value;
+    document.getElementById('nutritionBlock').style.display = cat === 'ALIMENTOS' ? 'block' : 'none';
+    document.getElementById('medicineBlock').style.display = cat === 'MEDICINAS' ? 'block' : 'none';
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('productName').value.trim();
+    if (!name) { showToast('⚠ Introduce un nombre', true); return; }
+    const product = { id: editingProductId || Date.now(), name, cat: document.getElementById('productCat').value, qty: parseFloat(document.getElementById('productQty').value) || 1, unit: document.getElementById('productUnit').value, minQty: document.getElementById('productMinQty').value ? parseFloat(document.getElementById('productMinQty').value) : null, exp: document.getElementById('productExp').value, loc: document.getElementById('productLoc').value, notes: document.getElementById('productNotes').value, photo: productPhotoData || null, netWeight: document.getElementById('productNetWeight').value ? parseFloat(document.getElementById('productNetWeight').value) : null, kcal: document.getElementById('productKcal').value ? parseFloat(document.getElementById('productKcal').value) : null, protein: document.getElementById('productProtein').value ? parseFloat(document.getElementById('productProtein').value) : null, fat: document.getElementById('productFat').value ? parseFloat(document.getElementById('productFat').value) : null, carbs: document.getElementById('productCarbs').value ? parseFloat(document.getElementById('productCarbs').value) : null, fiber: document.getElementById('productFiber').value ? parseFloat(document.getElementById('productFiber').value) : null, medFor: document.getElementById('productMedFor').value, medHow: document.getElementById('productMedHow').value, medSide: document.getElementById('productMedSide').value, medContra: document.getElementById('productMedContra').value };
+    if (editingProductId) { const idx = products.findIndex(p => p.id === editingProductId); if (idx !== -1) products[idx] = product; showToast('✅ Producto actualizado'); } else { products.push(product); showToast('✅ Producto añadido'); }
+    saveProducts(); closeModal(); renderProducts(); updateDashboard(); renderNutrition();
+  }
+
+  function editProduct(id) { const p = products.find(p => p.id === id); if (!p) return; editingProductId = id; productPhotoData = p.photo || null; document.getElementById('modalTitle').innerHTML = 'EDITAR PRODUCTO'; document.getElementById('productName').value = p.name; document.getElementById('productCat').value = p.cat; document.getElementById('productQty').value = p.qty; document.getElementById('productUnit').value = p.unit; document.getElementById('productMinQty').value = p.minQty || ''; document.getElementById('productExp').value = p.exp || ''; document.getElementById('productLoc').value = p.loc || ''; document.getElementById('productNotes').value = p.notes || ''; document.getElementById('productNetWeight').value = p.netWeight || ''; document.getElementById('productKcal').value = p.kcal || ''; document.getElementById('productProtein').value = p.protein || ''; document.getElementById('productFat').value = p.fat || ''; document.getElementById('productCarbs').value = p.carbs || ''; document.getElementById('productFiber').value = p.fiber || ''; document.getElementById('productMedFor').value = p.medFor || ''; document.getElementById('productMedHow').value = p.medHow || ''; document.getElementById('productMedSide').value = p.medSide || ''; document.getElementById('productMedContra').value = p.medContra || ''; if (p.photo) { document.getElementById('productPhotoPreview').src = p.photo; document.getElementById('productPhotoPreviewWrap').style.display = 'block'; document.getElementById('productPhotoArea').style.display = 'none'; } toggleProductFields(); document.getElementById('productModal').classList.add('open'); }
+  function deleteProduct(id) { pendingAction = () => { products = products.filter(p => p.id !== id); saveProducts(); renderProducts(); updateDashboard(); renderNutrition(); showToast('🗑️ Producto eliminado'); }; document.getElementById('confirmText').innerHTML = '¿Eliminar este producto?'; document.getElementById('confirmOverlay').classList.add('open'); }
+
+  // ============ CRUD MATERIALES ============
+  let selectedDeps = [];
+  function openMatModal(id = null) {
+    editingMaterialId = id; selectedDeps = []; materialPhotoData = null; removeMaterialPhoto();
+    document.getElementById('matModalTitle').innerHTML = id ? 'EDITAR MATERIAL' : 'AÑADIR MATERIAL';
+    if (id) { const m = materials.find(x => x.id === id); if (m) { document.getElementById('materialName').value = m.name; document.getElementById('materialCat').value = m.cat; document.getElementById('materialStatus').value = m.status; document.getElementById('materialQty').value = m.qty; document.getElementById('materialLoc').value = m.loc || ''; document.getElementById('materialInstructions').value = m.instructions || ''; document.getElementById('materialNotes').value = m.notes || ''; document.getElementById('materialLastCharge').value = m.lastCharge || ''; document.getElementById('materialChargeInterval').value = m.chargeInterval || '90'; document.getElementById('materialBatteryType').value = m.batteryType || ''; if (m.dependencies) selectedDeps = [...m.dependencies]; if (m.photo) { materialPhotoData = m.photo; document.getElementById('materialPhotoPreview').src = m.photo; document.getElementById('materialPhotoPreviewWrap').style.display = 'block'; document.getElementById('materialPhotoArea').style.display = 'none'; } } }
+    else { document.getElementById('materialName').value = ''; document.getElementById('materialCat').value = 'ILUMINACIÓN'; document.getElementById('materialStatus').value = 'OPERATIVO'; document.getElementById('materialQty').value = '1'; document.getElementById('materialLoc').value = ''; document.getElementById('materialInstructions').value = ''; document.getElementById('materialNotes').value = ''; document.getElementById('materialLastCharge').value = ''; document.getElementById('materialChargeInterval').value = '90'; document.getElementById('materialBatteryType').value = ''; }
+    renderSelectedDeps(); toggleMaterialFields(); document.getElementById('materialModal').classList.add('open');
+  }
+  function renderSelectedDeps() { document.getElementById('selectedDeps').innerHTML = selectedDeps.map((d, i) => `<div class="dep-tag">${d.name} x${d.required}<span class="dep-tag-remove" onclick="removeDep(${i})">✕</span></div>`).join(''); }
+  function searchDependencies(val) { if (!val.trim()) { document.getElementById('depResults').innerHTML = ''; return; } const matches = materials.filter(m => m.name.toLowerCase().includes(val.toLowerCase()) && !selectedDeps.some(d => d.name === m.name)).slice(0, 5); document.getElementById('depResults').innerHTML = matches.map(m => `<div class="dep-tag" onclick="addDep('${m.name}')">${m.name}</div>`).join(''); }
+  function addDep(name) { selectedDeps.push({ name: name, required: 1, rechargeable: false, expiryDate: '' }); renderSelectedDeps(); document.getElementById('depResults').innerHTML = ''; document.getElementById('depSearch').value = ''; }
+  function addCustomDependency() { const name = prompt('Nombre del componente necesario (ej: Pilas AAA):'); if (name) { const qty = prompt('Cantidad necesaria por unidad:', '1'); selectedDeps.push({ name: name, required: parseInt(qty) || 1, rechargeable: false, expiryDate: '' }); renderSelectedDeps(); } }
+  function removeDep(idx) { selectedDeps.splice(idx, 1); renderSelectedDeps(); }
+  function toggleMaterialFields() { const cat = document.getElementById('materialCat').value; document.getElementById('batteryBlock').style.display = (cat === 'ENERGÍA' || cat === 'ILUMINACIÓN') ? 'block' : 'none'; }
+  function saveMaterial() {
+    const name = document.getElementById('materialName').value.trim();
+    if (!name) { showToast('⚠ Introduce un nombre', true); return; }
+    const material = { id: editingMaterialId || Date.now(), name, cat: document.getElementById('materialCat').value, status: document.getElementById('materialStatus').value, qty: parseFloat(document.getElementById('materialQty').value) || 1, loc: document.getElementById('materialLoc').value, instructions: document.getElementById('materialInstructions').value, notes: document.getElementById('materialNotes').value, photo: materialPhotoData || null, dependencies: selectedDeps, lastCharge: document.getElementById('materialLastCharge').value, chargeInterval: document.getElementById('materialChargeInterval').value, batteryType: document.getElementById('materialBatteryType').value };
+    if (editingMaterialId) { const idx = materials.findIndex(m => m.id === editingMaterialId); if (idx !== -1) materials[idx] = material; showToast('✅ Material actualizado'); } else { materials.push(material); showToast('✅ Material añadido'); }
+    saveMaterials(); closeMatModal(); renderMaterials(); updateDashboard();
+  }
+  function editMaterial(id) { openMatModal(id); }
+  function deleteMaterial(id) { pendingAction = () => { materials = materials.filter(m => m.id !== id); saveMaterials(); renderMaterials(); updateDashboard(); showToast('🗑️ Material eliminado'); }; document.getElementById('confirmText').innerHTML = '¿Eliminar este material?'; document.getElementById('confirmOverlay').classList.add('open'); }
+
+  // ============ CRUD PERSONAS ============
+  function addPerson() { editingPersonId = null; document.getElementById('personModalTitle').innerHTML = 'AÑADIR PERSONA'; document.getElementById('personName').value = ''; document.getElementById('personAge').value = 'adult'; document.getElementById('personWeight').value = ''; document.getElementById('personModal').classList.add('open'); }
+  function editPerson(id) { const p = persons.find(x => x.id === id); if (!p) return; editingPersonId = id; document.getElementById('personModalTitle').innerHTML = 'EDITAR PERSONA'; document.getElementById('personName').value = p.name; document.getElementById('personAge').value = p.ageGroup; document.getElementById('personWeight').value = p.weight || ''; document.getElementById('personModal').classList.add('open'); }
+  function savePerson() { const name = document.getElementById('personName').value.trim(); if (!name) { showToast('⚠ Introduce un nombre', true); return; } const ageGroup = document.getElementById('personAge').value; let dailyCalories = ageGroup === 'child' ? 1800 : (ageGroup === 'senior' ? 1900 : 2200); const person = { id: editingPersonId || Date.now(), name, ageGroup, weight: parseFloat(document.getElementById('personWeight').value) || null, dailyCalories }; if (editingPersonId) { const idx = persons.findIndex(p => p.id === editingPersonId); if (idx !== -1) persons[idx] = person; showToast('✅ Persona actualizada'); } else { persons.push(person); showToast('✅ Persona añadida'); } savePersons(); closePersonModal(); renderPersons(); renderNutrition(); updateDashboard(); }
+  function deletePerson(id) { pendingAction = () => { persons = persons.filter(p => p.id !== id); savePersons(); renderPersons(); renderNutrition(); updateDashboard(); showToast('🗑️ Persona eliminada'); }; document.getElementById('confirmText').innerHTML = '¿Eliminar esta persona?'; document.getElementById('confirmOverlay').classList.add('open'); }
+  function closePersonModal() { document.getElementById('personModal').classList.remove('open'); editingPersonId = null; }
+
+  // ============ FOTOS ============
+  function triggerProductPhoto() { document.getElementById('productPhotoInput').click(); }
+  function triggerMaterialPhoto() { document.getElementById('materialPhotoInput').click(); }
+  function handleProductPhoto(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { productPhotoData = ev.target.result; document.getElementById('productPhotoPreview').src = productPhotoData; document.getElementById('productPhotoPreviewWrap').style.display = 'block'; document.getElementById('productPhotoArea').style.display = 'none'; }; reader.readAsDataURL(file); }
+  function handleMaterialPhoto(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { materialPhotoData = ev.target.result; document.getElementById('materialPhotoPreview').src = materialPhotoData; document.getElementById('materialPhotoPreviewWrap').style.display = 'block'; document.getElementById('materialPhotoArea').style.display = 'none'; }; reader.readAsDataURL(file); }
+  function removeProductPhoto() { productPhotoData = null; document.getElementById('productPhotoPreview').src = ''; document.getElementById('productPhotoPreviewWrap').style.display = 'none'; document.getElementById('productPhotoArea').style.display = 'flex'; }
+  function removeMaterialPhoto() { materialPhotoData = null; document.getElementById('materialPhotoPreview').src = ''; document.getElementById('materialPhotoPreviewWrap').style.display = 'none'; document.getElementById('materialPhotoArea').style.display = 'flex'; }
+
+  // ============ AJUSTES ============
+  function setFontSize(size) { document.body.className = document.body.className.replace(/font-\w+/, ''); document.body.classList.add('font-' + size); localStorage.setItem('kukades_font_size', size); }
+  function setAccentColor(color) { document.documentElement.style.setProperty('--green', color); document.documentElement.style.setProperty('--green-glow', color + '33'); localStorage.setItem('kukades_accent_color', color); }
+  function setTheme(theme) { if (theme === 'light') { document.documentElement.style.setProperty('--bg', '#f5f5f0'); document.documentElement.style.setProperty('--bg2', '#e8e8dd'); document.documentElement.style.setProperty('--panel', '#ecece0'); document.documentElement.style.setProperty('--border', '#aaa'); document.documentElement.style.setProperty('--text', '#1a1a1a'); } else if (theme === 'highContrast') { document.documentElement.style.setProperty('--bg', '#000'); document.documentElement.style.setProperty('--bg2', '#000'); document.documentElement.style.setProperty('--panel', '#111'); document.documentElement.style.setProperty('--border', '#ff0'); document.documentElement.style.setProperty('--text', '#fff'); document.documentElement.style.setProperty('--green', '#0f0'); } else { document.documentElement.style.setProperty('--bg', '#050e03'); document.documentElement.style.setProperty('--bg2', '#0a1f07'); document.documentElement.style.setProperty('--panel', '#0a1f07'); document.documentElement.style.setProperty('--border', '#1e4a12'); document.documentElement.style.setProperty('--text', '#a8e89c'); } localStorage.setItem('kukades_theme', theme); }
+  function setWarnDays(days) { config.warnDays = days; saveConfig(); renderProducts(); showToast('✅ Alertas configuradas a ' + days + ' días'); }
+  function exportData() { const data = { products: products.map(p => { const { photo, ...rest } = p; return rest; }), materials: materials.map(m => { const { photo, ...rest } = m; return rest; }), persons, config, exportDate: new Date().toISOString() }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `kukades-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(blob); showToast('📦 Datos exportados'); }
+  function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.products) products = data.products; if (data.materials) materials = data.materials; if (data.persons) persons = data.persons; if (data.config) config = data.config; saveProducts(); saveMaterials(); savePersons(); saveConfig(); updateAll(); showToast('✅ Datos importados'); } catch(err) { showToast('❌ Error al importar', true); } }; reader.readAsText(file); event.target.value = ''; }
+  function resetAllData() { pendingAction = () => { products = []; materials = []; persons = []; config = { personCount: 1, warnDays: 60 }; saveProducts(); saveMaterials(); savePersons(); saveConfig(); updateAll(); showToast('🗑️ Todos los datos eliminados'); }; document.getElementById('confirmText').innerHTML = '⚠️ Esto ELIMINARÁ TODOS tus datos. ¿Estás seguro?'; document.getElementById('confirmOverlay').classList.add('open'); }
+
+  // ============ GUÍAS ============
+  function showGuide(guide) { const content = { fuego: '🔥 <strong>CÓMO HACER FUEGO</strong><br><br>Métodos: Pedernal y eslabón, arco de fricción, lupa, pilas y papel de aluminio, encendedor. Mantén leña seca y yesca (corteza, algodón, estopa).', orientacion: '🧭 <strong>ORIENTACIÓN SIN BRÚJULA</strong><br><br>Usa el sol: la sombra indica el oeste por la mañana, este por la tarde. Por la noche: la Estrella Polar (norte). El musgo crece en el lado norte de los árboles.', primeros: '🩹 <strong>PRIMEROS AUXILIOS</strong><br><br>Heridas: Limpiar, desinfectar, cubrir. RCP: 30 compresiones, 2 insuflaciones. Quemaduras: Enfriar con agua 10-15 min, no aplicar hielo directo.', codigo: '📻 <strong>CÓDIGO MORSE</strong><br><br>SOS: ... --- ... (tres puntos, tres rayas, tres puntos). A: .-  B: -...  C: -.-.  Usa luz, sonido o espejo.', agua: '💧 <strong>PURIFICACIÓN DE AGUA</strong><br><br>Hervir 5-10 minutos. Pastillas potabilizadoras (cloro, yodo). Filtros de carbón activo. Destilación solar.', refugio: '🏠 <strong>REFUGIO Y ABRIGO</strong><br><br>Busca protección del viento y lluvia. Usa ramas, plástico, nieve. Capas de ropa seca. Conserva calor corporal.' }; document.getElementById('guideContent').innerHTML = `<div class="settings-block">${content[guide]}</div><button class="btn btn-secondary" onclick="document.getElementById('guideContent').style.display='none'">CERRAR</button>`; document.getElementById('guideContent').style.display = 'block'; }
+  function closeMatModal() { document.getElementById('materialModal').classList.remove('open'); editingMaterialId = null; selectedDeps = []; }
+  function closeModal() { document.getElementById('productModal').classList.remove('open'); editingProductId = null; productPhotoData = null; }
+  function executeConfirm() { if (pendingAction) { pendingAction(); pendingAction = null; } closeConfirm(); }
+  function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+  function showScreen(screen, btn) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(`screen-${screen}`).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); if (btn) btn.classList.add('active'); const fab = document.getElementById('fabBtn'); fab.style.display = (screen === 'despensa' || screen === 'materiales') ? 'flex' : 'none'; if (screen === 'despensa') renderProducts(); if (screen === 'materiales') renderMaterials(); if (screen === 'personas') renderPersons(); if (screen === 'nutricion') renderNutrition(); }
+
+  // ============ INIT ============
+  function loadVisualSettings() { const fontSize = localStorage.getItem('kukades_font_size') || 'medium'; setFontSize(fontSize); const accentColor = localStorage.getItem('kukades_accent_color') || '#39ff14'; setAccentColor(accentColor); document.getElementById('accentColorPicker').value = accentColor; const theme = localStorage.getItem('kukades_theme') || 'dark'; setTheme(theme); }
+  loadData(); loadVisualSettings();
+</script>
+</body>
+</html>
