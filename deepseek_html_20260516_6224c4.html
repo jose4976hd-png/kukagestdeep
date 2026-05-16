@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050e03">
+  <title>KUKADES - Preparado para lo Inesperado</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green: #39ff14;
+      --green-dim: #1a7a0a;
+      --green-dark: #0d3d05;
+      --green-glow: rgba(57, 255, 20, 0.3);
+      --amber: #ffb000;
+      --red: #ff2222;
+      --bg: #050e03;
+      --bg2: #0a1f07;
+      --panel: #0a1f07;
+      --border: #1e4a12;
+      --text: #a8e89c;
+      --font-mono: 'Courier New', 'Share Tech Mono', monospace;
+      --font-display: 'Segoe UI', 'Orbitron', monospace;
+      --font-size-base: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: var(--font-size-base);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* Font size classes */
+    body.font-small { --font-size-base: 12px; }
+    body.font-medium { --font-size-base: 16px; }
+    body.font-large { --font-size-base: 20px; }
+    body.font-xlarge { --font-size-base: 24px; }
+
+    /* Header */
+    .app-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--green-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid var(--green);
+    }
+
+    .header-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--green);
+    }
+
+    .header-subtitle {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+    }
+
+    .header-status {
+      margin-left: auto;
+      font-size: 0.6rem;
+      text-align: right;
+    }
+
+    .language-selector, .theme-selector {
+      display: flex;
+      gap: 4px;
+      background: var(--bg2);
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .lang-btn, .theme-btn {
+      background: transparent;
+      border: none;
+      color: var(--green-dim);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      transition: all 0.2s;
+    }
+
+    .lang-btn.active, .theme-btn.active {
+      background: var(--green-dark);
+      color: var(--green);
+      border: 1px solid var(--green);
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 2s infinite;
+      margin-right: 4px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 4px;
+      gap: 4px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: var(--green-dim);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      transition: all 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--green);
+      text-shadow: 0 0 8px var(--green-glow);
+    }
+
+    /* Content */
+    .app-content {
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* Cards */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--green);
+    }
+
+    .section-badge {
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 0.6rem;
+    }
+
+    /* Stats */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+      margin-top: 4px;
+    }
+
+    /* Dashboard Level Card */
+    .dash-level-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .dash-level-value {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green-glow);
+    }
+
+    .dash-level-bar-wrap {
+      background: var(--bg2);
+      height: 8px;
+      border-radius: 4px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .dash-level-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Product Cards */
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .product-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+
+    .product-card.status-danger {
+      border-left: 3px solid var(--red);
+    }
+
+    .product-card.status-warn {
+      border-left: 3px solid var(--amber);
+    }
+
+    .product-photo {
+      width: 60px;
+      height: 60px;
+      background: var(--bg2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .product-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .product-cat {
+      display: inline-block;
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      font-size: 0.6rem;
+      color: var(--green-dim);
+    }
+
+    .exp-date.danger {
+      color: var(--red);
+    }
+
+    .exp-date.warn {
+      color: var(--amber);
+    }
+
+    .alert-badge {
+      display: inline-block;
+      background: rgba(255, 34, 34, 0.2);
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    /* Buttons */
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--green);
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 76px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+      background: var(--green-dark);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      color: var(--green);
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 99;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--green-dim);
+      margin-bottom: 6px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .photo-upload {
+      width: 100%;
+      height: 120px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      background: var(--panel);
+      position: relative;
+    }
+
+    .photo-upload input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .photo-preview {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      border: 1px solid;
+    }
+
+    .btn-primary {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--green-dim);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--green-dim);
+    }
+
+    .toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--green);
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Confirm Dialog */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-overlay.open {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--bg2);
+      border: 1px solid var(--red);
+      border-radius: 12px;
+      padding: 24px;
+      width: 280px;
+      text-align: center;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      padding-bottom: 4px;
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Settings */
+    .settings-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .settings-block-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .color-preview {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .font-size-option {
+      display: inline-block;
+      padding: 8px 12px;
+      margin: 4px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .font-size-option.active {
+      background: var(--green-dark);
+      border-color: var(--green);
+    }
+
+    @media (max-width: 600px) {
+      .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-status {
+        margin-left: 0;
+        width: 100%;
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <div class="header-logo">K</div>
+    <div>
+      <div class="header-title" data-i18n="appName">KUKADES</div>
+      <div class="header-subtitle" data-i18n="subtitle">PREPARADO PARA LO INESPERADO</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div><span class="status-dot"></span><span data-i18n="systemActive">SISTEMA ACTIVO</span></div>
+    <div class="language-selector">
+      <button class="lang-btn" onclick="setLanguage('es')">ES</button>
+      <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+      <button class="lang-btn" onclick="setLanguage('fr')">FR</button>
+      <button class="lang-btn" onclick="setLanguage('de')">DE</button>
+      <button class="lang-btn" onclick="setLanguage('it')">IT</button>
+      <button class="lang-btn" onclick="setLanguage('pt')">PT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="app-content" id="appContent">
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="section-header">
+      <div class="section-title" data-i18n="dashboardTitle">// ESTADO GENERAL</div>
+    </div>
+
+    <div class="dash-level-card">
+      <div class="dash-level-value" id="dashLevel">0%</div>
+      <div class="dash-level-bar-wrap">
+        <div class="dash-level-bar" id="dashBar"></div>
+      </div>
+      <div id="dashStatus" data-i18n="evaluating">EVALUANDO...</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="statProducts">0</div>
+        <div class="stat-label" data-i18n="products">PRODUCTOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statExpired">0</div>
+        <div class="stat-label" data-i18n="expired">CADUCADOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMaterials">0</div>
+        <div class="stat-label" data-i18n="materials">MATERIALES</div>
+      </div>
+    </div>
+
+    <!-- Alertas activas -->
+    <div id="activeAlerts" style="margin-bottom: 20px;"></div>
+
+    <div class="section-header">
+      <div class="section-title" data-i18n="modulesTitle">// MÓDULOS</div>
+    </div>
+
+    <div style="display: grid; gap: 12px;">
+      <button class="settings-block" onclick="showScreen('despensa')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">🥫</div>
+        <div style="font-weight: bold;" data-i18n="pantry">DESPENSA</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);" data-i18n="pantryDesc">Gestión de alimentos y suministros</div>
+      </button>
+      <button class="settings-block" onclick="showScreen('materiales')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">🔧</div>
+        <div style="font-weight: bold;" data-i18n="gear">MATERIALES</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);" data-i18n="gearDesc">Herramientas y equipamiento</div>
+      </button>
+      <button class="settings-block" onclick="showScreen('ajustes')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">⚙️</div>
+        <div style="font-weight: bold;" data-i18n="settings">AJUSTES</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);" data-i18n="settingsDesc">Configuración de la aplicación</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- DESPENSA -->
+  <div class="screen" id="screen-despensa">
+    <div class="section-header">
+      <div class="section-title" data-i18n="pantryTitle">// DESPENSA</div>
+      <div class="section-badge" id="despensaCount">0 items</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="despensaTotal">0</div>
+        <div class="stat-label" data-i18n="total">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="despensaWarn" style="color: var(--amber);">0</div>
+        <div class="stat-label" data-i18n="warning">Aviso</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="despensaDanger" style="color: var(--red);">0</div>
+        <div class="stat-label" data-i18n="urgent">Urgente</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs" id="productFilters">
+      <button class="filter-tab active" data-filter="all" data-i18n="all">TODOS</button>
+      <button class="filter-tab" data-filter="ALIMENTOS" data-i18n="food">🥫 ALIMENTOS</button>
+      <button class="filter-tab" data-filter="AGUA" data-i18n="water">💧 AGUA</button>
+      <button class="filter-tab" data-filter="MEDICINAS" data-i18n="medicines">💊 MEDICINAS</button>
+      <button class="filter-tab" data-filter="HIGIENE" data-i18n="hygiene">🧼 HIGIENE</button>
+    </div>
+
+    <div id="productList" class="product-list"></div>
+  </div>
+
+  <!-- MATERIALES -->
+  <div class="screen" id="screen-materiales">
+    <div class="section-header">
+      <div class="section-title" data-i18n="gearTitle">// MATERIALES</div>
+      <div class="section-badge" id="materialesCount">0 items</div>
+    </div>
+
+    <div class="filter-tabs" id="materialFilters">
+      <button class="filter-tab active" data-filter="all" data-i18n="all">TODOS</button>
+      <button class="filter-tab" data-filter="ILUMINACIÓN" data-i18n="lighting">💡 ILUMINACIÓN</button>
+      <button class="filter-tab" data-filter="HERRAMIENTAS" data-i18n="tools">🔧 HERRAMIENTAS</button>
+      <button class="filter-tab" data-filter="ENERGÍA" data-i18n="energy">⚡ ENERGÍA</button>
+      <button class="filter-tab" data-filter="COMUNICACIÓN" data-i18n="communication">📻 COMUNICACIÓN</button>
+    </div>
+
+    <div id="materialList" class="product-list"></div>
+  </div>
+
+  <!-- AJUSTES -->
+  <div class="screen" id="screen-ajustes">
+    <div class="section-header">
+      <div class="section-title" data-i18n="settingsTitle">// AJUSTES</div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title" data-i18n="appearance">🎨 APARIENCIA</div>
+      <div class="field">
+        <label data-i18n="fontSize">TAMAÑO DE TEXTO</label>
+        <div>
+          <button class="filter-tab" onclick="setFontSize('small')" id="fontSmall" data-i18n="small">PEQUEÑO</button>
+          <button class="filter-tab" onclick="setFontSize('medium')" id="fontMedium" data-i18n="medium">MEDIANO</button>
+          <button class="filter-tab" onclick="setFontSize('large')" id="fontLarge" data-i18n="large">GRANDE</button>
+          <button class="filter-tab" onclick="setFontSize('xlarge')" id="fontXLarge" data-i18n="xlarge">MUY GRANDE</button>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="accentColor">COLOR PRINCIPAL</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="color" id="accentColorPicker" value="#39ff14" onchange="setAccentColor(this.value)">
+          <div class="color-preview" style="background: var(--green);" onclick="document.getElementById('accentColorPicker').click()"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="theme">TEMA</label>
+        <div>
+          <button class="filter-tab" onclick="setTheme('dark')" id="themeDark" data-i18n="darkTheme">OSCURO</button>
+          <button class="filter-tab" onclick="setTheme('light')" id="themeLight" data-i18n="lightTheme">CLARO</button>
+          <button class="filter-tab" onclick="setTheme('highContrast')" id="themeHighContrast" data-i18n="highContrast">ALTO CONTRASTE</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title" data-i18n="household">👥 HOGAR</div>
+      <div class="field">
+        <label data-i18n="peopleCount">NÚMERO DE PERSONAS</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button onclick="changePersonCount(-1)" style="width: 44px; height: 44px; background: var(--green-dark); border: 1px solid var(--green); color: var(--green); font-size: 1.5rem; cursor: pointer;">−</button>
+          <span id="personCount" style="font-family: var(--font-display); font-size: 1.5rem; width: 60px; text-align: center;">1</span>
+          <button onclick="changePersonCount(1)" style="width: 44px; height: 44px; background: var(--green-dark); border: 1px solid var(--green); color: var(--green); font-size: 1.5rem; cursor: pointer;">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title" data-i18n="alerts">🔔 ALERTAS</div>
+      <div class="field">
+        <label data-i18n="warningDays">DÍAS DE ANTELACIÓN CADUCIDAD</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="setWarnDays(30)" class="filter-tab" id="warn30" data-i18n="days30">30 DÍAS</button>
+          <button onclick="setWarnDays(60)" class="filter-tab" id="warn60" data-i18n="days60">60 DÍAS</button>
+          <button onclick="setWarnDays(90)" class="filter-tab" id="warn90" data-i18n="days90">90 DÍAS</button>
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="batteryAlert">ALERTA DE BATERÍA (días sin recargar)</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="setBatteryAlertDays(30)" class="filter-tab" id="battery30">30 DÍAS</button>
+          <button onclick="setBatteryAlertDays(60)" class="filter-tab" id="battery60">60 DÍAS</button>
+          <button onclick="setBatteryAlertDays(90)" class="filter-tab" id="battery90">90 DÍAS</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title" data-i18n="language">🌍 IDIOMA</div>
+      <div class="field">
+        <label data-i18n="selectLanguage">SELECCIONAR IDIOMA</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="setLanguage('es')" class="filter-tab" id="langEs">🇪🇸 Español</button>
+          <button onclick="setLanguage('en')" class="filter-tab" id="langEn">🇬🇧 English</button>
+          <button onclick="setLanguage('fr')" class="filter-tab" id="langFr">🇫🇷 Français</button>
+          <button onclick="setLanguage('de')" class="filter-tab" id="langDe">🇩🇪 Deutsch</button>
+          <button onclick="setLanguage('it')" class="filter-tab" id="langIt">🇮🇹 Italiano</button>
+          <button onclick="setLanguage('pt')" class="filter-tab" id="langPt">🇵🇹 Português</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title" data-i18n="data">💾 DATOS</div>
+      <button class="btn btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 8px;" data-i18n="exportData">📤 EXPORTAR DATOS</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%; margin-bottom: 8px;" data-i18n="importData">📥 IMPORTAR DATOS</button>
+      <button class="btn btn-secondary" onclick="resetAllData()" style="width: 100%; background: rgba(255,34,34,0.1); border-color: var(--red); color: var(--red);" data-i18n="resetAll">🗑️ RESTABLECER TODO</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 0.55rem; color: var(--green-dim);">
+      KUKADES v3.0 - <span data-i18n="prepared">Preparado para lo Inesperado</span>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showScreen('dashboard', this)" data-i18n="navHome">🏠 INICIO</button>
+  <button class="nav-item" onclick="showScreen('despensa', this)" data-i18n="navPantry">🥫 DESPENSA</button>
+  <button class="nav-item" onclick="showScreen('materiales', this)" data-i18n="navGear">🔧 MATERIALES</button>
+  <button class="nav-item" onclick="showScreen('ajustes', this)" data-i18n="navSettings">⚙️ AJUSTES</button>
+</nav>
+
+<!-- Modal Producto -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle" data-i18n="addProduct">AÑADIR PRODUCTO</div>
+    
+    <!-- Foto -->
+    <div class="field">
+      <label data-i18n="photo">FOTO</label>
+      <div class="photo-upload" id="productPhotoArea" onclick="triggerProductPhoto()">
+        <input type="file" id="productPhotoInput" accept="image/*" capture="environment" onchange="handleProductPhoto(event)">
+        <div class="photo-upload-icon">📷</div>
+        <div class="photo-upload-text" data-i18n="takePhoto">Tomar foto o seleccionar de galería</div>
+      </div>
+      <div id="productPhotoPreviewWrap" style="display:none; margin-top: 8px;">
+        <img class="photo-preview" id="productPhotoPreview" src="">
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-secondary" onclick="triggerProductPhoto()" data-i18n="changePhoto">📷 CAMBIAR</button>
+          <button class="btn btn-secondary" onclick="removeProductPhoto()" data-i18n="removePhoto">🗑️ QUITAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="name">NOMBRE *</label>
+      <input type="text" id="productName" placeholder="Ej: Atún en aceite">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="category">CATEGORÍA</label>
+        <select id="productCat" onchange="toggleProductFields()">
+          <option value="ALIMENTOS" data-i18n="food">🥫 ALIMENTOS</option>
+          <option value="AGUA" data-i18n="water">💧 AGUA</option>
+          <option value="MEDICINAS" data-i18n="medicines">💊 MEDICINAS</option>
+          <option value="HIGIENE" data-i18n="hygiene">🧼 HIGIENE</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="quantity">CANTIDAD</label>
+        <input type="number" id="productQty" placeholder="1" value="1" step="any">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="unit">UNIDAD</label>
+        <select id="productUnit">
+          <option value="uds">uds</option>
+          <option value="kg">kg</option>
+          <option value="g">g</option>
+          <option value="L">L</option>
+          <option value="ml">ml</option>
+          <option value="latas">latas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="minStock">STOCK MÍNIMO</label>
+        <input type="number" id="productMinQty" placeholder="0" step="any">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="expiryDate">FECHA DE CADUCIDAD</label>
+        <input type="date" id="productExp">
+      </div>
+      <div class="field">
+        <label data-i18n="location">UBICACIÓN</label>
+        <input type="text" id="productLoc" placeholder="Ej: Despensa">
+      </div>
+    </div>
+
+    <!-- Nutrición (solo para ALIMENTOS) -->
+    <div id="nutritionBlock" style="display: none;">
+      <div style="font-size: 0.65rem; color: var(--green); margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);">
+        🥗 DATOS NUTRICIONALES (por 100g/ml)
+      </div>
+      <button class="btn btn-secondary" onclick="autoFillNutrition()" style="margin-bottom: 12px; width: 100%;" data-i18n="autoFill">🤖 RELLENAR AUTOMÁTICAMENTE CON IA</button>
+      
+      <div class="field-row">
+        <div class="field">
+          <label>PESO NETO (g)</label>
+          <input type="number" id="productNetWeight" placeholder="100" step="any">
+        </div>
+        <div class="field">
+          <label>CALORÍAS (kcal)</label>
+          <input type="number" id="productKcal" placeholder="0" step="any">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>PROTEÍNAS (g)</label>
+          <input type="number" id="productProtein" placeholder="0" step="0.1">
+        </div>
+        <div class="field">
+          <label>GRASAS (g)</label>
+          <input type="number" id="productFat" placeholder="0" step="0.1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>CARBOHIDRATOS (g)</label>
+          <input type="number" id="productCarbs" placeholder="0" step="0.1">
+        </div>
+        <div class="field">
+          <label>FIBRA (g)</label>
+          <input type="number" id="productFiber" placeholder="0" step="0.1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Medicina (solo para MEDICINAS) -->
+    <div id="medicineBlock" style="display: none;">
+      <div style="font-size: 0.65rem; color: var(--green); margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);">
+        💊 INFORMACIÓN MÉDICA
+      </div>
+      <div class="field">
+        <label data-i18n="medFor">PARA QUÉ SIRVE</label>
+        <input type="text" id="productMedFor" placeholder="Ej: Analgésico, antiinflamatorio">
+      </div>
+      <div class="field">
+        <label data-i18n="medHow">CÓMO TOMAR</label>
+        <input type="text" id="productMedHow" placeholder="Ej: 1 comprimido cada 8h">
+      </div>
+      <div class="field">
+        <label data-i18n="medContra">CONTRAINDICACIONES</label>
+        <textarea id="productMedContra" rows="2" placeholder="Ej: No tomar con alcohol..."></textarea>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="notes">NOTAS</label>
+      <textarea id="productNotes" rows="2" placeholder="Observaciones adicionales..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()" data-i18n="cancel">CANCELAR</button>
+      <button class="btn btn-primary" onclick="saveProduct()" data-i18n="save">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Material -->
+<div class="modal-overlay" id="materialModal">
+  <div class="modal">
+    <div class="modal-title" id="matModalTitle" data-i18n="addMaterial">AÑADIR MATERIAL</div>
+    
+    <!-- Foto -->
+    <div class="field">
+      <label data-i18n="photo">FOTO</label>
+      <div class="photo-upload" id="materialPhotoArea" onclick="triggerMaterialPhoto()">
+        <input type="file" id="materialPhotoInput" accept="image/*" capture="environment" onchange="handleMaterialPhoto(event)">
+        <div class="photo-upload-icon">📷</div>
+        <div class="photo-upload-text" data-i18n="takePhoto">Tomar foto o seleccionar de galería</div>
+      </div>
+      <div id="materialPhotoPreviewWrap" style="display:none; margin-top: 8px;">
+        <img class="photo-preview" id="materialPhotoPreview" src="">
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-secondary" onclick="triggerMaterialPhoto()" data-i18n="changePhoto">📷 CAMBIAR</button>
+          <button class="btn btn-secondary" onclick="removeMaterialPhoto()" data-i18n="removePhoto">🗑️ QUITAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="name">NOMBRE *</label>
+      <input type="text" id="materialName" placeholder="Ej: Linterna frontal">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="category">CATEGORÍA</label>
+        <select id="materialCat" onchange="toggleMaterialFields()">
+          <option value="ILUMINACIÓN" data-i18n="lighting">💡 ILUMINACIÓN</option>
+          <option value="HERRAMIENTAS" data-i18n="tools">🔧 HERRAMIENTAS</option>
+          <option value="ENERGÍA" data-i18n="energy">⚡ ENERGÍA</option>
+          <option value="COMUNICACIÓN" data-i18n="communication">📻 COMUNICACIÓN</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="status">ESTADO</label>
+        <select id="materialStatus">
+          <option value="OPERATIVO" data-i18n="operational">✅ OPERATIVO</option>
+          <option value="REVISAR" data-i18n="check">⚠️ REVISAR</option>
+          <option value="AVERÍA" data-i18n="broken">❌ AVERÍA</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label data-i18n="quantity">CANTIDAD</label>
+        <input type="number" id="materialQty" placeholder="1" value="1">
+      </div>
+      <div class="field">
+        <label data-i18n="location">UBICACIÓN</label>
+        <input type="text" id="materialLoc" placeholder="Ej: Caja herramientas">
+      </div>
+    </div>
+
+    <!-- Baterías (solo para PILAS/ENERGÍA) -->
+    <div id="batteryBlock" style="display: none;">
+      <div style="font-size: 0.65rem; color: var(--green); margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);">
+        🔋 INFORMACIÓN DE BATERÍA
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label data-i18n="lastCharge">ÚLTIMA RECARGA</label>
+          <input type="date" id="materialLastCharge">
+        </div>
+        <div class="field">
+          <label data-i18n="chargeInterval">RECARGAR CADA (días)</label>
+          <input type="number" id="materialChargeInterval" placeholder="90" value="90">
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="batteryType">TIPO DE BATERÍA</label>
+        <input type="text" id="materialBatteryType" placeholder="Ej: 18650, AAA, AA, 12V">
+      </div>
+    </div>
+
+    <!-- Iluminación -->
+    <div id="lightingBlock" style="display: none;">
+      <div class="field-row">
+        <div class="field">
+          <label data-i18n="lightType">TIPO DE LUZ</label>
+          <select id="materialLightType">
+            <option value="LED">LED</option>
+            <option value="Halógeno">Halógeno</option>
+            <option value="Gas">Gas</option>
+            <option value="Vela">Vela</option>
+          </select>
+        </div>
+        <div class="field">
+          <label data-i18n="powerSource">FUENTE DE ENERGÍA</label>
+          <input type="text" id="materialPowerSource" placeholder="Ej: Pilas AAA, USB">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="instructions">INSTRUCCIONES DE USO</label>
+      <textarea id="materialInstructions" rows="2" placeholder="Cómo usar, mantener, precauciones..."></textarea>
+    </div>
+
+    <div class="field">
+      <label data-i18n="notes">NOTAS</label>
+      <textarea id="materialNotes" rows="2" placeholder="Observaciones adicionales..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeMatModal()" data-i18n="cancel">CANCELAR</button>
+      <button class="btn btn-primary" onclick="saveMaterial()" data-i18n="save">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="modal-title" style="color: var(--red);" data-i18n="confirm">⚠ CONFIRMAR</div>
+    <div id="confirmText" data-i18n="confirmMessage">¿Estás seguro?</div>
+    <div class="btn-row" style="margin-top: 20px;">
+      <button class="btn btn-secondary" onclick="closeConfirm()" data-i18n="cancel">CANCELAR</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="executeConfirm()" data-i18n="accept">ACEPTAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Mensaje</div>
+
+<script>
+  // ============ BASE DE DATOS NUTRICIONAL (IA) ============
+  const NUTRITION_DB = {
+    'arroz': { kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, fiber: 0.4 },
+    'lentejas': { kcal: 116, protein: 9, fat: 0.4, carbs: 20, fiber: 8 },
+    'garbanzos': { kcal: 139, protein: 8.9, fat: 2.6, carbs: 23, fiber: 7.6 },
+    'atun': { kcal: 184, protein: 23, fat: 10, carbs: 0, fiber: 0 },
+    'pollo': { kcal: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0 },
+    'huevo': { kcal: 155, protein: 13, fat: 11, carbs: 1.1, fiber: 0 },
+    'leche': { kcal: 42, protein: 3.4, fat: 1, carbs: 4.8, fiber: 0 },
+    'pan': { kcal: 265, protein: 9, fat: 3.2, carbs: 49, fiber: 2.7 },
+    'manzana': { kcal: 52, protein: 0.3, fat: 0.2, carbs: 14, fiber: 2.4 },
+    'platano': { kcal: 89, protein: 1.1, fat: 0.3, carbs: 23, fiber: 2.6 },
+    'tomate': { kcal: 18, protein: 0.9, fat: 0.2, carbs: 3.9, fiber: 1.2 },
+    'aceite oliva': { kcal: 884, protein: 0, fat: 100, carbs: 0, fiber: 0 },
+    'pasta': { kcal: 131, protein: 5, fat: 1.1, carbs: 25, fiber: 1.8 },
+    'quinoa': { kcal: 120, protein: 4.4, fat: 1.9, carbs: 21, fiber: 2.8 },
+    'avena': { kcal: 389, protein: 16.9, fat: 6.9, carbs: 66, fiber: 10.6 }
+  };
+
+  async function autoFillNutrition() {
+    const name = document.getElementById('productName').value.toLowerCase().trim();
+    if (!name) {
+      showToast('⚠ Introduce el nombre del producto primero', true);
+      return;
+    }
+    
+    showToast('🤖 Buscando datos nutricionales...');
+    
+    // Buscar en la base de datos
+    let found = null;
+    for (let [key, data] of Object.entries(NUTRITION_DB)) {
+      if (name.includes(key) || key.includes(name)) {
+        found = data;
+        break;
+      }
+    }
+    
+    // Buscar en caché aprendido
+    const learned = JSON.parse(localStorage.getItem('kukades_nutrition_learned') || '{}');
+    if (!found && learned[name]) found = learned[name];
+    
+    if (found) {
+      document.getElementById('productNetWeight').value = 100;
+      document.getElementById('productKcal').value = found.kcal;
+      document.getElementById('productProtein').value = found.protein;
+      document.getElementById('productFat').value = found.fat;
+      document.getElementById('productCarbs').value = found.carbs;
+      document.getElementById('productFiber').value = found.fiber || 0;
+      showToast('✅ Datos nutricionales cargados automáticamente');
+    } else {
+      showToast('❌ Producto no encontrado en la base de datos', true);
+    }
+  }
+
+  // ============ TRADUCCIONES ============
+  const translations = {
+    es: {
+      appName: 'KUKADES', subtitle: 'PREPARADO PARA LO INESPERADO', systemActive: 'SISTEMA ACTIVO',
+      dashboardTitle: '// ESTADO GENERAL', evaluating: 'EVALUANDO...', products: 'PRODUCTOS',
+      expired: 'CADUCADOS', materials: 'MATERIALES', modulesTitle: '// MÓDULOS', pantry: 'DESPENSA',
+      pantryDesc: 'Gestión de alimentos y suministros', gear: 'MATERIALES', gearDesc: 'Herramientas y equipamiento',
+      settings: 'AJUSTES', settingsDesc: 'Configuración de la aplicación', pantryTitle: '// DESPENSA',
+      total: 'Total', warning: 'Aviso', urgent: 'Urgente', all: 'TODOS', food: '🥫 ALIMENTOS',
+      water: '💧 AGUA', medicines: '💊 MEDICINAS', hygiene: '🧼 HIGIENE', gearTitle: '// MATERIALES',
+      lighting: '💡 ILUMINACIÓN', tools: '🔧 HERRAMIENTAS', energy: '⚡ ENERGÍA', communication: '📻 COMUNICACIÓN',
+      settingsTitle: '// AJUSTES', appearance: '🎨 APARIENCIA', fontSize: 'TAMAÑO DE TEXTO',
+      small: 'PEQUEÑO', medium: 'MEDIANO', large: 'GRANDE', xlarge: 'MUY GRANDE',
+      accentColor: 'COLOR PRINCIPAL', theme: 'TEMA', darkTheme: 'OSCURO', lightTheme: 'CLARO',
+      highContrast: 'ALTO CONTRASTE', household: '👥 HOGAR', peopleCount: 'NÚMERO DE PERSONAS',
+      alerts: '🔔 ALERTAS', warningDays: 'DÍAS DE ANTELACIÓN CADUCIDAD', days30: '30 DÍAS',
+      days60: '60 DÍAS', days90: '90 DÍAS', batteryAlert: 'ALERTA DE BATERÍA (días sin recargar)',
+      language: '🌍 IDIOMA', selectLanguage: 'SELECCIONAR IDIOMA', data: '💾 DATOS',
+      exportData: '📤 EXPORTAR DATOS', importData: '📥 IMPORTAR DATOS', resetAll: '🗑️ RESTABLECER TODO',
+      prepared: 'Preparado para lo Inesperado', navHome: '🏠 INICIO', navPantry: '🥫 DESPENSA',
+      navGear: '🔧 MATERIALES', navSettings: '⚙️ AJUSTES', addProduct: 'AÑADIR PRODUCTO',
+      addMaterial: 'AÑADIR MATERIAL', name: 'NOMBRE *', category: 'CATEGORÍA', quantity: 'CANTIDAD',
+      unit: 'UNIDAD', expiryDate: 'FECHA DE CADUCIDAD', location: 'UBICACIÓN', cancel: 'CANCELAR',
+      save: 'GUARDAR', status: 'ESTADO', operational: '✅ OPERATIVO', check: '⚠️ REVISAR',
+      broken: '❌ AVERÍA', confirm: '⚠ CONFIRMAR', confirmMessage: '¿Estás seguro?', accept: 'ACEPTAR',
+      optimal: '● ÓPTIMO', stable: '◐ ESTABLE', critical: '▼ CRÍTICO', photo: 'FOTO',
+      takePhoto: 'Tomar foto o seleccionar de galería', changePhoto: '📷 CAMBIAR', removePhoto: '🗑️ QUITAR',
+      minStock: 'STOCK MÍNIMO', autoFill: '🤖 RELLENAR AUTOMÁTICAMENTE CON IA', medFor: 'PARA QUÉ SIRVE',
+      medHow: 'CÓMO TOMAR', medContra: 'CONTRAINDICACIONES', notes: 'NOTAS', instructions: 'INSTRUCCIONES DE USO',
+      lastCharge: 'ÚLTIMA RECARGA', chargeInterval: 'RECARGAR CADA (días)', batteryType: 'TIPO DE BATERÍA',
+      lightType: 'TIPO DE LUZ', powerSource: 'FUENTE DE ENERGÍA', alertsActive: 'ALERTAS ACTIVAS',
+      expiredProducts: 'Productos caducados', soonExpiring: 'Próximos a caducar', lowStock: 'Stock bajo',
+      batteriesToCharge: 'Baterías por recargar', itemsToReview: 'Materiales por revisar'
+    },
+    en: {
+      appName: 'KUKADES', subtitle: 'READY FOR THE UNEXPECTED', systemActive: 'SYSTEM ACTIVE',
+      dashboardTitle: '// GENERAL STATUS', evaluating: 'EVALUATING...', products: 'PRODUCTS',
+      expired: 'EXPIRED', materials: 'GEAR', modulesTitle: '// MODULES', pantry: 'PANTRY',
+      pantryDesc: 'Food and supplies management', gear: 'GEAR', gearDesc: 'Tools and equipment',
+      settings: 'SETTINGS', settingsDesc: 'Application configuration', pantryTitle: '// PANTRY',
+      total: 'Total', warning: 'Warning', urgent: 'Urgent', all: 'ALL', food: '🥫 FOOD',
+      water: '💧 WATER', medicines: '💊 MEDICINES', hygiene: '🧼 HYGIENE', gearTitle: '// GEAR',
+      lighting: '💡 LIGHTING', tools: '🔧 TOOLS', energy: '⚡ ENERGY', communication: '📻 COMMUNICATION',
+      settingsTitle: '// SETTINGS', appearance: '🎨 APPEARANCE', fontSize: 'FONT SIZE',
+      small: 'SMALL', medium: 'MEDIUM', large: 'LARGE', xlarge: 'EXTRA LARGE',
+      accentColor: 'ACCENT COLOR', theme: 'THEME', darkTheme: 'DARK', lightTheme: 'LIGHT',
+      highContrast: 'HIGH CONTRAST', household: '👥 HOUSEHOLD', peopleCount: 'NUMBER OF PEOPLE',
+      alerts: '🔔 ALERTS', warningDays: 'EXPIRY WARNING DAYS', days30: '30 DAYS',
+      days60: '60 DAYS', days90: '90 DAYS', batteryAlert: 'BATTERY ALERT (days without charging)',
+      language: '🌍 LANGUAGE', selectLanguage: 'SELECT LANGUAGE', data: '💾 DATA',
+      exportData: '📤 EXPORT DATA', importData: '📥 IMPORT DATA', resetAll: '🗑️ RESET ALL',
+      prepared: 'Ready for the Unexpected', navHome: '🏠 HOME', navPantry: '🥫 PANTRY',
+      navGear: '🔧 GEAR', navSettings: '⚙️ SETTINGS', addProduct: 'ADD PRODUCT',
+      addMaterial: 'ADD GEAR', name: 'NAME *', category: 'CATEGORY', quantity: 'QUANTITY',
+      unit: 'UNIT', expiryDate: 'EXPIRY DATE', location: 'LOCATION', cancel: 'CANCEL',
+      save: 'SAVE', status: 'STATUS', operational: '✅ OPERATIONAL', check: '⚠️ CHECK',
+      broken: '❌ BROKEN', confirm: '⚠ CONFIRM', confirmMessage: 'Are you sure?', accept: 'ACCEPT',
+      optimal: '● OPTIMAL', stable: '◐ STABLE', critical: '▼ CRITICAL', photo: 'PHOTO',
+      takePhoto: 'Take photo or select from gallery', changePhoto: '📷 CHANGE', removePhoto: '🗑️ REMOVE',
+      minStock: 'MINIMUM STOCK', autoFill: '🤖 AUTO-FILL WITH AI', medFor: 'USED FOR',
+      medHow: 'HOW TO TAKE', medContra: 'CONTRAINDICATIONS', notes: 'NOTES', instructions: 'INSTRUCTIONS',
+      lastCharge: 'LAST CHARGE', chargeInterval: 'CHARGE EVERY (days)', batteryType: 'BATTERY TYPE',
+      lightType: 'LIGHT TYPE', powerSource: 'POWER SOURCE', alertsActive: 'ACTIVE ALERTS',
+      expiredProducts: 'Expired products', soonExpiring: 'Expiring soon', lowStock: 'Low stock',
+      batteriesToCharge: 'Batteries to charge', itemsToReview: 'Items to review'
+    },
+    fr: {
+      appName: 'KUKADES', subtitle: 'PRÊT POUR L\'IMPREVU', systemActive: 'SYSTÈME ACTIF',
+      dashboardTitle: '// ÉTAT GÉNÉRAL', evaluating: 'ÉVALUATION...', products: 'PRODUITS',
+      expired: 'EXPIRÉS', materials: 'MATÉRIEL', modulesTitle: '// MODULES', pantry: 'GARDE-MANGER',
+      pantryDesc: 'Gestion des aliments et fournitures', gear: 'MATÉRIEL', gearDesc: 'Outils et équipement',
+      settings: 'PARAMÈTRES', settingsDesc: 'Configuration de l\'application', pantryTitle: '// GARDE-MANGER',
+      total: 'Total', warning: 'Alerte', urgent: 'Urgent', all: 'TOUS', food: '🥫 ALIMENTS',
+      water: '💧 EAU', medicines: '💊 MÉDICAMENTS', hygiene: '🧼 HYGIÈNE', gearTitle: '// MATÉRIEL',
+      lighting: '💡 ÉCLAIRAGE', tools: '🔧 OUTILS', energy: '⚡ ÉNERGIE', communication: '📻 COMMUNICATION',
+      settingsTitle: '// PARAMÈTRES', appearance: '🎨 APPARENCE', fontSize: 'TAILLE DE POLICE',
+      small: 'PETIT', medium: 'MOYEN', large: 'GRAND', xlarge: 'TRÈS GRAND',
+      accentColor: 'COULEUR PRINCIPALE', theme: 'THÈME', darkTheme: 'SOMBRE', lightTheme: 'CLAIR',
+      highContrast: 'HAUT CONTRASTE', household: '👥 FOYER', peopleCount: 'NOMBRE DE PERSONNES',
+      alerts: '🔔 ALERTES', warningDays: 'JOURS D\'AVANCE', days30: '30 JOURS',
+      days60: '60 JOURS', days90: '90 JOURS', batteryAlert: 'ALERTE BATTERIE (jours sans charge)',
+      language: '🌍 LANGUE', selectLanguage: 'SÉLECTIONNER LANGUE', data: '💾 DONNÉES',
+      exportData: '📤 EXPORTER', importData: '📥 IMPORTER', resetAll: '🗑️ TOUT RÉINITIALISER',
+      prepared: 'Prêt pour l\'imprévu', navHome: '🏠 ACCUEIL', navPantry: '🥫 GARDE-MANGER',
+      navGear: '🔧 MATÉRIEL', navSettings: '⚙️ PARAMÈTRES', addProduct: 'AJOUTER PRODUIT',
+      addMaterial: 'AJOUTER MATÉRIEL', name: 'NOM *', category: 'CATÉGORIE', quantity: 'QUANTITÉ',
+      unit: 'UNITÉ', expiryDate: 'DATE D\'EXPIRATION', location: 'EMPLACEMENT', cancel: 'ANNULER',
+      save: 'ENREGISTRER', status: 'STATUT', operational: '✅ OPÉRATIONNEL', check: '⚠️ VÉRIFIER',
+      broken: '❌ EN PANNE', confirm: '⚠ CONFIRMER', confirmMessage: 'Êtes-vous sûr ?', accept: 'ACCEPTER',
+      optimal: '● OPTIMAL', stable: '◐ STABLE', critical: '▼ CRITIQUE', photo: 'PHOTO',
+      takePhoto: 'Prendre photo ou galerie', changePhoto: '📷 CHANGER', removePhoto: '🗑️ SUPPRIMER',
+      minStock: 'STOCK MINIMUM', autoFill: '🤖 REMPLISSAGE AUTO IA', medFor: 'UTILISÉ POUR',
+      medHow: 'COMMENT PRENDRE', medContra: 'CONTRE-INDICATIONS', notes: 'NOTES', instructions: 'INSTRUCTIONS',
+      lastCharge: 'DERNIÈRE CHARGE', chargeInterval: 'CHARGER TOUS LES (jours)', batteryType: 'TYPE DE BATTERIE',
+      lightType: 'TYPE DE LUMIÈRE', powerSource: 'SOURCE D\'ÉNERGIE', alertsActive: 'ALERTES ACTIVES',
+      expiredProducts: 'Produits expirés', soonExpiring: 'Expire bientôt', lowStock: 'Stock bas',
+      batteriesToCharge: 'Batteries à charger', itemsToReview: 'Articles à vérifier'
+    },
+    de: {
+      appName: 'KUKADES', subtitle: 'BEREIT FÜR DAS UNERWARTETE', systemActive: 'SYSTEM AKTIV',
+      dashboardTitle: '// ALLGEMEINER STATUS', evaluating: 'AUSWERTUNG...', products: 'PRODUKTE',
+      expired: 'ABGELAUFEN', materials: 'AUSRÜSTUNG', modulesTitle: '// MODULE', pantry: 'VORRAT',
+      pantryDesc: 'Lebensmittel- und Vorratsverwaltung', gear: 'AUSRÜSTUNG', gearDesc: 'Werkzeuge und Ausrüstung',
+      settings: 'EINSTELLUNGEN', settingsDesc: 'Anwendungskonfiguration', pantryTitle: '// VORRAT',
+      total: 'Gesamt', warning: 'Warnung', urgent: 'Dringend', all: 'ALLE', food: '🥫 LEBENSMITTEL',
+      water: '💧 WASSER', medicines: '💊 MEDIKAMENTE', hygiene: '🧼 HYGIENE', gearTitle: '// AUSRÜSTUNG',
+      lighting: '💡 BELEUCHTUNG', tools: '🔧 WERKZEUGE', energy: '⚡ ENERGIE', communication: '📻 KOMMUNIKATION',
+      settingsTitle: '// EINSTELLUNGEN', appearance: '🎨 AUSSEHEN', fontSize: 'SCHRIFTGRÖSSE',
+      small: 'KLEIN', medium: 'MITTEL', large: 'GROSS', xlarge: 'SEHR GROSS',
+      accentColor: 'AKZENTFARBE', theme: 'THEMA', darkTheme: 'DUNKEL', lightTheme: 'HELL',
+      highContrast: 'HOHER KONTRAST', household: '👥 HAUSHALT', peopleCount: 'ANZAHL PERSONEN',
+      alerts: '🔔 ALARME', warningDays: 'VORWARNUNG TAGE', days30: '30 TAGE',
+      days60: '60 TAGE', days90: '90 TAGE', batteryAlert: 'BATTERIEALARM (Tage ohne Laden)',
+      language: '🌍 SPRACHE', selectLanguage: 'SPRACHE AUSWÄHLEN', data: '💾 DATEN',
+      exportData: '📤 EXPORTIEREN', importData: '📥 IMPORTIEREN', resetAll: '🗑️ ALLES ZURÜCKSETZEN',
+      prepared: 'Bereit für das Unerwartete', navHome: '🏠 START', navPantry: '🥫 VORRAT',
+      navGear: '🔧 AUSRÜSTUNG', navSettings: '⚙️ EINSTELLUNGEN', addProduct: 'PRODUKT HINZUFÜGEN',
+      addMaterial: 'AUSRÜSTUNG HINZUFÜGEN', name: 'NAME *', category: 'KATEGORIE', quantity: 'MENGE',
+      unit: 'EINHEIT', expiryDate: 'VERFALLSDATUM', location: 'STANDORT', cancel: 'ABBRECHEN',
+      save: 'SPEICHERN', status: 'STATUS', operational: '✅ FUNKTIONSFÄHIG', check: '⚠️ PRÜFEN',
+      broken: '❌ DEFEKT', confirm: '⚠ BESTÄTIGEN', confirmMessage: 'Sind Sie sicher?', accept: 'AKZEPTIEREN',
+      optimal: '● OPTIMAL', stable: '◐ STABIL', critical: '▼ KRITISCH', photo: 'FOTO',
+      takePhoto: 'Foto aufnehmen oder aus Galerie', changePhoto: '📷 ÄNDERN', removePhoto: '🗑️ ENTFERNEN',
+      minStock: 'MINDESTBESTAND', autoFill: '🤖 AUTO-AUSFÜLLUNG MIT KI', medFor: 'VERWENDET FÜR',
+      medHow: 'EINNAHME', medContra: 'GEGENANZEIGEN', notes: 'NOTIZEN', instructions: 'ANLEITUNGEN',
+      lastCharge: 'LETZTE LADUNG', chargeInterval: 'LADEN ALLE (Tage)', batteryType: 'BATTERIETYP',
+      lightType: 'LICHTTYP', powerSource: 'ENERGIEQUELLE', alertsActive: 'AKTIVE ALARME',
+      expiredProducts: 'Abgelaufene Produkte', soonExpiring: 'Läuft bald ab', lowStock: 'Niedriger Bestand',
+      batteriesToCharge: 'Batterien zum Laden', itemsToReview: 'Zu prüfende Artikel'
+    },
+    it: {
+      appName: 'KUKADES', subtitle: 'PRONTO PER L\'IMPREVISTO', systemActive: 'SISTEMA ATTIVO',
+      dashboardTitle: '// STATO GENERALE', evaluating: 'VALUTAZIONE...', products: 'PRODOTTI',
+      expired: 'SCADUTI', materials: 'ATTREZZATURA', modulesTitle: '// MODULI', pantry: 'DISPENSA',
+      pantryDesc: 'Gestione cibo e forniture', gear: 'ATTREZZATURA', gearDesc: 'Strumenti e equipaggiamento',
+      settings: 'IMPOSTAZIONI', settingsDesc: 'Configurazione applicazione', pantryTitle: '// DISPENSA',
+      total: 'Totale', warning: 'Avviso', urgent: 'Urgente', all: 'TUTTI', food: '🥫 CIBO',
+      water: '💧 ACQUA', medicines: '💊 FARMACI', hygiene: '🧼 IGIENE', gearTitle: '// ATTREZZATURA',
+      lighting: '💡 ILLUMINAZIONE', tools: '🔧 UTENSILI', energy: '⚡ ENERGIA', communication: '📻 COMUNICAZIONE',
+      settingsTitle: '// IMPOSTAZIONI', appearance: '🎨 ASPETTO', fontSize: 'DIMENSIONE TESTO',
+      small: 'PICCOLO', medium: 'MEDIO', large: 'GRANDE', xlarge: 'MOLTO GRANDE',
+      accentColor: 'COLORE PRINCIPALE', theme: 'TEMA', darkTheme: 'SCURO', lightTheme: 'CHIARO',
+      highContrast: 'ALTO CONTRASTO', household: '👥 FAMIGLIA', peopleCount: 'NUMERO PERSONE',
+      alerts: '🔔 ALLERTE', warningDays: 'GIORNI DI PREAVVISO', days30: '30 GIORNI',
+      days60: '60 GIORNI', days90: '90 GIORNI', batteryAlert: 'ALLERTA BATTERIA (giorni senza carica)',
+      language: '🌍 LINGUA', selectLanguage: 'SELEZIONA LINGUA', data: '💾 DATI',
+      exportData: '📤 ESPORTA DATI', importData: '📥 IMPORTA DATI', resetAll: '🗑️ RESETTA TUTTO',
+      prepared: 'Pronto per l\'imprevisto', navHome: '🏠 HOME', navPantry: '🥫 DISPENSA',
+      navGear: '🔧 ATTREZZATURA', navSettings: '⚙️ IMPOSTAZIONI', addProduct: 'AGGIUNGI PRODOTTO',
+      addMaterial: 'AGGIUNGI ATTREZZATURA', name: 'NOME *', category: 'CATEGORIA', quantity: 'QUANTITÀ',
+      unit: 'UNITÀ', expiryDate: 'DATA SCADENZA', location: 'POSIZIONE', cancel: 'ANNULLA',
+      save: 'SALVA', status: 'STATO', operational: '✅ OPERATIVO', check: '⚠️ DA VERIFICARE',
+      broken: '❌ GUASTO', confirm: '⚠ CONFERMA', confirmMessage: 'Sei sicuro?', accept: 'ACCETTA',
+      optimal: '● OTTIMALE', stable: '◐ STABILE', critical: '▼ CRITICO', photo: 'FOTO',
+      takePhoto: 'Scatta foto o seleziona dalla galleria', changePhoto: '📷 CAMBIA', removePhoto: '🗑️ RIMUOVI',
+      minStock: 'SCORTA MINIMA', autoFill: '🤖 RIEMPIMENTO AUTOMATICO IA', medFor: 'USATO PER',
+      medHow: 'COME PRENDERE', medContra: 'CONTROINDICAZIONI', notes: 'NOTE', instructions: 'ISTRUZIONI',
+      lastCharge: 'ULTIMA RICARICA', chargeInterval: 'RICARICA OGNI (giorni)', batteryType: 'TIPO BATTERIA',
+      lightType: 'TIPO LUCE', powerSource: 'FONTE DI ENERGIA', alertsActive: 'ALLERTE ATTIVE',
+      expiredProducts: 'Prodotti scaduti', soonExpiring: 'In scadenza', lowStock: 'Scorta bassa',
+      batteriesToCharge: 'Batterie da caricare', itemsToReview: 'Articoli da verificare'
+    },
+    pt: {
+      appName: 'KUKADES', subtitle: 'PRONTO PARA O INESPERADO', systemActive: 'SISTEMA ATIVO',
+      dashboardTitle: '// ESTADO GERAL', evaluating: 'AVALIANDO...', products: 'PRODUTOS',
+      expired: 'EXPIRADOS', materials: 'MATERIAIS', modulesTitle: '// MÓDULOS', pantry: 'DESPENSA',
+      pantryDesc: 'Gestão de alimentos e suprimentos', gear: 'MATERIAIS', gearDesc: 'Ferramentas e equipamentos',
+      settings: 'CONFIGURAÇÕES', settingsDesc: 'Configuração da aplicação', pantryTitle: '// DESPENSA',
+      total: 'Total', warning: 'Aviso', urgent: 'Urgente', all: 'TODOS', food: '🥫 ALIMENTOS',
+      water: '💧 ÁGUA', medicines: '💊 MEDICAMENTOS', hygiene: '🧼 HIGIENE', gearTitle: '// MATERIAIS',
+      lighting: '💡 ILUMINAÇÃO', tools: '🔧 FERRAMENTAS', energy: '⚡ ENERGIA', communication: '📻 COMUNICAÇÃO',
+      settingsTitle: '// CONFIGURAÇÕES', appearance: '🎨 APARÊNCIA', fontSize: 'TAMANHO DO TEXTO',
+      small: 'PEQUENO', medium: 'MÉDIO', large: 'GRANDE', xlarge: 'MUITO GRANDE',
+      accentColor: 'COR PRINCIPAL', theme: 'TEMA', darkTheme: 'ESCURO', lightTheme: 'CLARO',
+      highContrast: 'ALTO CONTRASTE', household: '👥 FAMÍLIA', peopleCount: 'NÚMERO DE PESSOAS',
+      alerts: '🔔 ALERTAS', warningDays: 'DIAS DE ANTECEDÊNCIA', days30: '30 DIAS',
+      days60: '60 DIAS', days90: '90 DIAS', batteryAlert: 'ALERTA DE BATERIA (dias sem carregar)',
+      language: '🌍 IDIOMA', selectLanguage: 'SELECIONAR IDIOMA', data: '💾 DADOS',
+      exportData: '📤 EXPORTAR DADOS', importData: '📥 IMPORTAR DADOS', resetAll: '🗑️ REINICIAR TUDO',
+      prepared: 'Pronto para o Inesperado', navHome: '🏠 INÍCIO', navPantry: '🥫 DESPENSA',
+      navGear: '🔧 MATERIAIS', navSettings: '⚙️ CONFIGURAÇÕES', addProduct: 'ADICIONAR PRODUTO',
+      addMaterial: 'ADICIONAR MATERIAL', name: 'NOME *', category: 'CATEGORIA', quantity: 'QUANTIDADE',
+      unit: 'UNIDADE', expiryDate: 'DATA DE VALIDADE', location: 'LOCALIZAÇÃO', cancel: 'CANCELAR',
+      save: 'SALVAR', status: 'ESTADO', operational: '✅ OPERACIONAL', check: '⚠️ VERIFICAR',
+      broken: '❌ AVARIA', confirm: '⚠ CONFIRMAR', confirmMessage: 'Tem certeza?', accept: 'ACEITAR',
+      optimal: '● ÓTIMO', stable: '◐ ESTÁVEL', critical: '▼ CRÍTICO', photo: 'FOTO',
+      takePhoto: 'Tirar foto ou selecionar da galeria', changePhoto: '📷 ALTERAR', removePhoto: '🗑️ REMOVER',
+      minStock: 'ESTOQUE MÍNIMO', autoFill: '🤖 PREENCHIMENTO AUTOMÁTICO IA', medFor: 'USADO PARA',
+      medHow: 'COMO TOMAR', medContra: 'CONTRAINDICAÇÕES', notes: 'NOTAS', instructions: 'INSTRUÇÕES',
+      lastCharge: 'ÚLTIMA CARGA', chargeInterval: 'CARREGAR A CADA (dias)', batteryType: 'TIPO DE BATERIA',
+      lightType: 'TIPO DE LUZ', powerSource: 'FONTE DE ENERGIA', alertsActive: 'ALERTAS ATIVAS',
+      expiredProducts: 'Produtos vencidos', soonExpiring: 'Vence em breve', lowStock: 'Estoque baixo',
+      batteriesToCharge: 'Baterias para carregar', itemsToReview: 'Itens para verificar'
+    }
+  };
+
+  let currentLang = localStorage.getItem('kukades_lang') || 'es';
+
+  function t(key) {
+    return translations[currentLang]?.[key] || translations.es[key] || key;
+  }
+
+  function updateUILanguage() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (key && !el.tagName.match(/INPUT|TEXTAREA|SELECT/i)) {
+        if (el.tagName === 'OPTION') el.textContent = t(key);
+        else el.textContent = t(key);
+      }
+    });
+    
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      const lang = btn.textContent.toLowerCase();
+      if (lang === currentLang) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    
+    updateDashboardText();
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('kukades_lang', lang);
+    updateUILanguage();
+    showToast(t('language') + ': ' + lang.toUpperCase());
+  }
+
+  // ============ CONFIGURACIÓN VISUAL ============
+  function setFontSize(size) {
+    document.body.className = document.body.className.replace(/font-\w+/, '');
+    document.body.classList.add('font-' + size);
+    localStorage.setItem('kukades_font_size', size);
+    
+    document.querySelectorAll('[id^="font"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('font' + size.charAt(0).toUpperCase() + size.slice(1)).classList.add('active');
+  }
+
+  function setAccentColor(color) {
+    document.documentElement.style.setProperty('--green', color);
+    document.documentElement.style.setProperty('--green-glow', color + '33');
+    localStorage.setItem('kukades_accent_color', color);
+  }
+
+  function setTheme(theme) {
+    if (theme === 'light') {
+      document.documentElement.style.setProperty('--bg', '#f5f5f0');
+      document.documentElement.style.setProperty('--bg2', '#e8e8dd');
+      document.documentElement.style.setProperty('--panel', '#ecece0');
+      document.documentElement.style.setProperty('--border', '#aaa');
+      document.documentElement.style.setProperty('--text', '#1a1a1a');
+      document.documentElement.style.setProperty('--green-dim', '#2e7d32');
+      document.documentElement.style.setProperty('--green-dark', '#c8e6c9');
+    } else if (theme === 'highContrast') {
+      document.documentElement.style.setProperty('--bg', '#000000');
+      document.documentElement.style.setProperty('--bg2', '#000000');
+      document.documentElement.style.setProperty('--panel', '#111111');
+      document.documentElement.style.setProperty('--border', '#ffff00');
+      document.documentElement.style.setProperty('--text', '#ffffff');
+      document.documentElement.style.setProperty('--green', '#00ff00');
+      document.documentElement.style.setProperty('--green-dim', '#ffff00');
+      document.documentElement.style.setProperty('--green-dark', '#333300');
+    } else {
+      document.documentElement.style.setProperty('--bg', '#050e03');
+      document.documentElement.style.setProperty('--bg2', '#0a1f07');
+      document.documentElement.style.setProperty('--panel', '#0a1f07');
+      document.documentElement.style.setProperty('--border', '#1e4a12');
+      document.documentElement.style.setProperty('--text', '#a8e89c');
+      document.documentElement.style.setProperty('--green-dim', '#1a7a0a');
+      document.documentElement.style.setProperty('--green-dark', '#0d3d05');
+    }
+    localStorage.setItem('kukades_theme', theme);
+    
+    document.querySelectorAll('[id^="theme"]').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('theme' + theme.charAt(0).toUpperCase() + theme.slice(1)).classList.add('active');
+  }
+
+  function loadVisualSettings() {
+    const fontSize = localStorage.getItem('kukades_font_size') || 'medium';
+    setFontSize(fontSize);
+    
+    const accentColor = localStorage.getItem('kukades_accent_color') || '#39ff14';
+    setAccentColor(accentColor);
+    document.getElementById('accentColorPicker').value = accentColor;
+    
+    const theme = localStorage.getItem('kukades_theme') || 'dark';
+    setTheme(theme);
+  }
+
+  // ============ DATA ============
+  let products = [];
+  let materials = [];
+  let currentFilter = 'all';
+  let currentMatFilter = 'all';
+  let editingProductId = null;
+  let editingMaterialId = null;
+  let pendingAction = null;
+  let batteryAlertDays = localStorage.getItem('kukades_battery_alert_days') || 90;
+  
+  let config = {
+    personCount: 1,
+    warnDays: 60
+  };
+
+  // Fotos
+  let productPhotoData = null;
+  let materialPhotoData = null;
+
+  function triggerProductPhoto() { document.getElementById('productPhotoInput').click(); }
+  function triggerMaterialPhoto() { document.getElementById('materialPhotoInput').click(); }
+
+  function handleProductPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      productPhotoData = ev.target.result;
+      document.getElementById('productPhotoPreview').src = productPhotoData;
+      document.getElementById('productPhotoPreviewWrap').style.display = 'block';
+      document.getElementById('productPhotoArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleMaterialPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      materialPhotoData = ev.target.result;
+      document.getElementById('materialPhotoPreview').src = materialPhotoData;
+      document.getElementById('materialPhotoPreviewWrap').style.display = 'block';
+      document.getElementById('materialPhotoArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeProductPhoto() {
+    productPhotoData = null;
+    document.getElementById('productPhotoPreview').src = '';
+    document.getElementById('productPhotoPreviewWrap').style.display = 'none';
+    document.getElementById('productPhotoArea').style.display = 'flex';
+    document.getElementById('productPhotoInput').value = '';
+  }
+
+  function removeMaterialPhoto() {
+    materialPhotoData = null;
+    document.getElementById('materialPhotoPreview').src = '';
+    document.getElementById('materialPhotoPreviewWrap').style.display = 'none';
+    document.getElementById('materialPhotoArea').style.display = 'flex';
+    document.getElementById('materialPhotoInput').value = '';
+  }
+
+  function toggleProductFields() {
+    const cat = document.getElementById('productCat').value;
+    document.getElementById('nutritionBlock').style.display = cat === 'ALIMENTOS' ? 'block' : 'none';
+    document.getElementById('medicineBlock').style.display = cat === 'MEDICINAS' ? 'block' : 'none';
+  }
+
+  function toggleMaterialFields() {
+    const cat = document.getElementById('materialCat').value;
+    document.getElementById('batteryBlock').style.display = (cat === 'ENERGÍA' || cat === 'ILUMINACIÓN') ? 'block' : 'none';
+    document.getElementById('lightingBlock').style.display = cat === 'ILUMINACIÓN' ? 'block' : 'none';
+  }
+
+  // ============ INIT ============
+  function loadData() {
+    const savedProducts = localStorage.getItem('kukades_products');
+    if (savedProducts) products = JSON.parse(savedProducts);
+    else {
+      products = [
+        { id: Date.now() + 1, name: 'Agua embotellada', cat: 'AGUA', qty: 12, unit: 'L', exp: '', loc: 'Trastero', minQty: 10, notes: '', photo: null },
+        { id: Date.now() + 2, name: 'Arroz', cat: 'ALIMENTOS', qty: 5, unit: 'kg', exp: '', loc: 'Despensa', minQty: 2, netWeight: 1000, kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, fiber: 0.4, notes: '', photo: null },
+        { id: Date.now() + 3, name: 'Atún en conserva', cat: 'ALIMENTOS', qty: 24, unit: 'latas', exp: '', loc: 'Despensa', minQty: 12, netWeight: 150, kcal: 184, protein: 23, fat: 10, carbs: 0, notes: '', photo: null },
+        { id: Date.now() + 4, name: 'Ibuprofeno', cat: 'MEDICINAS', qty: 2, unit: 'cajas', exp: '', loc: 'Botiquín', minQty: 1, medFor: 'Dolor y fiebre', medHow: '1 comprimido cada 8h', medContra: 'No tomar con alcohol', notes: '', photo: null }
+      ];
+    }
+    
+    const savedMaterials = localStorage.getItem('kukades_materials');
+    if (savedMaterials) materials = JSON.parse(savedMaterials);
+    else {
+      materials = [
+        { id: Date.now() + 100, name: 'Linterna LED', cat: 'ILUMINACIÓN', status: 'OPERATIVO', qty: 2, loc: 'Cajón', instructions: 'Usar pilas AA', lastCharge: new Date().toISOString().split('T')[0], chargeInterval: 90, lightType: 'LED', powerSource: '3x AAA', photo: null },
+        { id: Date.now() + 101, name: 'Cuchillo multiusos', cat: 'HERRAMIENTAS', status: 'OPERATIVO', qty: 1, loc: 'Mochila', instructions: 'Mantener afilado y seco', photo: null }
+      ];
+    }
+    
+    const savedConfig = localStorage.getItem('kukades_config');
+    if (savedConfig) config = JSON.parse(savedConfig);
+    
+    updateAll();
+    updateUILanguage();
+  }
+  
+  function saveProducts() {
+    localStorage.setItem('kukades_products', JSON.stringify(products));
+  }
+  
+  function saveMaterials() {
+    localStorage.setItem('kukades_materials', JSON.stringify(materials));
+  }
+  
+  function saveConfig() {
+    localStorage.setItem('kukades_config', JSON.stringify(config));
+  }
+
+  // ============ HELPERS ============
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+  
+  function getExpStatus(expDate) {
+    if (!expDate) return 'ok';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exp = new Date(expDate);
+    const diff = Math.floor((exp - today) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return 'danger';
+    if (diff <= config.warnDays) return 'warn';
+    return 'ok';
+  }
+  
+  function formatExpDate(expDate) {
+    if (!expDate) return 'Sin fecha';
+    const exp = new Date(expDate);
+    const today = new Date();
+    const diff = Math.floor((exp - today) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return `⛔ CADUCÓ el ${exp.toLocaleDateString()}`;
+    if (diff === 0) return `🔴 CADUCA HOY`;
+    if (diff <= config.warnDays) return `⚠️ Caduca en ${diff} días (${exp.toLocaleDateString()})`;
+    return `🟢 ${exp.toLocaleDateString()}`;
+  }
+  
+  function getBatteryStatus(material) {
+    if (!material.lastCharge || !material.chargeInterval) return null;
+    const last = new Date(material.lastCharge);
+    const today = new Date();
+    const daysSince = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+    const interval = parseInt(material.chargeInterval);
+    if (daysSince > interval) return { status: 'danger', message: `🔴 Recarga pendiente (${daysSince - interval} días tarde)` };
+    if (daysSince > interval * 0.7) return { status: 'warn', message: `🟡 Recargar en ${interval - daysSince} días` };
+    return { status: 'ok', message: null };
+  }
+  
+  function getCatIcon(cat) {
+    const icons = { ALIMENTOS: '🥫', AGUA: '💧', MEDICINAS: '💊', HIGIENE: '🧼', ILUMINACIÓN: '💡', HERRAMIENTAS: '🔧', ENERGÍA: '⚡', COMUNICACIÓN: '📻' };
+    return icons[cat] || '📦';
+  }
+
+  // ============ UPDATE UI ============
+  function updateAll() {
+    updateDashboard();
+    renderProducts();
+    renderMaterials();
+    document.getElementById('personCount').innerText = config.personCount;
+    updateWarnButtons();
+    updateBatteryButtons();
+  }
+  
+  function updateDashboard() {
+    const totalProducts = products.length;
+    const expired = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const lowStock = products.filter(p => p.minQty && parseFloat(p.qty) < parseFloat(p.minQty)).length;
+    const totalMaterials = materials.length;
+    const batteriesToCharge = materials.filter(m => m.lastCharge && getBatteryStatus(m)?.status === 'danger').length;
+    const itemsToReview = materials.filter(m => m.status === 'REVISAR' || m.status === 'AVERÍA').length;
+    
+    let score = 100;
+    if (totalProducts > 0) {
+      score -= (expired / totalProducts) * 30;
+      score -= (warn / totalProducts) * 15;
+      score -= (lowStock / totalProducts) * 15;
+    }
+    if (totalMaterials > 0) {
+      score -= (batteriesToCharge / totalMaterials) * 20;
+      score -= (itemsToReview / totalMaterials) * 20;
+    }
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    
+    document.getElementById('dashLevel').innerText = score + '%';
+    document.getElementById('dashBar').style.width = score + '%';
+    document.getElementById('statProducts').innerText = totalProducts;
+    document.getElementById('statExpired').innerText = expired;
+    document.getElementById('statMaterials').innerText = totalMaterials;
+    
+    // Alertas activas
+    const alertsHtml = [];
+    if (expired > 0) alertsHtml.push(`<div class="stat-card" style="border-left-color: var(--red);"><span style="color: var(--red);">⚠️ ${t('expiredProducts')}: ${expired}</span></div>`);
+    if (warn > 0) alertsHtml.push(`<div class="stat-card" style="border-left-color: var(--amber);"><span style="color: var(--amber);">⚠️ ${t('soonExpiring')}: ${warn}</span></div>`);
+    if (lowStock > 0) alertsHtml.push(`<div class="stat-card" style="border-left-color: var(--amber);"><span style="color: var(--amber);">📦 ${t('lowStock')}: ${lowStock}</span></div>`);
+    if (batteriesToCharge > 0) alertsHtml.push(`<div class="stat-card" style="border-left-color: var(--red);"><span style="color: var(--red);">🔋 ${t('batteriesToCharge')}: ${batteriesToCharge}</span></div>`);
+    if (itemsToReview > 0) alertsHtml.push(`<div class="stat-card" style="border-left-color: var(--amber);"><span style="color: var(--amber);">⚠️ ${t('itemsToReview')}: ${itemsToReview}</span></div>`);
+    
+    const alertsContainer = document.getElementById('activeAlerts');
+    if (alertsContainer) {
+      if (alertsHtml.length > 0) {
+        alertsContainer.innerHTML = `<div class="section-header"><div class="section-title" data-i18n="alertsActive">ALERTAS ACTIVAS</div></div><div class="stats-bar">${alertsHtml.join('')}</div>`;
+      } else {
+        alertsContainer.innerHTML = '';
+      }
+    }
+    
+    updateDashboardText();
+  }
+  
+  function updateDashboardText() {
+    const level = parseInt(document.getElementById('dashLevel').innerText) || 0;
+    const statusEl = document.getElementById('dashStatus');
+    if (level >= 70) statusEl.innerHTML = t('optimal');
+    else if (level >= 40) statusEl.innerHTML = t('stable');
+    else statusEl.innerHTML = t('critical');
+  }
+  
+  function renderProducts() {
+    let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const danger = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    
+    document.getElementById('despensaTotal').innerText = products.length;
+    document.getElementById('despensaWarn').innerText = warn;
+    document.getElementById('despensaDanger').innerText = danger;
+    document.getElementById('despensaCount').innerText = filtered.length + ' items';
+    
+    const container = document.getElementById('productList');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">📦 ${t('noProducts') || 'No hay productos'}<br>Presiona + para añadir</div>`;
+      return;
+    }
+    
+    container.innerHTML = filtered.map(p => {
+      const status = getExpStatus(p.exp);
+      const isLowStock = p.minQty && parseFloat(p.qty) < parseFloat(p.minQty);
+      const photoHTML = p.photo ? `<img src="${p.photo}">` : getCatIcon(p.cat);
+      
+      return `
+        <div class="product-card status-${status}">
+          <div class="product-photo">${photoHTML}</div>
+          <div class="product-info">
+            <div class="product-cat">${p.cat}${isLowStock ? '<span class="alert-badge">⚠ STOCK BAJO</span>' : ''}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">${p.qty} ${p.unit}${p.loc ? ` · 📍 ${p.loc}` : ''}</div>
+            <div class="exp-date ${status}">${formatExpDate(p.exp)}</div>
+            ${p.minQty ? `<div class="product-meta">📊 Mínimo: ${p.minQty} ${p.unit}</div>` : ''}
+            ${p.notes ? `<div class="product-meta">📝 ${p.notes.substring(0, 50)}</div>` : ''}
+          </div>
+          <div>
+            <button class="btn-icon" onclick="editProduct(${p.id})">✏️</button>
+            <button class="btn-icon" onclick="deleteProduct(${p.id})" style="margin-left: 4px;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function renderMaterials() {
+    let filtered = currentMatFilter === 'all' ? materials : materials.filter(m => m.cat === currentMatFilter);
+    document.getElementById('materialesCount').innerText = filtered.length + ' items';
+    
+    const container = document.getElementById('materialList');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">🔧 ${t('noMaterials') || 'No hay materiales'}<br>Presiona + para añadir</div>`;
+      return;
+    }
+    
+    container.innerHTML = filtered.map(m => {
+      let statusClass = m.status === 'AVERÍA' ? 'danger' : (m.status === 'REVISAR' ? 'warn' : 'ok');
+      const batteryStatus = getBatteryStatus(m);
+      if (batteryStatus && batteryStatus.status !== 'ok') statusClass = batteryStatus.status;
+      const photoHTML = m.photo ? `<img src="${m.photo}">` : getCatIcon(m.cat);
+      
+      return `
+        <div class="product-card status-${statusClass}">
+          <div class="product-photo">${photoHTML}</div>
+          <div class="product-info">
+            <div class="product-cat">${m.cat}</div>
+            <div class="product-name">${m.name}</div>
+            <div class="product-meta">${m.qty} uds · ${m.status}${m.loc ? ` · 📍 ${m.loc}` : ''}</div>
+            ${batteryStatus && batteryStatus.message ? `<div class="exp-date ${batteryStatus.status}">${batteryStatus.message}</div>` : ''}
+            ${m.instructions ? `<div class="product-meta">📋 ${m.instructions.substring(0, 50)}</div>` : ''}
+          </div>
+          <div>
+            <button class="btn-icon" onclick="editMaterial(${m.id})">✏️</button>
+            <button class="btn-icon" onclick="deleteMaterial(${m.id})" style="margin-left: 4px;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function updateWarnButtons() {
+    document.querySelectorAll('#warn30, #warn60, #warn90').forEach(btn => btn.classList.remove('active'));
+    if (config.warnDays === 30) document.getElementById('warn30').classList.add('active');
+    else if (config.warnDays === 60) document.getElementById('warn60').classList.add('active');
+    else if (config.warnDays === 90) document.getElementById('warn90').classList.add('active');
+  }
+  
+  function updateBatteryButtons() {
+    document.querySelectorAll('#battery30, #battery60, #battery90').forEach(btn => btn.classList.remove('active'));
+    if (batteryAlertDays == 30) document.getElementById('battery30').classList.add('active');
+    else if (batteryAlertDays == 60) document.getElementById('battery60').classList.add('active');
+    else if (batteryAlertDays == 90) document.getElementById('battery90').classList.add('active');
+  }
+
+  function setBatteryAlertDays(days) {
+    batteryAlertDays = days;
+    localStorage.setItem('kukades_battery_alert_days', days);
+    updateBatteryButtons();
+    showToast('✅ Alerta de batería configurada a ' + days + ' días');
+  }
+
+  // ============ PRODUCT CRUD ============
+  function openAddModal() {
+    if (document.getElementById('screen-despensa').classList.contains('active')) {
+      editingProductId = null;
+      productPhotoData = null;
+      removeProductPhoto();
+      document.getElementById('modalTitle').innerHTML = t('addProduct');
+      document.getElementById('productName').value = '';
+      document.getElementById('productCat').value = 'ALIMENTOS';
+      document.getElementById('productQty').value = '1';
+      document.getElementById('productUnit').value = 'uds';
+      document.getElementById('productMinQty').value = '';
+      document.getElementById('productExp').value = '';
+      document.getElementById('productLoc').value = '';
+      document.getElementById('productNotes').value = '';
+      document.getElementById('productNetWeight').value = '';
+      document.getElementById('productKcal').value = '';
+      document.getElementById('productProtein').value = '';
+      document.getElementById('productFat').value = '';
+      document.getElementById('productCarbs').value = '';
+      document.getElementById('productFiber').value = '';
+      document.getElementById('productMedFor').value = '';
+      document.getElementById('productMedHow').value = '';
+      document.getElementById('productMedContra').value = '';
+      toggleProductFields();
+      document.getElementById('productModal').classList.add('open');
+    } else if (document.getElementById('screen-materiales').classList.contains('active')) {
+      editingMaterialId = null;
+      materialPhotoData = null;
+      removeMaterialPhoto();
+      document.getElementById('matModalTitle').innerHTML = t('addMaterial');
+      document.getElementById('materialName').value = '';
+      document.getElementById('materialCat').value = 'ILUMINACIÓN';
+      document.getElementById('materialStatus').value = 'OPERATIVO';
+      document.getElementById('materialQty').value = '1';
+      document.getElementById('materialLoc').value = '';
+      document.getElementById('materialInstructions').value = '';
+      document.getElementById('materialNotes').value = '';
+      document.getElementById('materialLastCharge').value = '';
+      document.getElementById('materialChargeInterval').value = '90';
+      document.getElementById('materialBatteryType').value = '';
+      document.getElementById('materialLightType').value = 'LED';
+      document.getElementById('materialPowerSource').value = '';
+      toggleMaterialFields();
+      document.getElementById('materialModal').classList.add('open');
+    }
+  }
+  
+  function saveProduct() {
+    const name = document.getElementById('productName').value.trim();
+    if (!name) { showToast('⚠ ' + t('nameRequired'), true); return; }
+    
+    const product = {
+      id: editingProductId || Date.now(),
+      name: name,
+      cat: document.getElementById('productCat').value,
+      qty: parseFloat(document.getElementById('productQty').value) || 1,
+      unit: document.getElementById('productUnit').value,
+      minQty: document.getElementById('productMinQty').value ? parseFloat(document.getElementById('productMinQty').value) : null,
+      exp: document.getElementById('productExp').value,
+      loc: document.getElementById('productLoc').value,
+      notes: document.getElementById('productNotes').value,
+      photo: productPhotoData || null,
+      netWeight: document.getElementById('productNetWeight').value ? parseFloat(document.getElementById('productNetWeight').value) : null,
+      kcal: document.getElementById('productKcal').value ? parseFloat(document.getElementById('productKcal').value) : null,
+      protein: document.getElementById('productProtein').value ? parseFloat(document.getElementById('productProtein').value) : null,
+      fat: document.getElementById('productFat').value ? parseFloat(document.getElementById('productFat').value) : null,
+      carbs: document.getElementById('productCarbs').value ? parseFloat(document.getElementById('productCarbs').value) : null,
+      fiber: document.getElementById('productFiber').value ? parseFloat(document.getElementById('productFiber').value) : null,
+      medFor: document.getElementById('productMedFor').value,
+      medHow: document.getElementById('productMedHow').value,
+      medContra: document.getElementById('productMedContra').value
+    };
+    
+    if (editingProductId) {
+      const index = products.findIndex(p => p.id === editingProductId);
+      if (index !== -1) products[index] = product;
+      showToast('✅ ' + t('productUpdated'));
+    } else {
+      products.push(product);
+      showToast('✅ ' + t('productAdded'));
+    }
+    
+    saveProducts();
+    closeModal();
+    renderProducts();
+    updateDashboard();
+  }
+  
+  function editProduct(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    editingProductId = id;
+    productPhotoData = product.photo || null;
+    
+    document.getElementById('modalTitle').innerHTML = t('addProduct');
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productCat').value = product.cat;
+    document.getElementById('productQty').value = product.qty;
+    document.getElementById('productUnit').value = product.unit;
+    document.getElementById('productMinQty').value = product.minQty || '';
+    document.getElementById('productExp').value = product.exp || '';
+    document.getElementById('productLoc').value = product.loc || '';
+    document.getElementById('productNotes').value = product.notes || '';
+    document.getElementById('productNetWeight').value = product.netWeight || '';
+    document.getElementById('productKcal').value = product.kcal || '';
+    document.getElementById('productProtein').value = product.protein || '';
+    document.getElementById('productFat').value = product.fat || '';
+    document.getElementById('productCarbs').value = product.carbs || '';
+    document.getElementById('productFiber').value = product.fiber || '';
+    document.getElementById('productMedFor').value = product.medFor || '';
+    document.getElementById('productMedHow').value = product.medHow || '';
+    document.getElementById('productMedContra').value = product.medContra || '';
+    
+    if (product.photo) {
+      document.getElementById('productPhotoPreview').src = product.photo;
+      document.getElementById('productPhotoPreviewWrap').style.display = 'block';
+      document.getElementById('productPhotoArea').style.display = 'none';
+    }
+    
+    toggleProductFields();
+    document.getElementById('productModal').classList.add('open');
+  }
+  
+  function deleteProduct(id) {
+    pendingAction = () => {
+      products = products.filter(p => p.id !== id);
+      saveProducts();
+      renderProducts();
+      updateDashboard();
+      showToast('🗑️ ' + t('productDeleted'));
+    };
+    document.getElementById('confirmText').innerHTML = t('confirmMessage');
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+  
+  // ============ MATERIAL CRUD ============
+  function saveMaterial() {
+    const name = document.getElementById('materialName').value.trim();
+    if (!name) { showToast('⚠ ' + t('nameRequired'), true); return; }
+    
+    const material = {
+      id: editingMaterialId || Date.now(),
+      name: name,
+      cat: document.getElementById('materialCat').value,
+      status: document.getElementById('materialStatus').value,
+      qty: parseFloat(document.getElementById('materialQty').value) || 1,
+      loc: document.getElementById('materialLoc').value,
+      instructions: document.getElementById('materialInstructions').value,
+      notes: document.getElementById('materialNotes').value,
+      photo: materialPhotoData || null,
+      lastCharge: document.getElementById('materialLastCharge').value,
+      chargeInterval: document.getElementById('materialChargeInterval').value,
+      batteryType: document.getElementById('materialBatteryType').value,
+      lightType: document.getElementById('materialLightType').value,
+      powerSource: document.getElementById('materialPowerSource').value
+    };
+    
+    if (editingMaterialId) {
+      const index = materials.findIndex(m => m.id === editingMaterialId);
+      if (index !== -1) materials[index] = material;
+      showToast('✅ ' + t('materialUpdated'));
+    } else {
+      materials.push(material);
+      showToast('✅ ' + t('materialAdded'));
+    }
+    
+    saveMaterials();
+    closeMatModal();
+    renderMaterials();
+    updateDashboard();
+  }
+  
+  function editMaterial(id) {
+    const material = materials.find(m => m.id === id);
+    if (!material) return;
+    editingMaterialId = id;
+    materialPhotoData = material.photo || null;
+    
+    document.getElementById('matModalTitle').innerHTML = t('addMaterial');
+    document.getElementById('materialName').value = material.name;
+    document.getElementById('materialCat').value = material.cat;
+    document.getElementById('materialStatus').value = material.status;
+    document.getElementById('materialQty').value = material.qty;
+    document.getElementById('materialLoc').value = material.loc || '';
+    document.getElementById('materialInstructions').value = material.instructions || '';
+    document.getElementById('materialNotes').value = material.notes || '';
+    document.getElementById('materialLastCharge').value = material.lastCharge || '';
+    document.getElementById('materialChargeInterval').value = material.chargeInterval || '90';
+    document.getElementById('materialBatteryType').value = material.batteryType || '';
+    document.getElementById('materialLightType').value = material.lightType || 'LED';
+    document.getElementById('materialPowerSource').value = material.powerSource || '';
+    
+    if (material.photo) {
+      document.getElementById('materialPhotoPreview').src = material.photo;
+      document.getElementById('materialPhotoPreviewWrap').style.display = 'block';
+      document.getElementById('materialPhotoArea').style.display = 'none';
+    }
+    
+    toggleMaterialFields();
+    document.getElementById('materialModal').classList.add('open');
+  }
+  
+  function deleteMaterial(id) {
+    pendingAction = () => {
+      materials = materials.filter(m => m.id !== id);
+      saveMaterials();
+      renderMaterials();
+      updateDashboard();
+      showToast('🗑️ ' + t('materialDeleted'));
+    };
+    document.getElementById('confirmText').innerHTML = t('confirmMessage');
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+  
+  function executeConfirm() {
+    if (pendingAction) {
+      pendingAction();
+      pendingAction = null;
+    }
+    closeConfirm();
+  }
+  
+  function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+  }
+  
+  // ============ SETTINGS ============
+  function changePersonCount(delta) {
+    config.personCount = Math.max(1, Math.min(20, config.personCount + delta));
+    document.getElementById('personCount').innerText = config.personCount;
+    saveConfig();
+    updateDashboard();
+    showToast(t('personsUpdated') + config.personCount);
+  }
+  
+  function setWarnDays(days) {
+    config.warnDays = days;
+    saveConfig();
+    updateWarnButtons();
+    renderProducts();
+    showToast(t('warningDays') + ': ' + days + ' ' + (t('days') || 'días'));
+  }
+  
+  function exportData() {
+    const data = {
+      products: products.map(p => {
+        const { photo, ...rest } = p;
+        return rest;
+      }),
+      materials: materials.map(m => {
+        const { photo, ...rest } = m;
+        return rest;
+      }),
+      config: config,
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kukades-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(t('dataExported'));
+  }
+  
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.products) products = data.products;
+        if (data.materials) materials = data.materials;
+        if (data.config) config = data.config;
+        saveProducts();
+        saveMaterials();
+        saveConfig();
+        updateAll();
+        showToast(t('dataImported'));
+      } catch(err) {
+        showToast(t('importError'), true);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+  
+  function resetAllData() {
+    pendingAction = () => {
+      products = [];
+      materials = [];
+      config = { personCount: 1, warnDays: 60 };
+      saveProducts();
+      saveMaterials();
+      saveConfig();
+      updateAll();
+      showToast(t('allDataDeleted'));
+    };
+    document.getElementById('confirmText').innerHTML = t('confirmMessage');
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+
+  // ============ NAVIGATION ============
+  function showScreen(screen, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen-${screen}`).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    const fab = document.getElementById('fabBtn');
+    if (screen === 'despensa' || screen === 'materiales') {
+      fab.style.display = 'flex';
+    } else {
+      fab.style.display = 'none';
+    }
+    
+    if (screen === 'despensa') renderProducts();
+    if (screen === 'materiales') renderMaterials();
+  }
+  
+  function closeModal() {
+    document.getElementById('productModal').classList.remove('open');
+    editingProductId = null;
+    productPhotoData = null;
+  }
+  
+  function closeMatModal() {
+    document.getElementById('materialModal').classList.remove('open');
+    editingMaterialId = null;
+    materialPhotoData = null;
+  }
+  
+  // ============ FILTERS ============
+  function setupFilters() {
+    document.querySelectorAll('#productFilters .filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#productFilters .filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderProducts();
+      });
+    });
+    
+    document.querySelectorAll('#materialFilters .filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#materialFilters .filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMatFilter = btn.dataset.filter;
+        renderMaterials();
+      });
+    });
+  }
+  
+  // ============ CHECK ALERTS PERIODICALLY ============
+  function startAlertChecker() {
+    setInterval(() => {
+      updateDashboard();
+      renderProducts();
+      renderMaterials();
+      
+      // Verificar notificaciones (si el navegador lo soporta)
+      if (Notification.permission === 'granted') {
+        const expired = products.filter(p => getExpStatus(p.exp) === 'danger');
+        const batteries = materials.filter(m => m.lastCharge && getBatteryStatus(m)?.status === 'danger');
+        
+        if (expired.length > 0) {
+          new Notification('KUKADES - Alerta de caducidad', {
+            body: `${expired.length} producto(s) han caducado`,
+            icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2339ff14"%3E%3Cpath d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/%3E%3C/svg%3E'
+          });
+        }
+        
+        if (batteries.length > 0) {
+          new Notification('KUKADES - Alerta de batería', {
+            body: `${batteries.length} material(es) necesitan recarga`,
+            icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2339ff14"%3E%3Cpath d="M7 3h10v2h2v4h2v8h-2v4H5v-4H3V9h2V5h2V3z"/%3E%3C/svg%3E'
+          });
+        }
+      }
+    }, 60000); // Revisar cada minuto
+  }
+  
+  // Solicitar permisos de notificación
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+  }
+  
+  // ============ INIT ============
+  loadData();
+  setupFilters();
+  loadVisualSettings();
+  requestNotificationPermission();
+  startAlertChecker();
+  
+  // Exponer funciones globales
+  window.showScreen = showScreen;
+  window.openAddModal = openAddModal;
+  window.saveProduct = saveProduct;
+  window.editProduct = editProduct;
+  window.deleteProduct = deleteProduct;
+  window.saveMaterial = saveMaterial;
+  window.editMaterial = editMaterial;
+  window.deleteMaterial = deleteMaterial;
+  window.closeModal = closeModal;
+  window.closeMatModal = closeMatModal;
+  window.executeConfirm = executeConfirm;
+  window.closeConfirm = closeConfirm;
+  window.changePersonCount = changePersonCount;
+  window.setWarnDays = setWarnDays;
+  window.setBatteryAlertDays = setBatteryAlertDays;
+  window.exportData = exportData;
+  window.importData = importData;
+  window.resetAllData = resetAllData;
+  window.setLanguage = setLanguage;
+  window.setFontSize = setFontSize;
+  window.setAccentColor = setAccentColor;
+  window.setTheme = setTheme;
+  window.autoFillNutrition = autoFillNutrition;
+  window.triggerProductPhoto = triggerProductPhoto;
+  window.triggerMaterialPhoto = triggerMaterialPhoto;
+  window.handleProductPhoto = handleProductPhoto;
+  window.handleMaterialPhoto = handleMaterialPhoto;
+  window.removeProductPhoto = removeProductPhoto;
+  window.removeMaterialPhoto = removeMaterialPhoto;
+  window.toggleProductFields = toggleProductFields;
+  window.toggleMaterialFields = toggleMaterialFields;
+</script>
+</body>
+</html>
