@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050e03">
+  <title>KUKADES - Preparado para lo Inesperado</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green: #39ff14;
+      --green-dim: #1a7a0a;
+      --green-dark: #0d3d05;
+      --green-glow: rgba(57, 255, 20, 0.3);
+      --amber: #ffb000;
+      --red: #ff2222;
+      --bg: #050e03;
+      --bg2: #0a1f07;
+      --panel: #0a1f07;
+      --border: #1e4a12;
+      --text: #a8e89c;
+      --font-mono: 'Courier New', 'Share Tech Mono', monospace;
+      --font-display: 'Segoe UI', 'Orbitron', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--green-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid var(--green);
+    }
+
+    .header-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--green);
+    }
+
+    .header-subtitle {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+    }
+
+    .header-status {
+      margin-left: auto;
+      font-size: 0.6rem;
+      text-align: right;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 2s infinite;
+      margin-right: 4px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 4px;
+      gap: 4px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: var(--green-dim);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      transition: all 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--green);
+      text-shadow: 0 0 8px var(--green-glow);
+    }
+
+    /* Content */
+    .app-content {
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* Cards */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--green);
+    }
+
+    .section-badge {
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 0.6rem;
+    }
+
+    /* Stats */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.55rem;
+      color: var(--green-dim);
+      margin-top: 4px;
+    }
+
+    /* Dashboard Level Card */
+    .dash-level-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .dash-level-value {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green-glow);
+    }
+
+    .dash-level-bar-wrap {
+      background: var(--bg2);
+      height: 8px;
+      border-radius: 4px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .dash-level-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* Product Cards */
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .product-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+
+    .product-card.status-danger {
+      border-left: 3px solid var(--red);
+    }
+
+    .product-card.status-warn {
+      border-left: 3px solid var(--amber);
+    }
+
+    .product-photo {
+      width: 50px;
+      height: 50px;
+      background: var(--bg2);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .product-cat {
+      display: inline-block;
+      background: var(--green-dark);
+      border: 1px solid var(--green-dim);
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-bottom: 6px;
+    }
+
+    .product-meta {
+      font-size: 0.6rem;
+      color: var(--green-dim);
+    }
+
+    .exp-date.danger {
+      color: var(--red);
+    }
+
+    .exp-date.warn {
+      color: var(--amber);
+    }
+
+    /* Buttons */
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--green);
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 76px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+      background: var(--green-dark);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      color: var(--green);
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 99;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--green-dim);
+      margin-bottom: 6px;
+    }
+
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      border: 1px solid;
+    }
+
+    .btn-primary {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--green-dim);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--green-dim);
+    }
+
+    .toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--green);
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Emergency Mode */
+    .emergency-mode .dash-level-value {
+      color: var(--red);
+      animation: pulse 0.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Confirm Dialog */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-overlay.open {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--bg2);
+      border: 1px solid var(--red);
+      border-radius: 12px;
+      padding: 24px;
+      width: 280px;
+      text-align: center;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      padding-bottom: 4px;
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--green-dark);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Settings */
+    .settings-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .settings-block-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <div class="header-logo">K</div>
+  <div>
+    <div class="header-title">KUKADES</div>
+    <div class="header-subtitle">PREPARADO PARA LO INESPERADO</div>
+  </div>
+  <div class="header-status">
+    <span class="status-dot"></span> ACTIVO
+  </div>
+</div>
+
+<!-- Content -->
+<div class="app-content" id="appContent">
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="section-header">
+      <div class="section-title">// ESTADO GENERAL</div>
+    </div>
+
+    <div class="dash-level-card">
+      <div class="dash-level-value" id="dashLevel">0%</div>
+      <div class="dash-level-bar-wrap">
+        <div class="dash-level-bar" id="dashBar"></div>
+      </div>
+      <div id="dashStatus">EVALUANDO...</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="statProducts">0</div>
+        <div class="stat-label">PRODUCTOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statExpired">0</div>
+        <div class="stat-label">CADUCADOS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMaterials">0</div>
+        <div class="stat-label">MATERIALES</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">// MÓDULOS</div>
+    </div>
+
+    <div style="display: grid; gap: 12px;">
+      <button class="settings-block" onclick="showScreen('despensa')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">🥫</div>
+        <div style="font-weight: bold;">DESPENSA</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);">Gestión de alimentos y suministros</div>
+      </button>
+      <button class="settings-block" onclick="showScreen('materiales')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">🔧</div>
+        <div style="font-weight: bold;">MATERIALES</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);">Herramientas y equipamiento</div>
+      </button>
+      <button class="settings-block" onclick="showScreen('ajustes')" style="text-align: left; cursor: pointer;">
+        <div style="font-size: 1.2rem;">⚙️</div>
+        <div style="font-weight: bold;">AJUSTES</div>
+        <div style="font-size: 0.6rem; color: var(--green-dim);">Configuración de la aplicación</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- DESPENSA -->
+  <div class="screen" id="screen-despensa">
+    <div class="section-header">
+      <div class="section-title">// DESPENSA</div>
+      <div class="section-badge" id="despensaCount">0 items</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="despensaTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="despensaWarn" style="color: var(--amber);">0</div>
+        <div class="stat-label">Aviso</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="despensaDanger" style="color: var(--red);">0</div>
+        <div class="stat-label">Urgente</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs" id="productFilters">
+      <button class="filter-tab active" data-filter="all">TODOS</button>
+      <button class="filter-tab" data-filter="ALIMENTOS">🥫 ALIMENTOS</button>
+      <button class="filter-tab" data-filter="AGUA">💧 AGUA</button>
+      <button class="filter-tab" data-filter="MEDICINAS">💊 MEDICINAS</button>
+      <button class="filter-tab" data-filter="HIGIENE">🧼 HIGIENE</button>
+    </div>
+
+    <div id="productList" class="product-list"></div>
+  </div>
+
+  <!-- MATERIALES -->
+  <div class="screen" id="screen-materiales">
+    <div class="section-header">
+      <div class="section-title">// MATERIALES</div>
+      <div class="section-badge" id="materialesCount">0 items</div>
+    </div>
+
+    <div class="filter-tabs" id="materialFilters">
+      <button class="filter-tab active" data-filter="all">TODOS</button>
+      <button class="filter-tab" data-filter="ILUMINACIÓN">💡 ILUMINACIÓN</button>
+      <button class="filter-tab" data-filter="HERRAMIENTAS">🔧 HERRAMIENTAS</button>
+      <button class="filter-tab" data-filter="ENERGÍA">⚡ ENERGÍA</button>
+    </div>
+
+    <div id="materialList" class="product-list"></div>
+  </div>
+
+  <!-- AJUSTES -->
+  <div class="screen" id="screen-ajustes">
+    <div class="section-header">
+      <div class="section-title">// AJUSTES</div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">👥 HOGAR</div>
+      <div class="field">
+        <label>NÚMERO DE PERSONAS</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button onclick="changePersonCount(-1)" style="width: 44px; height: 44px; background: var(--green-dark); border: 1px solid var(--green); color: var(--green); font-size: 1.5rem; cursor: pointer;">−</button>
+          <span id="personCount" style="font-family: var(--font-display); font-size: 1.5rem; width: 60px; text-align: center;">1</span>
+          <button onclick="changePersonCount(1)" style="width: 44px; height: 44px; background: var(--green-dark); border: 1px solid var(--green); color: var(--green); font-size: 1.5rem; cursor: pointer;">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">🔔 ALERTAS</div>
+      <div class="field">
+        <label>DÍAS DE ANTELACIÓN</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="setWarnDays(30)" class="filter-tab" id="warn30">30 DÍAS</button>
+          <button onclick="setWarnDays(60)" class="filter-tab" id="warn60">60 DÍAS</button>
+          <button onclick="setWarnDays(90)" class="filter-tab" id="warn90">90 DÍAS</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">💾 DATOS</div>
+      <button class="btn btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 8px;">📤 EXPORTAR DATOS</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%; margin-bottom: 8px;">📥 IMPORTAR DATOS</button>
+      <button class="btn btn-secondary" onclick="resetAllData()" style="width: 100%; background: rgba(255,34,34,0.1); border-color: var(--red); color: var(--red);">🗑️ RESTABLECER TODO</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 0.55rem; color: var(--green-dim);">
+      KUKADES v2.0 - Preparado para lo Inesperado
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showScreen('dashboard', this)">🏠 INICIO</button>
+  <button class="nav-item" onclick="showScreen('despensa', this)">🥫 DESPENSA</button>
+  <button class="nav-item" onclick="showScreen('materiales', this)">🔧 MATERIALES</button>
+  <button class="nav-item" onclick="showScreen('ajustes', this)">⚙️ AJUSTES</button>
+</nav>
+
+<!-- Modal Producto -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">AÑADIR PRODUCTO</div>
+    <div class="field">
+      <label>NOMBRE *</label>
+      <input type="text" id="productName" placeholder="Ej: Atún en aceite">
+    </div>
+    <div class="field">
+      <label>CATEGORÍA</label>
+      <select id="productCat">
+        <option value="ALIMENTOS">🥫 ALIMENTOS</option>
+        <option value="AGUA">💧 AGUA</option>
+        <option value="MEDICINAS">💊 MEDICINAS</option>
+        <option value="HIGIENE">🧼 HIGIENE</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>CANTIDAD</label>
+      <input type="number" id="productQty" placeholder="1" value="1">
+    </div>
+    <div class="field">
+      <label>UNIDAD</label>
+      <select id="productUnit">
+        <option value="uds">uds</option>
+        <option value="kg">kg</option>
+        <option value="L">L</option>
+        <option value="latas">latas</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>FECHA DE CADUCIDAD</label>
+      <input type="date" id="productExp">
+    </div>
+    <div class="field">
+      <label>UBICACIÓN</label>
+      <input type="text" id="productLoc" placeholder="Ej: Despensa, Trastero...">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal()">CANCELAR</button>
+      <button class="btn btn-primary" onclick="saveProduct()">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Material -->
+<div class="modal-overlay" id="materialModal">
+  <div class="modal">
+    <div class="modal-title" id="matModalTitle">AÑADIR MATERIAL</div>
+    <div class="field">
+      <label>NOMBRE *</label>
+      <input type="text" id="materialName" placeholder="Ej: Linterna frontal">
+    </div>
+    <div class="field">
+      <label>CATEGORÍA</label>
+      <select id="materialCat">
+        <option value="ILUMINACIÓN">💡 ILUMINACIÓN</option>
+        <option value="HERRAMIENTAS">🔧 HERRAMIENTAS</option>
+        <option value="ENERGÍA">⚡ ENERGÍA</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>ESTADO</label>
+      <select id="materialStatus">
+        <option value="OPERATIVO">✅ OPERATIVO</option>
+        <option value="REVISAR">⚠️ REVISAR</option>
+        <option value="AVERÍA">❌ AVERÍA</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>CANTIDAD</label>
+      <input type="number" id="materialQty" placeholder="1" value="1">
+    </div>
+    <div class="field">
+      <label>UBICACIÓN</label>
+      <input type="text" id="materialLoc" placeholder="Ej: Caja herramientas">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeMatModal()">CANCELAR</button>
+      <button class="btn btn-primary" onclick="saveMaterial()">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="modal-title" style="color: var(--red);">⚠ CONFIRMAR</div>
+    <div id="confirmText">¿Estás seguro?</div>
+    <div class="btn-row" style="margin-top: 20px;">
+      <button class="btn btn-secondary" onclick="closeConfirm()">CANCELAR</button>
+      <button class="btn btn-primary" id="confirmBtn" onclick="executeConfirm()">ACEPTAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">Mensaje</div>
+
+<script>
+  // ============ DATA ============
+  let products = [];
+  let materials = [];
+  let currentFilter = 'all';
+  let currentMatFilter = 'all';
+  let editingProductId = null;
+  let editingMaterialId = null;
+  let pendingAction = null;
+  
+  let config = {
+    personCount: 1,
+    warnDays: 60
+  };
+
+  // ============ INIT ============
+  function loadData() {
+    const savedProducts = localStorage.getItem('kukades_products');
+    if (savedProducts) products = JSON.parse(savedProducts);
+    else {
+      products = [
+        { id: Date.now() + 1, name: 'Agua embotellada', cat: 'AGUA', qty: 12, unit: 'L', exp: '', loc: 'Trastero' },
+        { id: Date.now() + 2, name: 'Arroz', cat: 'ALIMENTOS', qty: 5, unit: 'kg', exp: '', loc: 'Despensa' },
+        { id: Date.now() + 3, name: 'Atún en conserva', cat: 'ALIMENTOS', qty: 24, unit: 'latas', exp: '', loc: 'Despensa' },
+        { id: Date.now() + 4, name: 'Ibuprofeno', cat: 'MEDICINAS', qty: 2, unit: 'cajas', exp: '', loc: 'Botiquín' }
+      ];
+    }
+    
+    const savedMaterials = localStorage.getItem('kukades_materials');
+    if (savedMaterials) materials = JSON.parse(savedMaterials);
+    else {
+      materials = [
+        { id: Date.now() + 100, name: 'Linterna LED', cat: 'ILUMINACIÓN', status: 'OPERATIVO', qty: 2, loc: 'Cajón' },
+        { id: Date.now() + 101, name: 'Cuchillo multiusos', cat: 'HERRAMIENTAS', status: 'OPERATIVO', qty: 1, loc: 'Mochila' }
+      ];
+    }
+    
+    const savedConfig = localStorage.getItem('kukades_config');
+    if (savedConfig) config = JSON.parse(savedConfig);
+    
+    updateAll();
+  }
+  
+  function saveProducts() {
+    localStorage.setItem('kukades_products', JSON.stringify(products));
+  }
+  
+  function saveMaterials() {
+    localStorage.setItem('kukades_materials', JSON.stringify(materials));
+  }
+  
+  function saveConfig() {
+    localStorage.setItem('kukades_config', JSON.stringify(config));
+  }
+
+  // ============ HELPERS ============
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+  
+  function getExpStatus(expDate) {
+    if (!expDate) return 'ok';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const exp = new Date(expDate);
+    const diff = Math.floor((exp - today) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return 'danger';
+    if (diff <= config.warnDays) return 'warn';
+    return 'ok';
+  }
+  
+  function formatExpDate(expDate) {
+    if (!expDate) return 'Sin fecha';
+    const exp = new Date(expDate);
+    const today = new Date();
+    const diff = Math.floor((exp - today) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return `⛔ CADUCÓ el ${exp.toLocaleDateString()}`;
+    if (diff === 0) return `🔴 CADUCA HOY`;
+    if (diff <= config.warnDays) return `⚠️ Caduca en ${diff} días (${exp.toLocaleDateString()})`;
+    return `🟢 ${exp.toLocaleDateString()}`;
+  }
+  
+  function getCatIcon(cat) {
+    const icons = { ALIMENTOS: '🥫', AGUA: '💧', MEDICINAS: '💊', HIGIENE: '🧼', ILUMINACIÓN: '💡', HERRAMIENTAS: '🔧', ENERGÍA: '⚡' };
+    return icons[cat] || '📦';
+  }
+
+  // ============ UPDATE UI ============
+  function updateAll() {
+    updateDashboard();
+    renderProducts();
+    renderMaterials();
+    document.getElementById('personCount').innerText = config.personCount;
+    updateWarnButtons();
+  }
+  
+  function updateDashboard() {
+    const totalProducts = products.length;
+    const expired = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const totalMaterials = materials.length;
+    
+    let score = 100;
+    if (totalProducts > 0) {
+      score -= (expired / totalProducts) * 40;
+      score -= (warn / totalProducts) * 20;
+    }
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    
+    document.getElementById('dashLevel').innerText = score + '%';
+    document.getElementById('dashBar').style.width = score + '%';
+    document.getElementById('dashStatus').innerText = score >= 70 ? '● ÓPTIMO' : (score >= 40 ? '◐ ESTABLE' : '▼ CRÍTICO');
+    document.getElementById('statProducts').innerText = totalProducts;
+    document.getElementById('statExpired').innerText = expired;
+    document.getElementById('statMaterials').innerText = totalMaterials;
+  }
+  
+  function renderProducts() {
+    let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const danger = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    
+    document.getElementById('despensaTotal').innerText = products.length;
+    document.getElementById('despensaWarn').innerText = warn;
+    document.getElementById('despensaDanger').innerText = danger;
+    document.getElementById('despensaCount').innerText = filtered.length + ' items';
+    
+    const container = document.getElementById('productList');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">📦 No hay productos<br>Presiona + para añadir</div>`;
+      return;
+    }
+    
+    container.innerHTML = filtered.map(p => {
+      const status = getExpStatus(p.exp);
+      return `
+        <div class="product-card status-${status}">
+          <div class="product-photo">${getCatIcon(p.cat)}</div>
+          <div class="product-info">
+            <div class="product-cat">${p.cat}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-meta">${p.qty} ${p.unit}${p.loc ? ` · 📍 ${p.loc}` : ''}</div>
+            <div class="exp-date ${status}">${formatExpDate(p.exp)}</div>
+          </div>
+          <div>
+            <button class="btn-icon" onclick="editProduct(${p.id})">✏️</button>
+            <button class="btn-icon" onclick="deleteProduct(${p.id})" style="margin-left: 4px;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function renderMaterials() {
+    let filtered = currentMatFilter === 'all' ? materials : materials.filter(m => m.cat === currentMatFilter);
+    document.getElementById('materialesCount').innerText = filtered.length + ' items';
+    
+    const container = document.getElementById('materialList');
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">🔧 No hay materiales<br>Presiona + para añadir</div>`;
+      return;
+    }
+    
+    container.innerHTML = filtered.map(m => {
+      let statusClass = m.status === 'AVERÍA' ? 'danger' : (m.status === 'REVISAR' ? 'warn' : 'ok');
+      return `
+        <div class="product-card status-${statusClass}">
+          <div class="product-photo">${getCatIcon(m.cat)}</div>
+          <div class="product-info">
+            <div class="product-cat">${m.cat}</div>
+            <div class="product-name">${m.name}</div>
+            <div class="product-meta">${m.qty} uds · ${m.status}${m.loc ? ` · 📍 ${m.loc}` : ''}</div>
+          </div>
+          <div>
+            <button class="btn-icon" onclick="editMaterial(${m.id})">✏️</button>
+            <button class="btn-icon" onclick="deleteMaterial(${m.id})" style="margin-left: 4px;">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  function updateWarnButtons() {
+    document.querySelectorAll('#warn30, #warn60, #warn90').forEach(btn => btn.classList.remove('active'));
+    if (config.warnDays === 30) document.getElementById('warn30').classList.add('active');
+    else if (config.warnDays === 60) document.getElementById('warn60').classList.add('active');
+    else if (config.warnDays === 90) document.getElementById('warn90').classList.add('active');
+  }
+
+  // ============ PRODUCT CRUD ============
+  function openAddModal() {
+    if (document.getElementById('screen-despensa').classList.contains('active')) {
+      editingProductId = null;
+      document.getElementById('modalTitle').innerText = 'AÑADIR PRODUCTO';
+      document.getElementById('productName').value = '';
+      document.getElementById('productCat').value = 'ALIMENTOS';
+      document.getElementById('productQty').value = '1';
+      document.getElementById('productUnit').value = 'uds';
+      document.getElementById('productExp').value = '';
+      document.getElementById('productLoc').value = '';
+      document.getElementById('productModal').classList.add('open');
+    } else if (document.getElementById('screen-materiales').classList.contains('active')) {
+      editingMaterialId = null;
+      document.getElementById('matModalTitle').innerText = 'AÑADIR MATERIAL';
+      document.getElementById('materialName').value = '';
+      document.getElementById('materialCat').value = 'ILUMINACIÓN';
+      document.getElementById('materialStatus').value = 'OPERATIVO';
+      document.getElementById('materialQty').value = '1';
+      document.getElementById('materialLoc').value = '';
+      document.getElementById('materialModal').classList.add('open');
+    }
+  }
+  
+  function saveProduct() {
+    const name = document.getElementById('productName').value.trim();
+    if (!name) { showToast('⚠ Introduce un nombre', true); return; }
+    
+    const product = {
+      id: editingProductId || Date.now(),
+      name: name,
+      cat: document.getElementById('productCat').value,
+      qty: parseFloat(document.getElementById('productQty').value) || 1,
+      unit: document.getElementById('productUnit').value,
+      exp: document.getElementById('productExp').value,
+      loc: document.getElementById('productLoc').value
+    };
+    
+    if (editingProductId) {
+      const index = products.findIndex(p => p.id === editingProductId);
+      if (index !== -1) products[index] = product;
+      showToast('✅ Producto actualizado');
+    } else {
+      products.push(product);
+      showToast('✅ Producto añadido');
+    }
+    
+    saveProducts();
+    closeModal();
+    renderProducts();
+    updateDashboard();
+  }
+  
+  function editProduct(id) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    editingProductId = id;
+    document.getElementById('modalTitle').innerText = 'EDITAR PRODUCTO';
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productCat').value = product.cat;
+    document.getElementById('productQty').value = product.qty;
+    document.getElementById('productUnit').value = product.unit;
+    document.getElementById('productExp').value = product.exp || '';
+    document.getElementById('productLoc').value = product.loc || '';
+    document.getElementById('productModal').classList.add('open');
+  }
+  
+  function deleteProduct(id) {
+    pendingAction = () => {
+      products = products.filter(p => p.id !== id);
+      saveProducts();
+      renderProducts();
+      updateDashboard();
+      showToast('🗑️ Producto eliminado');
+    };
+    document.getElementById('confirmText').innerHTML = '¿Eliminar este producto?';
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+  
+  // ============ MATERIAL CRUD ============
+  function saveMaterial() {
+    const name = document.getElementById('materialName').value.trim();
+    if (!name) { showToast('⚠ Introduce un nombre', true); return; }
+    
+    const material = {
+      id: editingMaterialId || Date.now(),
+      name: name,
+      cat: document.getElementById('materialCat').value,
+      status: document.getElementById('materialStatus').value,
+      qty: parseFloat(document.getElementById('materialQty').value) || 1,
+      loc: document.getElementById('materialLoc').value
+    };
+    
+    if (editingMaterialId) {
+      const index = materials.findIndex(m => m.id === editingMaterialId);
+      if (index !== -1) materials[index] = material;
+      showToast('✅ Material actualizado');
+    } else {
+      materials.push(material);
+      showToast('✅ Material añadido');
+    }
+    
+    saveMaterials();
+    closeMatModal();
+    renderMaterials();
+    updateDashboard();
+  }
+  
+  function editMaterial(id) {
+    const material = materials.find(m => m.id === id);
+    if (!material) return;
+    editingMaterialId = id;
+    document.getElementById('matModalTitle').innerText = 'EDITAR MATERIAL';
+    document.getElementById('materialName').value = material.name;
+    document.getElementById('materialCat').value = material.cat;
+    document.getElementById('materialStatus').value = material.status;
+    document.getElementById('materialQty').value = material.qty;
+    document.getElementById('materialLoc').value = material.loc || '';
+    document.getElementById('materialModal').classList.add('open');
+  }
+  
+  function deleteMaterial(id) {
+    pendingAction = () => {
+      materials = materials.filter(m => m.id !== id);
+      saveMaterials();
+      renderMaterials();
+      updateDashboard();
+      showToast('🗑️ Material eliminado');
+    };
+    document.getElementById('confirmText').innerHTML = '¿Eliminar este material?';
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+  
+  function executeConfirm() {
+    if (pendingAction) {
+      pendingAction();
+      pendingAction = null;
+    }
+    closeConfirm();
+  }
+  
+  function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+  }
+  
+  // ============ SETTINGS ============
+  function changePersonCount(delta) {
+    config.personCount = Math.max(1, Math.min(20, config.personCount + delta));
+    document.getElementById('personCount').innerText = config.personCount;
+    saveConfig();
+    updateDashboard();
+    showToast(`✅ Personas: ${config.personCount}`);
+  }
+  
+  function setWarnDays(days) {
+    config.warnDays = days;
+    saveConfig();
+    updateWarnButtons();
+    renderProducts();
+    showToast(`✅ Alertas configuradas a ${days} días`);
+  }
+  
+  function exportData() {
+    const data = {
+      products: products,
+      materials: materials,
+      config: config,
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kukades-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📦 Datos exportados');
+  }
+  
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.products) products = data.products;
+        if (data.materials) materials = data.materials;
+        if (data.config) config = data.config;
+        saveProducts();
+        saveMaterials();
+        saveConfig();
+        updateAll();
+        showToast('✅ Datos importados');
+      } catch(err) {
+        showToast('❌ Error al importar', true);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+  
+  function resetAllData() {
+    pendingAction = () => {
+      products = [];
+      materials = [];
+      config = { personCount: 1, warnDays: 60 };
+      saveProducts();
+      saveMaterials();
+      saveConfig();
+      updateAll();
+      showToast('🗑️ Todos los datos eliminados');
+    };
+    document.getElementById('confirmText').innerHTML = '⚠️ Esto ELIMINARÁ TODOS tus datos. ¿Estás seguro?';
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+
+  // ============ NAVIGATION ============
+  function showScreen(screen, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen-${screen}`).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    const fab = document.getElementById('fabBtn');
+    if (screen === 'despensa' || screen === 'materiales') {
+      fab.style.display = 'flex';
+    } else {
+      fab.style.display = 'none';
+    }
+    
+    // Update filters when showing despensa/materiales
+    if (screen === 'despensa') renderProducts();
+    if (screen === 'materiales') renderMaterials();
+  }
+  
+  function closeModal() {
+    document.getElementById('productModal').classList.remove('open');
+    editingProductId = null;
+  }
+  
+  function closeMatModal() {
+    document.getElementById('materialModal').classList.remove('open');
+    editingMaterialId = null;
+  }
+  
+  // ============ FILTERS ============
+  function setupFilters() {
+    document.querySelectorAll('#productFilters .filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#productFilters .filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderProducts();
+      });
+    });
+    
+    document.querySelectorAll('#materialFilters .filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#materialFilters .filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMatFilter = btn.dataset.filter;
+        renderMaterials();
+      });
+    });
+  }
+  
+  // ============ INIT ============
+  loadData();
+  setupFilters();
+  
+  // Exponer funciones globales
+  window.showScreen = showScreen;
+  window.openAddModal = openAddModal;
+  window.saveProduct = saveProduct;
+  window.editProduct = editProduct;
+  window.deleteProduct = deleteProduct;
+  window.saveMaterial = saveMaterial;
+  window.editMaterial = editMaterial;
+  window.deleteMaterial = deleteMaterial;
+  window.closeModal = closeModal;
+  window.closeMatModal = closeMatModal;
+  window.executeConfirm = executeConfirm;
+  window.closeConfirm = closeConfirm;
+  window.changePersonCount = changePersonCount;
+  window.setWarnDays = setWarnDays;
+  window.exportData = exportData;
+  window.importData = importData;
+  window.resetAllData = resetAllData;
+</script>
+</body>
+</html>
