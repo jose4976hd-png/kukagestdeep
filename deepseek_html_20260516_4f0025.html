@@ -1,0 +1,38 @@
+<!-- En la pantalla de ajustes, añadir sección de sincronización -->
+<div class="settings-block">
+  <div class="settings-block-title">🔄 SINCRONIZACIÓN Y BACKUP</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+    <button class="btn btn-secondary" onclick="exportAllData()">📤 EXPORTAR TODO</button>
+    <button class="btn btn-secondary" onclick="shareData()">📱 COMPARTIR</button>
+    <button class="btn btn-secondary" onclick="generatePDFReport()">📄 GENERAR INFORME</button>
+    <button class="btn btn-secondary" onclick="exportToCSV()">📊 EXPORTAR CSV</button>
+  </div>
+  <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+  <button class="btn btn-primary" onclick="document.getElementById('importFile').click()">📥 IMPORTAR DATOS</button>
+</div>
+
+<!-- Botón de modo emergencia en el header -->
+<button class="btn-icon" onclick="toggleEmergencyMode()" style="margin-left: auto; background: rgba(255,34,34,0.2); border-color: var(--red);">
+  🚨
+</button>
+
+<!-- Botón de escáner en despensa -->
+<button class="btn-icon" onclick="scanBarcode()" style="margin-left: auto;" title="Escanear código de barras">
+  📷
+</button>
+
+<!-- Inicializar notificaciones -->
+<script>
+  // Al cargar la página
+  document.addEventListener('DOMContentLoaded', async () => {
+    const notified = localStorage.getItem('notifications_requested');
+    if (!notified) {
+      setTimeout(() => {
+        if (confirm('¿Quieres recibir notificaciones de caducidad y stock bajo?')) {
+          initNotifications();
+        }
+        localStorage.setItem('notifications_requested', 'true');
+      }, 3000);
+    }
+  });
+</script>
