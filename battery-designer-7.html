@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Battery Designer 3D</title>
+<style>
+:root{
+  --bg:#070b12;--panel:#0c1320;--border:#1a2d45;
+  --acc:#00c8f0;--grn:#00f0a0;--warn:#f0a000;--red:#f04040;
+  --txt:#b0c8e0;--dim:#3a5570;--r:4px;--th:48px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:'Courier New',monospace;touch-action:none;}
+#app{display:flex;flex-direction:column;height:100dvh;width:100vw;overflow:hidden;}
+
+/* TOP BAR */
+#topbar{flex-shrink:0;height:50px;background:var(--panel);border-bottom:2px solid var(--acc);
+  display:flex;align-items:center;padding:0 8px;gap:6px;z-index:30;}
+#topbar h1{font-size:11px;color:var(--acc);letter-spacing:2px;white-space:nowrap;}
+.pill{font-size:9px;padding:3px 8px;border-radius:var(--r);border:1px solid var(--acc);
+  color:var(--acc);background:#00c8f010;white-space:nowrap;}
+.pill2{border-color:var(--warn);color:var(--warn);background:#f0a00010;}
+#menu-btn{margin-left:auto;width:40px;height:40px;background:#00000030;border:1px solid var(--border);
+  border-radius:var(--r);color:var(--acc);font-size:20px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;}
+
+/* CANVAS */
+#canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
+#c{display:block;width:100%;height:100%;}
+
+/* BOTTOM TOOLBAR */
+#toolbar{flex-shrink:0;height:58px;background:var(--panel);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;padding:0 2px;z-index:30;overflow-x:auto;}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:50px;height:50px;background:none;border:1px solid transparent;border-radius:var(--r);
+  color:var(--dim);font-family:'Courier New',monospace;font-size:8px;cursor:pointer;
+  padding:2px 4px;gap:1px;transition:all .15s;flex-shrink:0;}
+.tb span{font-size:17px;line-height:1;}
+.tb.active{border-color:var(--acc);color:var(--acc);background:#00c8f010;}
+.tb.red{color:var(--red);}
+.tb.grn{color:var(--grn);}
+.tb.warn{color:var(--warn);}
+
+/* CELL ACTION POPUP */
+#cell-popup{
+  position:absolute;bottom:70px;left:50%;transform:translateX(-50%);
+  background:#0c1320ee;border:1px solid var(--acc);border-radius:var(--r);
+  padding:8px 10px;display:none;z-index:40;gap:6px;
+  flex-direction:row;align-items:center;backdrop-filter:blur(6px);
+  white-space:nowrap;
+}
+#cell-popup.show{display:flex;}
+#cell-popup .pi{font-size:9px;color:var(--acc);letter-spacing:1px;margin-right:4px;}
+.pb{height:34px;padding:0 12px;background:#06090f;border:1px solid var(--border);
+  color:var(--txt);font-family:'Courier New',monospace;font-size:9px;letter-spacing:1px;
+  cursor:pointer;border-radius:var(--r);text-transform:uppercase;white-space:nowrap;}
+.pb.warn{border-color:var(--warn);color:var(--warn);}
+.pb.red{border-color:var(--red);color:var(--red);}
+.pb.grn{border-color:var(--grn);color:var(--grn);}
+
+/* COLLISION FLASH */
+#col-flash{
+  position:absolute;inset:0;background:#f0404020;pointer-events:none;
+  border:2px solid var(--red);border-radius:4px;opacity:0;z-index:25;
+  transition:opacity .1s;
+}
+#col-flash.show{opacity:1;}
+
+/* HINT */
+#hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:#0c132090;border:1px solid var(--border);padding:4px 12px;
+  border-radius:20px;font-size:9px;color:var(--dim);pointer-events:none;
+  white-space:nowrap;z-index:20;backdrop-filter:blur(4px);}
+
+/* BRIDGE MODE IND */
+#bm-ind{position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-size:9px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);
+  color:var(--dim);background:#0c132080;backdrop-filter:blur(4px);
+  pointer-events:none;z-index:20;display:none;}
+
+/* SLIDE PANEL */
+#panel{position:fixed;top:0;right:-310px;width:300px;height:100%;
+  background:var(--panel);border-left:1px solid var(--border);
+  z-index:100;transition:right .25s ease;display:flex;flex-direction:column;overflow:hidden;}
+#panel.open{right:0;}
+#panel-head{padding:13px 13px 9px;background:#0a1018;border-bottom:2px solid var(--acc);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#panel-head h2{font-size:11px;color:var(--acc);letter-spacing:2px;}
+#close-panel{width:36px;height:36px;background:none;border:1px solid var(--border);
+  border-radius:var(--r);color:var(--dim);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+#panel-body{flex:1;overflow-y:auto;overflow-x:hidden;}
+#panel-body::-webkit-scrollbar{width:3px;}
+#panel-body::-webkit-scrollbar-thumb{background:var(--border);}
+
+.sec{padding:10px 12px;border-bottom:1px solid var(--border);}
+.sec-t{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px;font-weight:700;}
+.f{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.f label{font-size:10px;color:var(--dim);min-width:82px;flex-shrink:0;}
+.f input,.f select{flex:1;background:#06090f;border:1px solid var(--border);color:var(--acc);
+  padding:6px 8px;font-family:'Courier New',monospace;font-size:11px;border-radius:var(--r);
+  outline:none;min-width:0;height:var(--th);}
+.f input:focus,.f select:focus{border-color:var(--acc);}
+.f select option{background:#06090f;}
+.btn{width:100%;padding:0 8px;height:var(--th);background:#06090f;border:1px solid var(--border);
+  color:var(--txt);font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;
+  cursor:pointer;border-radius:var(--r);text-transform:uppercase;transition:all .1s;
+  margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+.btn:active{opacity:.7;}
+.btn.g{border-color:#00f0a030;color:var(--grn);}
+.btn.r{border-color:#f0404030;color:var(--red);}
+.btn.a{background:#00c8f015;border-color:var(--acc);color:var(--acc);}
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px;}
+.st{display:flex;justify-content:space-between;margin-bottom:4px;}
+.sl{font-size:10px;color:var(--dim);}
+.sv{font-size:11px;font-weight:700;color:var(--acc);}
+.sv.ok{color:var(--grn);}.sv.w{color:var(--warn);}.sv.b{color:var(--red);}
+.lg{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-size:10px;color:var(--dim);}
+.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+#overlay{position:fixed;inset:0;background:#00000060;z-index:90;display:none;backdrop-filter:blur(2px);}
+#overlay.show{display:block;}
+
+/* UNDO/REDO BUTTONS */
+.tb.undo-btn { color: var(--warn); }
+.tb.undo-btn:disabled, .tb.undo-btn[data-disabled="1"] { color: var(--dim); opacity: 0.35; }
+.tb.redo-btn { color: var(--acc); }
+.tb.redo-btn:disabled, .tb.redo-btn[data-disabled="1"] { color: var(--dim); opacity: 0.35; }
+
+/* UNDO TOAST */
+#undo-toast {
+  position:absolute; top:46px; left:50%; transform:translateX(-50%);
+  background:#0c1320ee; border:1px solid var(--warn); border-radius:20px;
+  padding:5px 16px; font-size:10px; color:var(--warn); letter-spacing:1px;
+  pointer-events:none; z-index:50; opacity:0; transition:opacity .2s;
+  white-space:nowrap; backdrop-filter:blur(4px);
+}
+#undo-toast.show { opacity:1; }
+
+/* ── TRASH TRAY ── */
+#tray {
+  position:absolute; right:0; top:50%; transform:translateY(-50%);
+  width:60px; background:#0c1320ee; border-left:1px solid var(--border);
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  border-radius:8px 0 0 8px; z-index:35; display:none;
+  flex-direction:column; align-items:center; padding:6px 4px; gap:4px;
+  backdrop-filter:blur(8px); max-height:70vh; overflow-y:auto;
+}
+#tray.visible { display:flex; }
+#tray::-webkit-scrollbar { width:2px; }
+#tray::-webkit-scrollbar-thumb { background:var(--border); }
+#tray-label {
+  font-size:8px; color:var(--dim); letter-spacing:1px; text-align:center;
+  margin-bottom:2px; flex-shrink:0;
+}
+.tray-cell {
+  width:48px; height:48px; border-radius:50%; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; cursor:grab; flex-shrink:0;
+  position:relative; overflow:hidden; transition:border-color .15s;
+  touch-action:none; user-select:none;
+}
+.tray-cell:active { cursor:grabbing; border-color:var(--acc); }
+.tray-cell .tc-top { width:100%; height:50%; display:flex; align-items:center; justify-content:center; font-size:9px; }
+.tray-cell .tc-bot { width:100%; height:50%; display:flex; align-items:center; justify-content:center; font-size:9px; }
+.tray-cell .tc-lbl { position:absolute; bottom:1px; right:2px; font-size:7px; color:#ffffff80; }
+.tray-cell .tc-ins { position:absolute; inset:0; border-radius:50%; border:2px solid #00ff88; pointer-events:none; opacity:0; }
+.tray-cell .tc-ins.on { opacity:0.6; }
+
+/* DRAG GHOST from tray */
+#drag-ghost {
+  position:fixed; width:44px; height:44px; border-radius:50%;
+  pointer-events:none; z-index:200; display:none;
+  border:2px solid var(--acc); opacity:0.85;
+  align-items:center; justify-content:center; font-size:20px;
+}
+#drag-ghost.show { display:flex; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <h1>⚡ BATTERY 3D</h1>
+    <span class="pill" id="ptool">ORBITAR</span>
+    <span class="pill pill2" id="pstat">-</span>
+    <span class="pill" id="pview" style="border-color:#7030e060;color:#9060e0;background:#7030e010">ISO</span>
+    <button id="menu-btn" onclick="togglePanel()">☰</button>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div id="col-flash"></div>
+    <div id="hint">1 dedo: orbitar | 2 dedos: zoom/pan</div>
+    <div id="bm-ind">NÍQUEL: <span id="bm-type">TOP</span></div>
+    <div id="undo-toast">↩ DESHECHO</div>
+
+    <!-- TRASH TRAY: deleted cells waiting to be reused -->
+    <div id="tray">
+      <div id="tray-label">🗑️<br>BANCO</div>
+    </div>
+  </div>
+
+  <!-- DRAG GHOST element (follows finger when dragging from tray) -->
+  <div id="drag-ghost">🔋</div>
+
+  <!-- CELL ACTION POPUP -->
+  <div id="cell-popup">
+    <span class="pi" id="popup-info">CELDA #1</span>
+    <button class="pb warn" onclick="flipSelected()">🔄 VOLTEAR</button>
+    <button class="pb grn" onclick="insulToggleSelected()">🛡️ AISLAR</button>
+    <button class="pb red" onclick="deleteSelected()">🗑️</button>
+    <button class="pb" onclick="closePopup()">✕</button>
+  </div>
+
+  <div id="toolbar">
+    <button class="tb undo-btn" id="btn-undo" onclick="undo()" data-disabled="1"><span>↩</span>DESHACER</button>
+    <button class="tb redo-btn" id="btn-redo" onclick="redo()" data-disabled="1"><span>↪</span>REHACER</button>
+    <button class="tb active" id="t-orbit" onclick="setTool('orbit')"><span>🔄</span>ORBITAR</button>
+    <button class="tb" id="t-select" onclick="setTool('select')"><span>👆</span>MOVER</button>
+    <button class="tb" id="t-bridge" onclick="setTool('bridge')"><span>🔗</span>PUENTE</button>
+    <button class="tb" id="t-insul" onclick="setTool('insul')"><span>🛡️</span>AISLAR</button>
+    <button class="tb red" id="t-delete" onclick="setTool('delete')"><span>🗑️</span>BORRAR</button>
+    <button class="tb grn" onclick="autoNickel()"><span>⚡</span>AUTO-NI</button>
+    <button class="tb warn" onclick="autoLayout()"><span>📐</span>AUTO</button>
+    <button class="tb" onclick="setView('iso')"><span>⬡</span>ISO</button>
+    <button class="tb" onclick="setView('top')"><span>⬆</span>TOP</button>
+    <button class="tb" onclick="setView('bottom')"><span>⬇</span>BAJO</button>
+    <button class="tb" onclick="setView('front')"><span>⬛</span>FRONT</button>
+    <button class="tb" onclick="setView('side')"><span>◀</span>LADO</button>
+  </div>
+</div>
+
+<div id="overlay" onclick="togglePanel()"></div>
+
+<div id="panel">
+  <div id="panel-head">
+    <h2>⚙️ CONFIGURACIÓN</h2>
+    <button id="close-panel" onclick="togglePanel()">✕</button>
+  </div>
+  <div id="panel-body">
+
+    <div class="sec">
+      <div class="sec-t">🔋 Celda</div>
+      <div class="f"><label>Formato</label>
+        <select id="cell-fmt" onchange="onFmtChange()">
+          <option value="18650">18650 (18×65mm)</option>
+          <option value="21700">21700 (21×70mm)</option>
+          <option value="26650">26650 (26×65mm)</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </div>
+      <div class="f" id="cd-row" style="display:none"><label>Diám. (mm)</label>
+        <input type="number" id="c-d" value="18" min="8" max="60" step="0.5" inputmode="decimal"></div>
+      <div class="f" id="ch-row" style="display:none"><label>Alto (mm)</label>
+        <input type="number" id="c-h" value="65" min="20" max="120" step="0.5" inputmode="decimal"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">📦 Espacio</div>
+      <div class="f"><label>Ancho (mm)</label><input type="number" id="bw" value="80" min="10" max="600" inputmode="numeric"></div>
+      <div class="f"><label>Largo (mm)</label><input type="number" id="bl" value="140" min="10" max="900" inputmode="numeric"></div>
+      <div class="f"><label>Alto (mm)</label><input type="number" id="bh" value="80" min="10" max="300" inputmode="numeric"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">⚙️ Pack</div>
+      <div class="f"><label>Orientación</label>
+        <select id="cell-orient">
+          <option value="vert">Vertical (estándar)</option>
+          <option value="horiz-z">Horizontal — polos al frente</option>
+          <option value="horiz-x">Horizontal — polos al lado</option>
+        </select>
+      </div>
+      <div class="f"><label>Nº Celdas</label><input type="number" id="nc" value="40" min="1" max="400" inputmode="numeric"></div>
+      <div class="f"><label>Series (S)</label><input type="number" id="ns" value="10" min="1" max="200" inputmode="numeric"></div>
+      <div class="f"><label>Separac. (mm)</label><input type="number" id="cgap" value="0.5" min="0" max="5" step="0.1" inputmode="decimal"></div>
+      <div class="f"><label>Patrón</label>
+        <select id="pat">
+          <option value="rect">Rectangular</option>
+          <option value="hex">Hexagonal</option>
+        </select>
+      </div>
+      <button class="btn g" onclick="buildPack();togglePanel()">⚡ GENERAR LAYOUT</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">🔗 Níquel</div>
+      <div class="f"><label>Ancho (mm)</label><input type="number" id="nw" value="8" min="2" max="40" step="0.5" inputmode="decimal"></div>
+      <div class="f"><label>Grosor</label>
+        <select id="nt">
+          <option value="0.10">0.10 mm</option><option value="0.12">0.12 mm</option>
+          <option value="0.15" selected>0.15 mm</option><option value="0.20">0.20 mm</option>
+          <option value="0.25">0.25 mm</option><option value="0.30">0.30 mm</option>
+        </select>
+      </div>
+      <div class="f"><label>Posición</label>
+        <select id="nic-side">
+          <option value="auto">Auto (según vista)</option>
+          <option value="top">Principal (TOP/FRONT/RIGHT)</option>
+          <option value="bot">Secundario (BOT/BACK/LEFT)</option>
+        </select>
+      </div>
+      <div id="nic-pos-ind" style="font-size:9px;color:var(--dim);margin-bottom:6px;padding:4px 6px;background:#06090f;border-radius:var(--r);border:1px solid var(--border)">
+        Posición actual: <span id="nic-pos-text" style="color:var(--acc)">TOP</span>
+      </div>
+      <button class="btn" onclick="autoNickel();togglePanel()">🔗 Auto Níquel</button>
+      <button class="btn r" onclick="clearBridges()">✖ Quitar níquel</button>
+      <p style="font-size:9px;color:var(--dim);margin-top:2px;line-height:1.4">
+        En modo PUENTE: toca celda 1 → celda 2.<br>
+        Puedes añadir varias tiras a la misma celda.<br>
+        Vista desde arriba → níquel TOP.<br>
+        Vista desde abajo → níquel BOTTOM.
+      </p>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">🛡️ Aislamiento</div>
+      <div class="f"><label>Grosor (mm)</label><input type="number" id="it" value="0.2" min="0.05" max="3" step="0.05" inputmode="decimal"></div>
+      <div class="f"><label>Zona</label>
+        <select id="iz">
+          <option value="full">Completo</option>
+          <option value="top">Solo polo +</option>
+          <option value="bot">Solo polo −</option>
+        </select>
+      </div>
+      <button class="btn" onclick="insulAll();togglePanel()">🛡️ Aislar todas</button>
+      <button class="btn r" onclick="uninsulAll()">✖ Quitar aislamiento</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">🖥️ BMS</div>
+      <div class="f"><label>Ancho (mm)</label><input type="number" id="bmsw" value="60" min="10" max="250" inputmode="numeric"></div>
+      <div class="f"><label>Largo (mm)</label><input type="number" id="bmsl" value="40" min="10" max="250" inputmode="numeric"></div>
+      <div class="f"><label>Grosor (mm)</label><input type="number" id="bmsh" value="5" min="1" max="40" inputmode="numeric"></div>
+      <div class="f"><label>Posición</label>
+        <select id="bpos">
+          <option value="top">Encima</option>
+          <option value="side">Lateral</option>
+          <option value="end">Extremo</option>
+        </select>
+      </div>
+      <button class="btn g" onclick="placeBMS();togglePanel()">🖥️ Colocar BMS</button>
+      <button class="btn r" onclick="removeBMS()">✖ Quitar BMS</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">👁️ Vista</div>
+      <div class="bg2">
+        <button class="btn" onclick="setView('iso')">⬡ Iso</button>
+        <button class="btn" onclick="setView('top')">⬆ Top</button>
+        <button class="btn" onclick="setView('bottom')">⬇ Abajo</button>
+        <button class="btn" onclick="setView('front')">⬛ Front</button>
+        <button class="btn" onclick="setView('back')">⬛ Atrás</button>
+        <button class="btn" onclick="setView('side')">◀ Lado</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">📊 Estadísticas</div>
+      <div class="st"><span class="sl">Celdas:</span><span class="sv" id="s1">-</span></div>
+      <div class="st"><span class="sl">Config:</span><span class="sv" id="s2">-</span></div>
+      <div class="st"><span class="sl">Voltaje:</span><span class="sv" id="s3">-</span></div>
+      <div class="st"><span class="sl">Puentes:</span><span class="sv" id="s4">0</span></div>
+      <div class="st"><span class="sl">Espacio:</span><span class="sv" id="s5">-</span></div>
+      <div class="st"><span class="sl">Aisladas:</span><span class="sv" id="s6">0</span></div>
+      <div class="st"><span class="sl">Colisiones:</span><span class="sv" id="s7" class="ok">NINGUNA</span></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t">🎨 Leyenda</div>
+      <div class="lg"><div class="ld" style="background:#1a5080"></div>Celda (+ arriba)</div>
+      <div class="lg"><div class="ld" style="background:#7030e0"></div>Celda (− arriba / voltead)</div>
+      <div class="lg"><div class="ld" style="background:#00e090"></div>Polo positivo</div>
+      <div class="lg"><div class="ld" style="background:#e03030"></div>Polo negativo</div>
+      <div class="lg"><div class="ld" style="background:#f0a000"></div>Seleccionada</div>
+      <div class="lg"><div class="ld" style="background:#00c8f0"></div>Níquel TOP (arriba)</div>
+      <div class="lg"><div class="ld" style="background:#f07020"></div>Níquel BOT (abajo)</div>
+      <div class="lg"><div class="ld" style="background:#00ff8850;border:1px solid #00ff88"></div>Aislamiento</div>
+      <div class="lg"><div class="ld" style="background:#f04040;border:1px dashed #f04040"></div>Colisión detectada</div>
+      <div class="lg"><div class="ld" style="background:#f06000"></div>Fuera de caja ⚠️</div>
+    </div>
+
+    <div class="sec">
+      <button class="btn r" onclick="clearAll()">🗑️ LIMPIAR TODO</button>
+      <button class="btn" onclick="doExport()">📋 COPIAR INFO</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// =====================================================
+//  BATTERY DESIGNER 3D v2.3
+//  + Collision detection
+//  + Cell flip (polarity inversion)
+//  + No overlap allowed during drag
+//  + Cell action popup
+// =====================================================
+
+const A = {
+  scene:null, cam:null, ren:null, ray:null,
+  cells:[], bridges:[], insulMeshes:[], bms:null, boundary:null,
+  tool:'orbit',
+  selected:null, pending:null,
+  phi:1.0, theta:0.8, radius:280,
+  target:null,
+  ptrs:{}, lastDist:0, lastMidX:0, lastMidY:0,
+  orbiting:false, pinching:false,
+  dragCell:null, dragPlane:null, dragStartPos:null,
+  tapX:0, tapY:0, moved:false,
+};
+
+const FMTS = {'18650':{d:18,h:65},'21700':{d:21,h:70},'26650':{d:26,h:65}};
+
+// ─────────────────────────────────────────────────
+//  UNDO / REDO SYSTEM
+//  Stores full snapshots of the scene state.
+//  Max 30 steps. Camera is NOT part of history.
+// ─────────────────────────────────────────────────
+const HIST = {
+  stack: [],   // past states (index 0 = oldest)
+  future: [],  // redo states
+  MAX: 30,
+};
+
+// Serialize current scene into a plain JS object
+function takeSnapshot() {
+  return {
+    cells: A.cells.map(c => ({
+      x: c.position.x,
+      z: c.position.z,
+      r: c.userData.r,
+      h: c.userData.h,
+      grpIdx: c.userData.grpIdx,
+      numS: +document.getElementById('ns').value || 10,
+      flipped: c.userData.flipped,
+      idx: c.userData.idx,
+      insulated: c.userData.insulated,
+      insulZone: document.getElementById('iz').value,
+      insulT: +document.getElementById('it').value || 0.2,
+    })),
+    bridges: A.bridges.map(b => ({
+      id1: b.userData.id1,
+      id2: b.userData.id2,
+      side: b.userData.side,
+      ci1: A.cells.findIndex(c => c.userData.id === b.userData.id1),
+      ci2: A.cells.findIndex(c => c.userData.id === b.userData.id2),
+    })),
+    bms: A.bms ? {
+      w: +document.getElementById('bmsw').value,
+      l: +document.getElementById('bmsl').value,
+      h: +document.getElementById('bmsh').value,
+      pos: document.getElementById('bpos').value,
+    } : null,
+    // config inputs at time of snapshot
+    cfg: {
+      fmt: document.getElementById('cell-fmt').value,
+      cd: document.getElementById('c-d').value,
+      ch: document.getElementById('c-h').value,
+      nw: document.getElementById('nw').value,
+      nt: document.getElementById('nt').value,
+    }
+  };
+}
+
+// Push current state onto undo stack BEFORE making a change
+function pushUndo() {
+  HIST.stack.push(takeSnapshot());
+  if (HIST.stack.length > HIST.MAX) HIST.stack.shift();
+  HIST.future = []; // clear redo on new action
+  updUndoUI();
+}
+
+// Restore a snapshot
+function restoreSnapshot(snap) {
+  A._restoringSnapshot = true;
+  trayClear();
+  // Clear scene
+  A.cells.forEach(c => A.scene.remove(c)); A.cells = [];
+  A.bridges.forEach(b => A.scene.remove(b)); A.bridges = [];
+  A.insulMeshes.forEach(m => A.scene.remove(m)); A.insulMeshes = [];
+  if (A.bms) { A.scene.remove(A.bms); A.bms = null; }
+  A.selected = null; A.pending = null;
+  closePopup();
+
+  // Restore config
+  if (snap.cfg) {
+    document.getElementById('cell-fmt').value = snap.cfg.fmt;
+    document.getElementById('c-d').value = snap.cfg.cd;
+    document.getElementById('c-h').value = snap.cfg.ch;
+    document.getElementById('nw').value = snap.cfg.nw;
+    document.getElementById('nt').value = snap.cfg.nt;
+    onFmtChange();
+  }
+
+  const numS = snap.cells.length > 0 ? (snap.cells[snap.cells.length-1].numS || 10) : 10;
+
+  // Restore cells
+  snap.cells.forEach(sc => {
+    const cell = makeCell(sc.x, sc.z, sc.r, sc.h, sc.grpIdx, sc.numS, sc.flipped, sc.idx);
+    A.cells.push(cell);
+    // Restore insulation
+    if (sc.insulated) {
+      document.getElementById('iz').value = sc.insulZone || 'full';
+      document.getElementById('it').value = sc.insulT || 0.2;
+      applyInsul(cell);
+    }
+  });
+
+  // Restore bridges (by cell index)
+  snap.bridges.forEach(sb => {
+    const c1 = A.cells[sb.ci1];
+    const c2 = A.cells[sb.ci2];
+    if (c1 && c2) makeBridge(c1, c2, sb.side || 'top');
+  });
+
+  // Restore BMS
+  if (snap.bms) {
+    document.getElementById('bmsw').value = snap.bms.w;
+    document.getElementById('bmsl').value = snap.bms.l;
+    document.getElementById('bmsh').value = snap.bms.h;
+    document.getElementById('bpos').value = snap.bms.pos;
+    placeBMSQuiet();
+  }
+
+  makeBoundary();
+  updStats();
+  detectAllCollisions();
+  A._restoringSnapshot = false;
+}
+
+function undo() {
+  if (HIST.stack.length === 0) return;
+  HIST.future.push(takeSnapshot());
+  const snap = HIST.stack.pop();
+  restoreSnapshot(snap);
+  updUndoUI();
+  showUndoToast('↩ DESHECHO  (' + HIST.stack.length + ' más)');
+}
+
+function redo() {
+  if (HIST.future.length === 0) return;
+  HIST.stack.push(takeSnapshot());
+  const snap = HIST.future.pop();
+  restoreSnapshot(snap);
+  updUndoUI();
+  showUndoToast('↪ REHECHO');
+}
+
+function updUndoUI() {
+  const ub = document.getElementById('btn-undo');
+  const rb = document.getElementById('btn-redo');
+  const canUndo = HIST.stack.length > 0;
+  const canRedo = HIST.future.length > 0;
+  ub.setAttribute('data-disabled', canUndo ? '0' : '1');
+  rb.setAttribute('data-disabled', canRedo ? '0' : '1');
+  ub.style.opacity = canUndo ? '1' : '0.3';
+  rb.style.opacity = canRedo ? '1' : '0.3';
+  // Update label with count
+  ub.querySelector('span').textContent = canUndo ? `↩${HIST.stack.length}` : '↩';
+  rb.querySelector('span').textContent = canRedo ? `↪${HIST.future.length}` : '↪';
+}
+
+let toastTimer = null;
+function showUndoToast(msg) {
+  const t = document.getElementById('undo-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function getSpec(){
+  const f = document.getElementById('cell-fmt').value;
+  if(f==='custom') return {d:+document.getElementById('c-d').value||18, h:+document.getElementById('c-h').value||65};
+  return {...FMTS[f]};
+}
+
+// ─────────────────────────────────────────────────
+//  TRASH TRAY — deleted cells bank
+//  Stores serialised cell data; user can drag back
+// ─────────────────────────────────────────────────
+const TRAY = {
+  items: [],   // array of { snapData, el } — snapData same format as takeSnapshot().cells[i]
+  dragging: null,   // { snapData, startX, startY }
+};
+
+// Add a removed cell to the tray
+function trayAdd(cell) {
+  const sp = getSpec();
+  const snapData = {
+    x: 0, z: 0,           // position will be chosen on drop
+    r: cell.userData.r,
+    h: cell.userData.h,
+    grpIdx: cell.userData.grpIdx,
+    numS: +document.getElementById('ns').value || 10,
+    flipped: cell.userData.flipped,
+    idx: cell.userData.idx,
+    insulated: cell.userData.insulated,
+    insulZone: document.getElementById('iz').value,
+    insulT: +document.getElementById('it').value || 0.2,
+  };
+
+  const topColor = snapData.flipped ? '#e03030' : '#00e090';
+  const botColor = snapData.flipped ? '#00e090' : '#e03030';
+
+  const el = document.createElement('div');
+  el.className = 'tray-cell';
+  el.style.background = `linear-gradient(to bottom, ${topColor}33, ${botColor}33)`;
+  el.style.borderColor = snapData.flipped ? '#e03030' : '#00e090';
+  el.innerHTML = `
+    <div class="tc-top" style="background:${topColor}44">${snapData.flipped?'−':'+'}​</div>
+    <div class="tc-bot" style="background:${botColor}44">${snapData.flipped?'+':'−'}​</div>
+    <div class="tc-lbl">#${snapData.idx+1}</div>
+    <div class="tc-ins ${snapData.insulated?'on':''}"></div>
+  `;
+
+  // Touch/pointer drag from tray
+  el.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    trayStartDrag(snapData, el, e.clientX, e.clientY);
+  });
+  el.addEventListener('pointermove', (e) => {
+    e.preventDefault();
+    trayMoveDrag(e.clientX, e.clientY);
+  });
+  el.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    trayEndDrag(e.clientX, e.clientY, el, snapData);
+  });
+  el.addEventListener('pointercancel', (e) => {
+    trayCancelDrag();
+  });
+
+  // Store
+  TRAY.items.push({ snapData, el });
+  const tray = document.getElementById('tray');
+  tray.appendChild(el);
+  trayRefresh();
+}
+
+function trayRemoveItem(el) {
+  TRAY.items = TRAY.items.filter(i => i.el !== el);
+  el.remove();
+  trayRefresh();
+}
+
+function trayRefresh() {
+  const tray = document.getElementById('tray');
+  tray.classList.toggle('visible', TRAY.items.length > 0);
+}
+
+// ── TRAY DRAG ──
+function trayStartDrag(snapData, el, cx, cy) {
+  TRAY.dragging = { snapData, el };
+  el.style.opacity = '0.4';
+  const ghost = document.getElementById('drag-ghost');
+  const topColor = snapData.flipped ? '#e03030' : '#00e090';
+  ghost.style.background = `radial-gradient(circle, ${topColor}66, #0c132090)`;
+  ghost.style.borderColor = topColor;
+  ghost.textContent = snapData.flipped ? '−' : '+';
+  ghost.classList.add('show');
+  ghost.style.left = (cx - 22) + 'px';
+  ghost.style.top  = (cy - 22) + 'px';
+}
+
+function trayMoveDrag(cx, cy) {
+  if (!TRAY.dragging) return;
+  const ghost = document.getElementById('drag-ghost');
+  ghost.style.left = (cx - 22) + 'px';
+  ghost.style.top  = (cy - 22) + 'px';
+}
+
+function trayEndDrag(cx, cy, el, snapData) {
+  if (!TRAY.dragging) return;
+  const ghost = document.getElementById('drag-ghost');
+  ghost.classList.remove('show');
+  TRAY.dragging = null;
+  el.style.opacity = '1';
+
+  // Convert screen position to 3D world position on floor plane
+  const canvas = document.getElementById('c');
+  const rect = canvas.getBoundingClientRect();
+  // Only place if drop is on the canvas area
+  if (cx < rect.left || cx > rect.right || cy < rect.top || cy > rect.bottom) {
+    return; // dropped outside canvas — cancel
+  }
+
+  const ndcX = ((cx - rect.left) / rect.width) * 2 - 1;
+  const ndcY = -((cy - rect.top) / rect.height) * 2 + 1;
+  A.ray.setFromCamera({x:ndcX, y:ndcY}, A.cam);
+  const floorPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+  const dropPt = new THREE.Vector3();
+  A.ray.ray.intersectPlane(floorPlane, dropPt);
+
+  if (!dropPt) return;
+
+  // Check if position is free AND inside bounds
+  const r = snapData.r;
+  const insulExtra = snapData.insulated ? (+document.getElementById('it').value||0.2)+0.6+0.9 : 0;
+  const totalR = r + insulExtra;
+
+  // Bounds check
+  if (rawExceedsBounds(totalR, dropPt.x, dropPt.y, dropPt.z, 'vert')) {
+    flashCollision();
+    showUndoToast('⚠️ Fuera de la caja — suelta dentro del borde azul');
+    return;
+  }
+
+  // Overlap check against existing cells
+  let blocked = false;
+  for (const other of A.cells) {
+    const dx = dropPt.x - other.position.x;
+    const dz = dropPt.z - other.position.z;
+    const dist = Math.sqrt(dx*dx + dz*dz);
+    const minD = effectiveR(other) + totalR;
+    if (dist < minD - 0.01) { blocked = true; break; }
+  }
+
+  if (blocked) {
+    flashCollision();
+    showUndoToast('⚠️ Posición ocupada — inténtalo en otro lugar');
+    return;
+  }
+
+  // Place cell back into scene
+  pushUndo();
+  const numS = snapData.numS || +document.getElementById('ns').value || 10;
+  const newCell = makeCell(dropPt.x, dropPt.z, snapData.r, snapData.h,
+    snapData.grpIdx, numS, snapData.flipped, snapData.idx);
+  A.cells.push(newCell);
+
+  if (snapData.insulated) {
+    document.getElementById('iz').value = snapData.insulZone || 'full';
+    document.getElementById('it').value = snapData.insulT || 0.2;
+    A._restoringSnapshot = true;
+    applyInsul(newCell);
+    A._restoringSnapshot = false;
+  }
+
+  // Remove from tray
+  trayRemoveItem(el);
+  updStats();
+  detectAllCollisions();
+  showUndoToast('✅ Celda recolocada');
+}
+
+function trayCancelDrag() {
+  if (!TRAY.dragging) return;
+  document.getElementById('drag-ghost').classList.remove('show');
+  TRAY.dragging.el.style.opacity = '1';
+  TRAY.dragging = null;
+}
+
+// Clear the tray (e.g. on buildPack)
+function trayClear() {
+  TRAY.items.forEach(i => i.el.remove());
+  TRAY.items = [];
+  trayRefresh();
+}
+//  Each cell occupies a cylinder: position (x,z), radius r + insulation
+// ─────────────────────────────────────────────────
+
+// Returns effective radius of a cell (including insulation if present)
+function effectiveR(cell) {
+  if (!cell.userData.insulated) return cell.userData.r;
+  const t = +document.getElementById('it').value || 0.2;
+  return cell.userData.r + t + 0.6 + 0.9; // match insul geometry
+}
+
+// Check if two cells overlap
+function cellsOverlap(c1, c2) {
+  if (c1 === c2) return false;
+  const dx = c1.position.x - c2.position.x;
+  const dz = c1.position.z - c2.position.z;
+  const dist = Math.sqrt(dx*dx + dz*dz);
+  const minDist = effectiveR(c1) + effectiveR(c2);
+  return dist < minDist - 0.01;
+}
+
+// Check if a cell at a given position would overlap with any other cell
+// Get the 2D collision coordinates for a cell based on its orientation
+// Returns {u, v} — the two axes that form the grid plane
+function cellUV(cell) {
+  const orient = cell.userData.orient || 'vert';
+  if (orient === 'vert')    return { u: cell.position.x, v: cell.position.z };
+  if (orient === 'horiz-z') return { u: cell.position.x, v: cell.position.y };
+  return                           { u: cell.position.z, v: cell.position.y }; // horiz-x
+}
+
+function cellsOverlap(c1, c2) {
+  if (c1 === c2) return false;
+  const a = cellUV(c1), b = cellUV(c2);
+  const dist = Math.sqrt((a.u-b.u)**2 + (a.v-b.v)**2);
+  return dist < effectiveR(c1) + effectiveR(c2) - 0.01;
+}
+
+function wouldOverlap(movingCell, newX, newY, newZ) {
+  const orient = movingCell.userData.orient || 'vert';
+  let nu, nv;
+  if (orient === 'vert')    { nu = newX; nv = newZ; }
+  else if (orient === 'horiz-z') { nu = newX; nv = newY; }
+  else                      { nu = newZ; nv = newY; }
+
+  for (const other of A.cells) {
+    if (other === movingCell) continue;
+    const o = cellUV(other);
+    const dist = Math.sqrt((nu-o.u)**2 + (nv-o.v)**2);
+    if (dist < effectiveR(movingCell) + effectiveR(other) - 0.01) return true;
+  }
+  return false;
+}
+
+function wouldExceedBounds(movingCell, newX, newY, newZ) {
+  const boxW = +document.getElementById('bw').value || 80;
+  const boxL = +document.getElementById('bl').value || 140;
+  const boxH = +document.getElementById('bh').value || 80;
+  const r = effectiveR(movingCell);
+  const orient = movingCell.userData.orient || 'vert';
+
+  if (orient === 'vert') {
+    return newX-r < -boxW/2 || newX+r > boxW/2 || newZ-r < -boxL/2 || newZ+r > boxL/2;
+  } else if (orient === 'horiz-z') {
+    return newX-r < -boxW/2 || newX+r > boxW/2 || newY-r < 0 || newY+r > boxH;
+  } else { // horiz-x
+    return newZ-r < -boxL/2 || newZ+r > boxL/2 || newY-r < 0 || newY+r > boxH;
+  }
+}
+
+function rawExceedsBounds(r, newX, newY, newZ, orient) {
+  const boxW = +document.getElementById('bw').value || 80;
+  const boxL = +document.getElementById('bl').value || 140;
+  const boxH = +document.getElementById('bh').value || 80;
+  orient = orient || 'vert';
+  if (orient === 'vert') {
+    return newX-r < -boxW/2 || newX+r > boxW/2 || newZ-r < -boxL/2 || newZ+r > boxL/2;
+  } else if (orient === 'horiz-z') {
+    return newX-r < -boxW/2 || newX+r > boxW/2 || newY-r < 0 || newY+r > boxH;
+  } else {
+    return newZ-r < -boxL/2 || newZ+r > boxL/2 || newY-r < 0 || newY+r > boxH;
+  }
+}
+function detectAllCollisions() {
+  let found = false;
+  A.cells.forEach(c => {
+    c.userData.inCollision = false;
+    c.userData.outOfBounds = false;
+    if (!c.userData.selected) {
+      c.userData.bmat.emissive = new THREE.Color(0,0,0);
+      c.userData.bmat.emissiveIntensity = 0;
+    }
+  });
+
+  // Cell vs cell overlap
+  for (let i=0; i<A.cells.length; i++) {
+    for (let j=i+1; j<A.cells.length; j++) {
+      if (cellsOverlap(A.cells[i], A.cells[j])) {
+        found = true;
+        A.cells[i].userData.inCollision = true;
+        A.cells[j].userData.inCollision = true;
+      }
+    }
+  }
+
+  // Out-of-bounds per orientation
+  A.cells.forEach(c => {
+    if (wouldExceedBounds(c, c.position.x, c.position.y, c.position.z)) {
+      c.userData.outOfBounds = true;
+      found = true;
+    }
+  });
+
+  // Visual feedback
+  A.cells.forEach(c => {
+    if (c.userData.selected) return;
+    if (c.userData.outOfBounds) {
+      c.userData.bmat.color.setHex(0xf06000);
+      c.userData.bmat.emissive = new THREE.Color(0x2a1500);
+      c.userData.bmat.emissiveIntensity = 0.8;
+    } else if (c.userData.inCollision) {
+      c.userData.bmat.color.setHex(c.userData.hex);
+      c.userData.bmat.emissive = new THREE.Color(0x3a0000);
+      c.userData.bmat.emissiveIntensity = 0.7;
+    } else {
+      c.userData.bmat.color.setHex(c.userData.hex);
+    }
+  });
+
+  const el = document.getElementById('s7');
+  if (el) {
+    const oob = A.cells.filter(c => c.userData.outOfBounds).length;
+    const col = A.cells.filter(c => c.userData.inCollision && !c.userData.outOfBounds).length;
+    if (oob > 0) {
+      el.textContent = `FUERA CAJA: ${oob} ⚠️`;
+      el.className = 'sv b';
+    } else if (col > 0) {
+      el.textContent = 'COLISIÓN ⚠️';
+      el.className = 'sv b';
+    } else {
+      el.textContent = 'NINGUNA ✓';
+      el.className = 'sv ok';
+    }
+  }
+  return found;
+}
+
+// Flash red border on collision attempt
+let flashTimer = null;
+function flashCollision() {
+  const f = document.getElementById('col-flash');
+  f.classList.add('show');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => f.classList.remove('show'), 300);
+}
+
+// ─────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────
+function init() {
+  const wrap = document.getElementById('canvas-wrap');
+  const canvas = document.getElementById('c');
+  A.target = new THREE.Vector3(0, 28, 0);
+
+  A.scene = new THREE.Scene();
+  A.scene.background = new THREE.Color(0x070b12);
+
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  A.cam = new THREE.PerspectiveCamera(45, W/H, 0.1, 4000);
+  camSync();
+
+  A.ren = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+  A.ren.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  A.ren.setSize(W, H);
+  A.ren.shadowMap.enabled = true;
+  A.ren.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  A.scene.add(new THREE.AmbientLight(0x2a4060, 1.5));
+  const sun = new THREE.DirectionalLight(0x90b8ff, 1.8);
+  sun.position.set(150, 250, 120);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
+  const sc = sun.shadow.camera;
+  sc.left = sc.bottom = -400; sc.right = sc.top = 400; sc.far = 900;
+  A.scene.add(sun);
+  A.scene.add(new THREE.HemisphereLight(0x0d2040, 0x050810, 0.8));
+
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(1200, 1200),
+    new THREE.MeshLambertMaterial({color:0x070b12})
+  );
+  floor.rotation.x = -Math.PI/2;
+  floor.receiveShadow = true;
+  floor.userData.isFloor = true;
+  A.scene.add(floor);
+  A.scene.add(new THREE.GridHelper(1200, 80, 0x0f1e30, 0x0a1520));
+
+  A.ray = new THREE.Raycaster();
+
+  const cv = document.getElementById('c');
+  cv.addEventListener('pointerdown',  onDown,  {passive:false});
+  cv.addEventListener('pointermove',  onMove,  {passive:false});
+  cv.addEventListener('pointerup',    onUp,    {passive:false});
+  cv.addEventListener('pointercancel',onUp,    {passive:false});
+  cv.addEventListener('contextmenu',  e => e.preventDefault());
+  window.addEventListener('resize', onResize);
+
+  makeBoundary();
+  buildPack();
+  updUndoUI();
+  loop();
+}
+
+// ─────────────────────────────────────────────────
+//  BOUNDARY
+// ─────────────────────────────────────────────────
+function makeBoundary() {
+  if (A.boundary) A.scene.remove(A.boundary);
+  const W = +document.getElementById('bw').value || 80;
+  const L = +document.getElementById('bl').value || 140;
+  const H = +document.getElementById('bh').value || 80;
+  const orient = getOrient();
+
+  // Box dimensions in world space depend on orientation:
+  // vert:    box is W(X) × H(Y) × L(Z)
+  // horiz-z: cells along Z, grid in XY → box W(X) × H(Y) × L(Z), same
+  // horiz-x: cells along X, grid in ZY → box W(X) × H(Y) × L(Z), same
+  // The boundary always shows the user-defined caja dimensions
+  const g = new THREE.Group();
+  const geo = new THREE.BoxGeometry(W, H, L);
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(geo),
+    new THREE.LineBasicMaterial({color:0x00c8f0, transparent:true, opacity:0.4})
+  );
+  edges.position.y = H/2; g.add(edges);
+
+  const face = new THREE.Mesh(geo,
+    new THREE.MeshBasicMaterial({color:0x00c8f0, transparent:true, opacity:0.02, side:THREE.BackSide})
+  );
+  face.position.y = H/2; g.add(face);
+
+  A.boundary = g; A.scene.add(g);
+}
+
+// ─────────────────────────────────────────────────
+//  BUILD PACK
+// ─────────────────────────────────────────────────
+// Returns current orientation: 'vert' | 'horiz-z' | 'horiz-x'
+function getOrient() {
+  return document.getElementById('cell-orient').value || 'vert';
+}
+
+function buildPack() {
+  if(!A._restoringSnapshot) pushUndo();
+  A.cells.forEach(c => A.scene.remove(c)); A.cells = [];
+  A.bridges.forEach(b => A.scene.remove(b)); A.bridges = [];
+  A.insulMeshes.forEach(m => A.scene.remove(m)); A.insulMeshes = [];
+  A.selected = null; A.pending = null;
+  closePopup();
+  trayClear();
+  makeBoundary();
+
+  const sp = getSpec();
+  const gap = +document.getElementById('cgap').value || 0.5;
+  const pitch = sp.d + gap;
+  const numCells = Math.min(+document.getElementById('nc').value || 40, 400);
+  const numS = +document.getElementById('ns').value || 10;
+  const numP = Math.ceil(numCells / numS);
+  const pat = document.getElementById('pat').value;
+  const orient = getOrient();
+  const boxW = +document.getElementById('bw').value || 80;
+  const boxL = +document.getElementById('bl').value || 140;
+
+  // For horizontal orientations the "footprint" plane changes:
+  // vert:    grid in XZ, cell height along Y  → use boxW for cols
+  // horiz-z: grid in XY, cell length along Z  → use boxW(X) for cols, boxH(Y) for rows limit
+  // horiz-x: grid in ZY, cell length along X  → use boxL(Z) for cols, boxH(Y) for rows limit
+  const boxH = +document.getElementById('bh').value || 80;
+
+  let gridW, gridH;
+  if (orient === 'vert') {
+    gridW = boxW; gridH = boxL;
+  } else if (orient === 'horiz-z') {
+    gridW = boxW; gridH = boxH;
+  } else { // horiz-x
+    gridW = boxL; gridH = boxH;
+  }
+
+  const cols = Math.max(1, Math.floor((gridW + gap) / pitch));
+  const rows = Math.ceil(numCells / cols);
+  const totalW = Math.min(numCells, cols) * pitch - gap;
+  const totalH = rows * pitch - gap;
+
+  // Origin offsets to centre the grid
+  const ox = -totalW/2 + sp.d/2;
+  const oh = -totalH/2 + sp.d/2;
+
+  let count = 0;
+  for (let row = 0; row < rows && count < numCells; row++) {
+    for (let col = 0; col < cols && count < numCells; col++) {
+      let gu = ox + col * pitch;   // "u" = main grid axis
+      let gv = oh + row * pitch;   // "v" = secondary grid axis
+      if (pat === 'hex' && row % 2 === 1) gu += pitch/2;
+
+      const grp = Math.floor(count / numP);
+      const flipped = (grp % 2 !== 0);
+
+      // Map (gu, gv) to world position based on orientation
+      let wx, wy, wz;
+      if (orient === 'vert') {
+        wx = gu; wy = 0; wz = gv;
+      } else if (orient === 'horiz-z') {
+        // cells lie along Z; grid spreads in X (gu) and Y (gv) lifted off floor
+        wx = gu; wy = gv + sp.d/2; wz = 0;
+      } else { // horiz-x
+        // cells lie along X; grid spreads in Z (gu) and Y (gv)
+        wx = 0; wy = gv + sp.d/2; wz = gu;
+      }
+
+      A.cells.push(makeCell(wx, wy, wz, sp.d/2, sp.h, grp, numS, flipped, count, orient));
+      count++;
+    }
+  }
+  updStats();
+  detectAllCollisions();
+}
+
+// ─────────────────────────────────────────────────
+//  CELL MESH — supports vert / horiz-z / horiz-x
+// ─────────────────────────────────────────────────
+function makeCell(wx, wy, wz, r, h, grpIdx, numS, flipped, idx, orient) {
+  orient = orient || getOrient();
+  const g = new THREE.Group();
+  g.position.set(wx, wy, wz);
+
+  const hue = numS > 1 ? (grpIdx / (numS-1)) * 0.65 : 0.55;
+  const col = new THREE.Color().setHSL(hue, flipped ? 0.45 : 0.55, 0.22);
+  const hex = col.getHex();
+  const bmat = new THREE.MeshPhongMaterial({color:hex, shininess:50});
+
+  // All geometry is built as if vertical, then the group is rotated.
+  // Vertical: cylinder axis = Y, top cap at +Y, bot cap at -Y (before offset)
+  // We build centred at origin then shift up by h/2.
+
+  // Body
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(r-0.4, r-0.4, h-5, 22),
+    bmat
+  );
+  body.position.y = h/2; body.castShadow = true; body.receiveShadow = true;
+  g.add(body);
+
+  // Sheath
+  const sheath = new THREE.Mesh(
+    new THREE.CylinderGeometry(r, r, h-7, 22, 1, true),
+    new THREE.MeshPhongMaterial({color:0x081828, transparent:true, opacity:0.4, side:THREE.BackSide})
+  );
+  sheath.position.y = h/2; g.add(sheath);
+
+  // Caps — for flipped: top=red(−), bot=green(+); normal: top=green(+), bot=red(−)
+  const topColor = flipped ? 0xe03030 : 0x00e090;
+  const botColor = flipped ? 0x00e090 : 0xe03030;
+  const topMat = new THREE.MeshPhongMaterial({color:topColor, shininess:100});
+  const botMat = new THREE.MeshPhongMaterial({color:botColor, shininess:100});
+
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(r-1.8, r-0.5, 2, 18), topMat);
+  top.position.y = h - 1.5; top.castShadow = true; g.add(top);
+
+  const nub = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 1.2, 8), topMat);
+  nub.position.y = h + 0.1; g.add(nub);
+
+  const bot = new THREE.Mesh(new THREE.CylinderGeometry(r-0.4, r-0.4, 1.5, 18), botMat);
+  bot.position.y = 0.75; bot.castShadow = true; g.add(bot);
+
+  // Polarity ring
+  const ringColor = flipped ? 0xe03030 : 0x00e090;
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(r-0.8, 0.7, 6, 18),
+    new THREE.MeshPhongMaterial({color:ringColor, emissive:ringColor, emissiveIntensity:0.3})
+  );
+  ring.rotation.x = Math.PI/2;
+  ring.position.y = flipped ? h-6 : 6;
+  g.add(ring);
+
+  // Flip stripe
+  if (flipped) {
+    const stripe = new THREE.Mesh(
+      new THREE.CylinderGeometry(r+0.1, r+0.1, 2, 18, 1, true),
+      new THREE.MeshPhongMaterial({color:0xe03030, emissive:0xe03030,
+        emissiveIntensity:0.2, transparent:true, opacity:0.8})
+    );
+    stripe.position.y = h/2;
+    g.add(stripe);
+  }
+
+  // ── Rotate group for horizontal orientations ──
+  // horiz-z: cylinder was vertical (Y), rotate 90° around X → now lies along Z
+  // horiz-x: cylinder was vertical (Y), rotate 90° around Z → now lies along X
+  if (orient === 'horiz-z') {
+    g.rotation.x = Math.PI / 2;
+  } else if (orient === 'horiz-x') {
+    g.rotation.z = Math.PI / 2;
+  }
+
+  g.userData = {
+    type:'cell',
+    id:'c_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+    idx, grpIdx, flipped, r, h, hex, bmat, orient,
+    insulated:false, selected:false, inCollision:false, outOfBounds:false,
+    topMat, botMat, nub, top, bot, ring
+  };
+
+  A.scene.add(g);
+  return g;
+}
+
+// ─────────────────────────────────────────────────
+//  FLIP CELL (invert polarity)
+// ─────────────────────────────────────────────────
+function flipCell(cell) {
+  pushUndo();
+  const d = cell.userData;
+  d.flipped = !d.flipped;
+
+  // Update cap colors
+  const topColor = d.flipped ? 0xe03030 : 0x00e090;
+  const botColor = d.flipped ? 0x00e090 : 0xe03030;
+  d.topMat.color.setHex(topColor);
+  d.botMat.color.setHex(botColor);
+
+  // Update ring position and color
+  const ringColor = d.flipped ? 0xe03030 : 0x00e090;
+  d.ring.position.y = d.flipped ? d.h - 6 : 6;
+  d.ring.material.color.setHex(ringColor);
+  d.ring.material.emissive.setHex(ringColor);
+
+  // Add/remove flip stripe
+  // find existing stripe child
+  cell.children.forEach(ch => {
+    if (ch.userData && ch.userData.isStripe) {
+      cell.remove(ch);
+    }
+  });
+  if (d.flipped) {
+    const stripe = new THREE.Mesh(
+      new THREE.CylinderGeometry(d.r+0.1, d.r+0.1, 2, 18, 1, true),
+      new THREE.MeshPhongMaterial({color:0xe03030, emissive:0xe03030, emissiveIntensity:0.2,
+        transparent:true, opacity:0.8})
+    );
+    stripe.position.y = d.h/2;
+    stripe.userData = {isStripe:true};
+    cell.add(stripe);
+  }
+
+  // Update popup info
+  updatePopup(cell);
+
+  // Rebuild bridges since ends may change
+  rebridgeCell(cell);
+}
+
+function flipSelected() {
+  if (A.selected) flipCell(A.selected);
+}
+
+// ─────────────────────────────────────────────────
+//  BRIDGES
+// ─────────────────────────────────────────────────
+// Returns 'top'|'bot'|'front'|'back'|'left'|'right' based on orient + camera
+function getNickelSide() {
+  const sel = document.getElementById('nic-side').value;
+  const orient = getOrient();
+
+  if (orient === 'vert') {
+    if (sel === 'top') return 'top';
+    if (sel === 'bot') return 'bot';
+    return A.phi > Math.PI / 2 ? 'bot' : 'top';
+  } else if (orient === 'horiz-z') {
+    // Cells lie along Z; nickel goes on front (−Z end) or back (+Z end)
+    if (sel === 'top') return 'front';
+    if (sel === 'bot') return 'back';
+    // Auto: camera theta ~0 = looking from front
+    const t = ((A.theta % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+    return (t < Math.PI) ? 'front' : 'back';
+  } else { // horiz-x
+    // Cells lie along X; nickel goes on left (−X) or right (+X)
+    if (sel === 'top') return 'right';
+    if (sel === 'bot') return 'left';
+    const t = ((A.theta % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+    return (t > Math.PI/2 && t < 3*Math.PI/2) ? 'left' : 'right';
+  }
+}
+
+// Update the overlay indicator in real time
+function updNickelInd() {
+  const side = getNickelSide();
+  const orient = getOrient();
+  let txt, col;
+  if (orient === 'vert') {
+    txt = side === 'top' ? 'TOP ⬆' : 'BOT ⬇';
+    col = side === 'top' ? '#00c8f0' : '#f0a000';
+  } else if (orient === 'horiz-z') {
+    txt = side === 'front' ? 'FRONT ⬛' : 'BACK ⬜';
+    col = side === 'front' ? '#00c8f0' : '#f0a000';
+  } else {
+    txt = side === 'right' ? 'DERECHA ▶' : 'IZQUIERDA ◀';
+    col = side === 'right' ? '#00c8f0' : '#f0a000';
+  }
+  const el = document.getElementById('bm-type');
+  if (el) { el.textContent = txt; el.style.color = col; }
+  const ind = document.getElementById('nic-pos-text');
+  if (ind) { ind.textContent = txt; ind.style.color = col; }
+}
+
+function makeBridge(c1, c2, side) {
+  const nickelSide = side || getNickelSide();
+  const nw = +document.getElementById('nw').value || 8;
+  const nt = +document.getElementById('nt').value || 0.15;
+  const sp = getSpec();
+  const orient = c1.userData.orient || getOrient();
+
+  // Calculate nickel position based on orientation and side
+  let p1, p2;
+  if (orient === 'vert') {
+    const yy = (nickelSide === 'top') ? sp.h + 1 : 0.8;
+    p1 = new THREE.Vector3(c1.position.x, yy, c1.position.z);
+    p2 = new THREE.Vector3(c2.position.x, yy, c2.position.z);
+  } else if (orient === 'horiz-z') {
+    // Cells lie along Z — nickel on Z ends of each cell
+    const zz = (nickelSide === 'front') ? -(sp.h/2 + 1) : (sp.h/2 + 1);
+    p1 = new THREE.Vector3(c1.position.x, c1.position.y, zz);
+    p2 = new THREE.Vector3(c2.position.x, c2.position.y, zz);
+  } else { // horiz-x
+    // Cells lie along X — nickel on X ends
+    const xx = (nickelSide === 'right') ? (sp.h/2 + 1) : -(sp.h/2 + 1);
+    p1 = new THREE.Vector3(xx, c1.position.y, c1.position.z);
+    p2 = new THREE.Vector3(xx, c2.position.y, c2.position.z);
+  }
+
+  const len = p1.distanceTo(p2);
+  if (len < 0.5) return null;
+
+  const mid = p1.clone().lerp(p2, 0.5);
+  const dir = p2.clone().sub(p1).normalize();
+
+  const isPrimary = ['top','front','right'].includes(nickelSide);
+  const color = isPrimary ? 0x00c8f0 : 0xf07020;
+
+  // For horizontal cells the nickel strip geometry needs to be oriented differently
+  let geo;
+  if (orient === 'vert') {
+    geo = new THREE.BoxGeometry(nw, Math.max(0.8, nt*15), len);
+  } else if (orient === 'horiz-z') {
+    // Strip runs in XY plane (connecting cells side by side)
+    geo = new THREE.BoxGeometry(len, nw, Math.max(0.8, nt*15));
+  } else {
+    // Strip runs in ZY plane
+    geo = new THREE.BoxGeometry(Math.max(0.8, nt*15), nw, len);
+  }
+
+  const mesh = new THREE.Mesh(geo,
+    new THREE.MeshPhongMaterial({ color, shininess:180, specular:0x606060 })
+  );
+  mesh.position.copy(mid);
+
+  // Rotate strip to align with direction between cells
+  if (orient === 'vert') {
+    mesh.rotation.y = Math.atan2(dir.x, dir.z);
+  } else if (orient === 'horiz-z') {
+    // dir is in XY plane
+    mesh.rotation.z = Math.atan2(dir.y, dir.x);
+  } else {
+    mesh.rotation.x = Math.atan2(dir.y, dir.z);
+  }
+
+  mesh.castShadow = true;
+  mesh.userData = { type:'bridge', side:nickelSide, orient, id1:c1.userData.id, id2:c2.userData.id };
+
+  A.scene.add(mesh);
+  A.bridges.push(mesh);
+  updStats();
+  return mesh;
+}
+
+function autoNickel() {
+  pushUndo();
+  clearBridgesQuiet();
+  const orient = getOrient();
+  const grps = {};
+  A.cells.forEach(c => { const g = c.userData.grpIdx; if (!grps[g]) grps[g] = []; grps[g].push(c); });
+  const gk = Object.keys(grps).map(Number).sort((a, b) => a - b);
+
+  // Primary side (parallel connections) = first end
+  // Secondary side (series connections)  = opposite end
+  const sides = {
+    'vert':    { primary:'top',   secondary:'bot' },
+    'horiz-z': { primary:'front', secondary:'back' },
+    'horiz-x': { primary:'right', secondary:'left' },
+  };
+  const { primary, secondary } = sides[orient] || sides['vert'];
+
+  gk.forEach(k => {
+    const arr = grps[k];
+    for (let i = 0; i < arr.length - 1; i++) makeBridge(arr[i], arr[i + 1], primary);
+  });
+  for (let i = 0; i < gk.length - 1; i++) {
+    const a = grps[gk[i]], b = grps[gk[i + 1]];
+    if (a.length && b.length) makeBridge(a[0], b[0], secondary);
+  }
+}
+
+function clearBridgesQuiet() { A.bridges.forEach(b => A.scene.remove(b)); A.bridges = []; updStats(); }
+function clearBridges() { pushUndo(); clearBridgesQuiet(); }
+
+function rebridgeCell(cell) {
+  const id = cell.userData.id;
+  const old = A.bridges.filter(b => b.userData.id1 === id || b.userData.id2 === id);
+  old.forEach(b => {
+    A.scene.remove(b);
+    A.bridges = A.bridges.filter(x => x !== b);
+    const c1 = A.cells.find(c => c.userData.id === b.userData.id1);
+    const c2 = A.cells.find(c => c.userData.id === b.userData.id2);
+    if (c1 && c2) makeBridge(c1, c2, b.userData.side);
+  });
+}
+
+// ─────────────────────────────────────────────────
+//  INSULATION
+// ─────────────────────────────────────────────────
+function applyInsul(cell) {
+  if (cell.userData.insulated) return;
+  if (!A._restoringSnapshot) pushUndo();
+  const r = cell.userData.r, h = cell.userData.h;
+  const t = +document.getElementById('it').value || 0.2;
+  const zone = document.getElementById('iz').value;
+  let cy=h/2, ch=h;
+  if(zone==='top'){cy=h-h*0.15;ch=h*0.3;}
+  if(zone==='bot'){cy=h*0.15;ch=h*0.3;}
+  const mesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(r+t+0.6, r+t+0.6, ch, 20, 1, true),
+    new THREE.MeshPhongMaterial({color:0x001508, transparent:true, opacity:0.55, side:THREE.DoubleSide})
+  );
+  mesh.position.set(cell.position.x, cy, cell.position.z);
+  const el = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.CylinderGeometry(r+t+0.9,r+t+0.9,ch,20)),
+    new THREE.LineBasicMaterial({color:0x00ff88, transparent:true, opacity:0.35})
+  );
+  mesh.add(el);
+  mesh.userData = {type:'insul', cellId:cell.userData.id};
+  A.scene.add(mesh); A.insulMeshes.push(mesh);
+  cell.userData.insulated = true;
+  updStats();
+  detectAllCollisions(); // insul changes effective radius
+}
+
+function removeInsul(cell) {
+  if (!cell.userData.insulated) return;
+  if (!A._restoringSnapshot) pushUndo();
+  const id = cell.userData.id;
+  A.insulMeshes.filter(m=>m.userData.cellId===id).forEach(m=>A.scene.remove(m));
+  A.insulMeshes = A.insulMeshes.filter(m=>m.userData.cellId!==id);
+  cell.userData.insulated = false;
+  updStats();
+  detectAllCollisions();
+}
+
+function insulToggleSelected() {
+  if (!A.selected) return;
+  if (A.selected.userData.insulated) removeInsul(A.selected);
+  else applyInsul(A.selected);
+  updatePopup(A.selected);
+}
+
+function insulAll() {
+  pushUndo();
+  A._restoringSnapshot = true;
+  A.cells.forEach(applyInsul);
+  A._restoringSnapshot = false;
+  updStats(); detectAllCollisions();
+}
+function uninsulAll() {
+  pushUndo();
+  A.insulMeshes.forEach(m=>A.scene.remove(m)); A.insulMeshes=[];
+  A.cells.forEach(c=>c.userData.insulated=false);
+  updStats(); detectAllCollisions();
+}
+
+// ─────────────────────────────────────────────────
+//  BMS
+// ─────────────────────────────────────────────────
+function removeBMS(silent){
+  if(!silent && A.bms) pushUndo();
+  if(A.bms){A.scene.remove(A.bms);A.bms=null;}
+}
+
+// Internal BMS placement without pushing undo (used by restoreSnapshot)
+function placeBMSQuiet() {
+  if(A.bms){A.scene.remove(A.bms);A.bms=null;}
+  _placeBMSInner();
+}
+
+function placeBMS() {
+  if(!A._restoringSnapshot) pushUndo();
+  if(A.bms){A.scene.remove(A.bms);A.bms=null;}
+  _placeBMSInner();
+}
+
+function _placeBMSInner() {
+  const bw=+document.getElementById('bmsw').value||60;
+  const bl=+document.getElementById('bmsl').value||40;
+  const bh=+document.getElementById('bmsh').value||5;
+  const bpos=document.getElementById('bpos').value;
+  const sp=getSpec();
+  const boxW=+document.getElementById('bw').value||80;
+  const boxL=+document.getElementById('bl').value||140;
+  const g=new THREE.Group();
+  const pcb=new THREE.Mesh(new THREE.BoxGeometry(bw,bh,bl),
+    new THREE.MeshPhongMaterial({color:0x003318,shininess:30,emissive:0x000e08}));
+  pcb.castShadow=true; g.add(pcb);
+  const trace=new THREE.Mesh(new THREE.BoxGeometry(bw*.82,0.3,bl*.65),
+    new THREE.MeshPhongMaterial({color:0xb87333,shininess:120}));
+  trace.position.y=bh/2+0.15; g.add(trace);
+  for(let i=0;i<4;i++){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,5),
+      new THREE.MeshPhongMaterial({color:0x0a0a0a}));
+    m.position.set(-bw*.28+i*bw*.18,bh/2+1.3,-bl*.22); g.add(m);
+  }
+  for(let i=0;i<3;i++){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(0.9,8,8),
+      new THREE.MeshPhongMaterial({color:0x00ff44,emissive:0x00ff44,emissiveIntensity:1.0}));
+    m.position.set(-bw*.15+i*bw*.15,bh/2+1,bl*.28);
+    m.userData.isLED=true; g.add(m);
+  }
+  let px=0, py=sp.h+bh/2+3, pz=0;
+  if(bpos==='side'){px=boxW/2+bh/2+2;py=sp.h/2;g.rotation.z=Math.PI/2;}
+  else if(bpos==='end'){pz=boxL/2+bh/2+2;py=sp.h/2;g.rotation.x=Math.PI/2;}
+  g.position.set(px,py,pz);
+  g.userData={type:'bms'};
+  A.bms=g; A.scene.add(g);
+}
+
+// ─────────────────────────────────────────────────
+//  SELECTION + POPUP
+// ─────────────────────────────────────────────────
+function selectCell(cell) {
+  deselectAll();
+  if (!cell) return;
+  A.selected = cell;
+  cell.userData.selected = true;
+  cell.userData.bmat.color.setHex(0xf0a000);
+  cell.userData.bmat.emissive = new THREE.Color(0x302000);
+  cell.userData.bmat.emissiveIntensity = 0.6;
+  showPopup(cell);
+}
+
+function deselectAll() {
+  if (A.selected) {
+    resetColor(A.selected);
+    A.selected.userData.selected = false;
+  }
+  A.selected = null;
+  if (A.pending) { resetColor(A.pending); A.pending = null; }
+  closePopup();
+}
+
+function resetColor(cell) {
+  if (cell.userData.outOfBounds) {
+    cell.userData.bmat.color.setHex(0xf06000);
+    cell.userData.bmat.emissive = new THREE.Color(0x2a1500);
+    cell.userData.bmat.emissiveIntensity = 0.8;
+  } else if (cell.userData.inCollision) {
+    cell.userData.bmat.color.setHex(cell.userData.hex);
+    cell.userData.bmat.emissive = new THREE.Color(0x3a0000);
+    cell.userData.bmat.emissiveIntensity = 0.7;
+  } else {
+    cell.userData.bmat.color.setHex(cell.userData.hex);
+    cell.userData.bmat.emissiveIntensity = 0;
+  }
+}
+
+function showPopup(cell) {
+  const popup = document.getElementById('cell-popup');
+  updatePopup(cell);
+  popup.classList.add('show');
+}
+
+function updatePopup(cell) {
+  if (!cell) return;
+  const d = cell.userData;
+  const polStr = d.flipped ? '(−) arriba' : '(+) arriba';
+  document.getElementById('popup-info').textContent =
+    `CELDA #${d.idx+1} | S${d.grpIdx+1} | ${polStr}${d.insulated?' | AISLADA':''}`;
+}
+
+function closePopup() {
+  document.getElementById('cell-popup').classList.remove('show');
+}
+
+function deleteSelected() {
+  if (!A.selected) return;
+  pushUndo();
+  const cell = A.selected;
+  deselectAll();
+  // Save to tray BEFORE removing insulation/bridges
+  trayAdd(cell);
+  A._restoringSnapshot = true;
+  removeInsul(cell);
+  A._restoringSnapshot = false;
+  A.bridges = A.bridges.filter(b=>{
+    if(b.userData.id1===cell.userData.id||b.userData.id2===cell.userData.id){
+      A.scene.remove(b);return false;
+    }return true;
+  });
+  A.scene.remove(cell);
+  A.cells = A.cells.filter(c=>c!==cell);
+  updStats();
+  detectAllCollisions();
+}
+
+// ─────────────────────────────────────────────────
+//  TOOL
+// ─────────────────────────────────────────────────
+function setTool(t) {
+  A.tool=t; A.pending=null;
+  if(t!=='select') deselectAll();
+  ['orbit','select','bridge','insul','delete'].forEach(k=>{
+    const b=document.getElementById('t-'+k);
+    if(b) b.classList.toggle('active',k===t);
+  });
+  const labels={orbit:'ORBITAR',select:'MOVER',bridge:'PUENTE',insul:'AISLAR',delete:'BORRAR'};
+  const hints={
+    orbit:'1 dedo: orbitar 360° en todos los ejes | 2 dedos: zoom/pan | Botón BAJO para ver níquel inferior',
+    select:'Toca celda → popup | Arrastra celda para mover',
+    bridge:'Toca celda 1 → celda 2 → tira de níquel | Vista arriba=TOP, abajo=BOT | Múltiples tiras por celda',
+    insul:'Toca celda para aislar / desaislar',
+    delete:'Toca objeto para borrarlo'
+  };
+  document.getElementById('ptool').textContent = labels[t] || t.toUpperCase();
+  document.getElementById('hint').textContent = hints[t] || '';
+  document.getElementById('bm-ind').style.display = t === 'bridge' ? 'block' : 'none';
+  if (t === 'bridge') updNickelInd();
+}
+
+// ─────────────────────────────────────────────────
+//  RAYCASTING
+// ─────────────────────────────────────────────────
+function ndc(cx,cy){
+  const c=document.getElementById('c');
+  const r=c.getBoundingClientRect();
+  return {x:((cx-r.left)/r.width)*2-1,y:-((cy-r.top)/r.height)*2+1};
+}
+
+function castRay(cx,cy){
+  const n=ndc(cx,cy);
+  A.ray.setFromCamera(n,A.cam);
+  const objs=[];
+  A.cells.forEach(c=>c.traverse(o=>{if(o.isMesh)objs.push(o);}));
+  A.bridges.forEach(b=>objs.push(b));
+  if(A.bms) A.bms.traverse(o=>{if(o.isMesh)objs.push(o);});
+  return A.ray.intersectObjects(objs,false);
+}
+
+function cellOf(o){let c=o;while(c){if(c.userData&&c.userData.type==='cell')return c;c=c.parent;}return null;}
+function topOf(o){let c=o;while(c){if(c.userData&&c.userData.type)return c;c=c.parent;}return null;}
+
+// ─────────────────────────────────────────────────
+//  POINTER EVENTS
+// ─────────────────────────────────────────────────
+function onDown(e){
+  e.preventDefault();
+  A.ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+  const count=Object.keys(A.ptrs).length;
+
+  if(count===1){
+    A.tapX=e.clientX; A.tapY=e.clientY; A.moved=false;
+
+    if(A.tool==='select'){
+      const hits=castRay(e.clientX,e.clientY);
+      if(hits.length){
+        const cell=cellOf(hits[0].object);
+        if(cell){
+          pushUndo();  // save before drag
+          selectCell(cell);
+          A.dragCell=cell;
+          return;
+        }
+      }
+    }
+    A.orbiting=true;
+  } else if(count===2){
+    A.orbiting=false; A.dragCell=null;
+    A.pinching=true;
+    const pts=Object.values(A.ptrs);
+    A.lastDist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+    A.lastMidX=(pts[0].x+pts[1].x)/2;
+    A.lastMidY=(pts[0].y+pts[1].y)/2;
+  }
+}
+
+function onMove(e){
+  e.preventDefault();
+  if(!A.ptrs[e.pointerId]) return;
+  const prev={...A.ptrs[e.pointerId]};
+  A.ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+  const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+  if(Math.hypot(e.clientX-A.tapX,e.clientY-A.tapY)>8) A.moved=true;
+
+  const count=Object.keys(A.ptrs).length;
+
+  // Drag cell with collision check
+  if(A.dragCell && count===1){
+    const n=ndc(e.clientX,e.clientY);
+    A.ray.setFromCamera(n,A.cam);
+    const tgt=new THREE.Vector3();
+    const orient = A.dragCell.userData.orient || 'vert';
+
+    // Drag plane depends on orientation — always drag in the cell's grid plane
+    let plane;
+    if (orient === 'vert') {
+      plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0); // XZ plane at Y=0
+    } else if (orient === 'horiz-z') {
+      plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0); // XY plane at Z=0
+    } else {
+      plane = new THREE.Plane(new THREE.Vector3(1,0,0), 0); // ZY plane at X=0
+    }
+    A.ray.ray.intersectPlane(plane, tgt);
+    if(tgt){
+      let nx = A.dragCell.position.x;
+      let ny = A.dragCell.position.y;
+      let nz = A.dragCell.position.z;
+      if (orient === 'vert')    { nx=tgt.x; nz=tgt.z; }
+      else if (orient === 'horiz-z') { nx=tgt.x; ny=tgt.y; }
+      else                      { nz=tgt.z; ny=tgt.y; }
+
+      if(!wouldOverlap(A.dragCell,nx,ny,nz) && !wouldExceedBounds(A.dragCell,nx,ny,nz)){
+        A.dragCell.position.x=nx;
+        A.dragCell.position.y=ny;
+        A.dragCell.position.z=nz;
+        A.insulMeshes
+          .filter(m=>m.userData.cellId===A.dragCell.userData.id)
+          .forEach(m=>{m.position.x=nx;m.position.y=ny;m.position.z=nz;});
+        rebridgeCell(A.dragCell);
+        detectAllCollisions();
+      } else {
+        flashCollision();
+      }
+    }
+    return;
+  }
+
+  if(A.orbiting && count===1){
+    camOrbit(dx, dy);
+    return;
+  }
+
+  if(A.pinching && count===2){
+    const pts=Object.values(A.ptrs);
+    const dist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+    const midX=(pts[0].x+pts[1].x)/2, midY=(pts[0].y+pts[1].y)/2;
+
+    // Zoom: move camera along the view direction (works at any angle)
+    const zoomDelta = (A.lastDist - dist) * 0.8;
+    if (Math.abs(zoomDelta) > 0.1) {
+      const fwd = new THREE.Vector3().subVectors(A.target, A.cam.position).normalize();
+      const newPos = A.cam.position.clone().addScaledVector(fwd, -zoomDelta);
+      const newDist = newPos.distanceTo(A.target);
+      if (newDist > 20 && newDist < 800) {
+        A.cam.position.copy(newPos);
+        A.radius = newDist;
+      }
+    }
+
+    // Pan: move target using camera right and up vectors (works at any angle)
+    const pdx = midX - A.lastMidX, pdy = midY - A.lastMidY;
+    if (Math.abs(pdx) > 0.5 || Math.abs(pdy) > 0.5) {
+      const camRight = new THREE.Vector3();
+      const camUp = A.cam.up.clone();
+      camRight.crossVectors(
+        new THREE.Vector3().subVectors(A.cam.position, A.target),
+        camUp
+      ).normalize();
+      // camera screen-up = cross(right, forward)
+      const fwd2 = new THREE.Vector3().subVectors(A.target, A.cam.position).normalize();
+      const screenUp = new THREE.Vector3().crossVectors(camRight, fwd2).normalize();
+      const panScale = A.radius * 0.0015;
+      A.target.addScaledVector(camRight, -pdx * panScale);
+      A.target.addScaledVector(screenUp, pdy * panScale);
+      A.cam.lookAt(A.target);
+    }
+
+    A.lastDist=dist; A.lastMidX=midX; A.lastMidY=midY;
+  }
+}
+
+function onUp(e){
+  e.preventDefault();
+  delete A.ptrs[e.pointerId];
+  const count=Object.keys(A.ptrs).length;
+
+  if(count===0){
+    const wasDragging=!!A.dragCell;
+    A.orbiting=false; A.pinching=false; A.dragCell=null; A.dragStartPos=null;
+    if(!A.moved && !wasDragging) handleTap(A.tapX,A.tapY);
+    detectAllCollisions();
+  } else if(count===1){
+    A.pinching=false; A.orbiting=true;
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  TAP HANDLING
+// ─────────────────────────────────────────────────
+function handleTap(cx,cy){
+  const hits=castRay(cx,cy);
+
+  if(A.tool==='select'){
+    if(!hits.length){deselectAll();return;}
+    const cell=cellOf(hits[0].object);
+    if(cell) selectCell(cell); else deselectAll();
+  }
+  else if(A.tool==='bridge'){
+    if(!hits.length){if(A.pending){resetColor(A.pending);A.pending=null;}return;}
+    const cell=cellOf(hits[0].object);
+    if(!cell) return;
+    if(!A.pending){
+      A.pending=cell;
+      cell.userData.bmat.color.setHex(0x00c8f0);
+      cell.userData.bmat.emissive=new THREE.Color(0x001828);
+      cell.userData.bmat.emissiveIntensity=0.5;
+    } else if(A.pending!==cell){
+      pushUndo();
+      resetColor(A.pending);
+      makeBridge(A.pending, cell, getNickelSide());
+      A.pending = null;
+    }
+  }
+  else if(A.tool==='insul'){
+    if(!hits.length) return;
+    const cell=cellOf(hits[0].object);
+    if(!cell) return;
+    if(cell.userData.insulated) removeInsul(cell); else applyInsul(cell);
+  }
+  else if(A.tool==='delete'){
+    if(!hits.length) return;
+    const obj=topOf(hits[0].object);
+    if(!obj) return;
+    pushUndo();
+    if(obj.userData.type==='cell'){
+      trayAdd(obj);   // send to tray before removing
+      A._restoringSnapshot = true;
+      removeInsul(obj);
+      A._restoringSnapshot = false;
+      A.bridges=A.bridges.filter(b=>{
+        if(b.userData.id1===obj.userData.id||b.userData.id2===obj.userData.id){A.scene.remove(b);return false;}
+        return true;
+      });
+      A.scene.remove(obj); A.cells=A.cells.filter(c=>c!==obj);
+    } else if(obj.userData.type==='bridge'){
+      A.scene.remove(obj); A.bridges=A.bridges.filter(b=>b!==obj);
+    } else if(obj.userData.type==='bms') removeBMS(true);
+    updStats(); detectAllCollisions();
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  CAMERA
+// ─────────────────────────────────────────────────
+//  CAMERA — free 360° orbit using quaternion rotation
+//  No gimbal lock, no poles, full inversion support
+// ─────────────────────────────────────────────────
+function camSync(){
+  const {phi,theta,radius,target,cam}=A;
+  cam.position.set(
+    target.x + radius * Math.sin(phi) * Math.sin(theta),
+    target.y + radius * Math.cos(phi),
+    target.z + radius * Math.sin(phi) * Math.cos(theta)
+  );
+  // When below the pack (phi > PI/2) flip the up vector so the view stays natural
+  if (phi > Math.PI / 2) {
+    cam.up.set(0, -1, 0);
+  } else {
+    cam.up.set(0, 1, 0);
+  }
+  cam.lookAt(target);
+}
+
+// Called every frame of orbit drag — applies delta rotation via quaternions
+// Supports full 360° in both axes with no gimbal lock or flip.
+function camOrbit(dx, dy){
+  const sensitivity = 0.007;
+
+  // --- Horizontal rotation: always around world Y through target ---
+  const yAxis = new THREE.Vector3(0, 1, 0);
+  const qY = new THREE.Quaternion().setFromAxisAngle(yAxis, -dx * sensitivity);
+
+  // --- Vertical rotation: around camera's local right axis through target ---
+  // "right" = cross(forward, up) using current cam up so it's always correct
+  const forward = new THREE.Vector3().subVectors(A.target, A.cam.position).normalize();
+  const right = new THREE.Vector3().crossVectors(forward, A.cam.up).normalize();
+  const qX = new THREE.Quaternion().setFromAxisAngle(right, dy * sensitivity);
+
+  // Apply combined rotation to offset vector
+  const q = new THREE.Quaternion().multiplyQuaternions(qY, qX);
+  const offset = A.cam.position.clone().sub(A.target);
+  offset.applyQuaternion(q);
+  A.cam.position.copy(A.target).add(offset);
+
+  // --- Decide camera "up" vector ---
+  // Project world-Y onto the plane perpendicular to the view direction,
+  // then use that as up. This makes the camera smoothly flip when going
+  // upside-down so controls never reverse.
+  const newForward = new THREE.Vector3().subVectors(A.target, A.cam.position).normalize();
+  const worldY = new THREE.Vector3(0, 1, 0);
+
+  // Component of worldY perpendicular to the view direction
+  const upProj = worldY.clone().sub(
+    newForward.clone().multiplyScalar(worldY.dot(newForward))
+  );
+
+  if (upProj.lengthSq() > 0.001) {
+    // Use the projected up (smooth, no sudden flip)
+    A.cam.up.copy(upProj.normalize());
+  }
+  // else: looking straight up/down — keep previous up so it doesn't spin
+
+  A.cam.lookAt(A.target);
+  A.radius = A.cam.position.distanceTo(A.target);
+}
+
+function setView(v){
+  const m={
+    iso:   {phi:1.0,              theta:0.8},
+    top:   {phi:0.001,            theta:0},
+    bottom:{phi:Math.PI-0.001,    theta:0},
+    front: {phi:Math.PI/2,        theta:0},
+    back:  {phi:Math.PI/2,        theta:Math.PI},
+    side:  {phi:Math.PI/2,        theta:Math.PI/2},
+  };
+  const l={iso:'ISO',top:'TOP',bottom:'⬇ BAJO',front:'FRONT',back:'ATRÁS',side:'LADO'};
+  if(m[v]){ A.phi=m[v].phi; A.theta=m[v].theta; camSync(); }
+
+  const pill = document.getElementById('pview');
+  if(pill){
+    pill.textContent = l[v] || v.toUpperCase();
+    // Bottom view = orange warning so user knows they're upside-down
+    if(v==='bottom'){
+      pill.style.borderColor='#f0a00099';
+      pill.style.color='#f0a000';
+      pill.style.background='#f0a00015';
+    } else {
+      pill.style.borderColor='#7030e060';
+      pill.style.color='#9060e0';
+      pill.style.background='#7030e010';
+    }
+  }
+}
+
+function onResize(){
+  const wrap=document.getElementById('canvas-wrap');
+  const W=wrap.clientWidth,H=wrap.clientHeight;
+  A.cam.aspect=W/H; A.cam.updateProjectionMatrix();
+  A.ren.setSize(W,H);
+}
+
+// ─────────────────────────────────────────────────
+//  STATS
+// ─────────────────────────────────────────────────
+function updStats(){
+  const n=A.cells.length, s=+document.getElementById('ns').value||1;
+  const p=Math.ceil(n/s), volt=(s*3.6).toFixed(1);
+  const sp=getSpec(), gap=+document.getElementById('cgap').value||0.5;
+  const pitch=sp.d+gap, boxW=+document.getElementById('bw').value||80, boxL=+document.getElementById('bl').value||140;
+  const cols=Math.max(1,Math.floor((boxW+gap)/pitch));
+  const rows=Math.ceil(n/cols);
+  const uw=Math.min(n,cols)*pitch-gap, ul=rows*pitch-gap;
+  const fits=uw<=boxW&&ul<=boxL;
+  const flippedCount=A.cells.filter(c=>c.userData.flipped).length;
+
+  document.getElementById('s1').textContent=`${n} (${flippedCount} volteadas)`;
+  document.getElementById('s2').textContent=`${s}S × ${p}P`;
+  const ve=document.getElementById('s3');
+  ve.textContent=`${volt}V`; ve.className='sv '+(s>=10?'ok':s>=7?'w':'b');
+  document.getElementById('s4').textContent=A.bridges.length;
+  const se=document.getElementById('s5');
+  se.textContent=`${uw.toFixed(0)}×${ul.toFixed(0)}mm`;
+  se.className='sv '+(fits?'ok':'b');
+  document.getElementById('s6').textContent=A.insulMeshes.length;
+  document.getElementById('pstat').textContent=`${n}cel ${s}S×${p}P ${volt}V`;
+}
+
+// ─────────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────────
+function onFmtChange(){
+  const c=document.getElementById('cell-fmt').value==='custom';
+  document.getElementById('cd-row').style.display=c?'flex':'none';
+  document.getElementById('ch-row').style.display=c?'flex':'none';
+}
+
+function togglePanel(){
+  const p=document.getElementById('panel');
+  const o=document.getElementById('overlay');
+  const open=p.classList.toggle('open');
+  o.classList.toggle('show',open);
+}
+
+function clearAll(){
+  pushUndo();
+  A.cells.forEach(c=>A.scene.remove(c));A.cells=[];
+  A.bridges.forEach(b=>A.scene.remove(b));A.bridges=[];
+  A.insulMeshes.forEach(m=>A.scene.remove(m));A.insulMeshes=[];
+  removeBMS(true); A.selected=null; A.pending=null;
+  closePopup(); trayClear(); updStats(); detectAllCollisions(); updUndoUI();
+}
+
+function doExport(){
+  const n=A.cells.length, s=+document.getElementById('ns').value||1;
+  const p=Math.ceil(n/s), sp=getSpec();
+  const flipped=A.cells.filter(c=>c.userData.flipped).length;
+  const txt=`=== BATTERY PACK DESIGN ===
+Celda: ${document.getElementById('cell-fmt').value} (⌀${sp.d}×${sp.h}mm)
+Config: ${s}S × ${p}P = ${n} celdas
+Celdas volteadas (− arriba): ${flipped}
+Voltaje nominal: ${(s*3.6).toFixed(1)}V
+Espacio: ${document.getElementById('bw').value}×${document.getElementById('bl').value}×${document.getElementById('bh').value}mm
+Níquel: ${document.getElementById('nw').value}mm × ${document.getElementById('nt').value}mm
+Puentes: ${A.bridges.length}
+Celdas aisladas: ${A.insulMeshes.length}
+BMS: ${A.bms?'Colocado':'No colocado'}`;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(()=>alert('✅ Copiado!'));
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=txt;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);alert('✅ Copiado!');
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  LOOP
+// ─────────────────────────────────────────────────
+function loop(){
+  requestAnimationFrame(loop);
+  // Live nickel side indicator
+  if (A.tool === 'bridge') updNickelInd();
+  if(A.bms){
+    const t=Date.now()*0.003;
+    A.bms.traverse(ch=>{
+      if(ch.isMesh&&ch.userData.isLED)
+        ch.material.emissiveIntensity=0.5+0.5*Math.sin(t+ch.position.x*0.4);
+    });
+  }
+  A.ren.render(A.scene,A.cam);
+}
+
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
