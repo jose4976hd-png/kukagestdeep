@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>KUKADES - Preparado para lo Inesperado</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --green: #39ff14;
+      --green-dim: #1a7a0a;
+      --green-dark: #0d3d05;
+      --amber: #ffb000;
+      --red: #ff2222;
+      --bg: #050e03;
+      --bg2: #0a1f07;
+      --panel: #0a1f07;
+      --border: #1e4a12;
+      --text: #a8e89c;
+      --font-mono: 'Courier New', monospace;
+      --font-display: 'Segoe UI', monospace;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 16px; transition: font-size 0.1s ease; }
+    body.font-small { font-size: 11px; }
+    body.font-medium { font-size: 15px; }
+    body.font-large { font-size: 19px; }
+    body.font-xlarge { font-size: 24px; }
+    .app-header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .header-logo { width: 36px; height: 36px; background: var(--green-dark); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--green); }
+    .header-title { font-family: var(--font-display); font-size: 1rem; font-weight: bold; color: var(--green); }
+    .header-subtitle { font-size: 0.55rem; color: var(--green-dim); }
+    .lang-selector { display: flex; gap: 5px; flex-wrap: wrap; }
+    .lang-btn { background: transparent; border: 1px solid var(--border); color: var(--green-dim); cursor: pointer; padding: 4px 8px; border-radius: 16px; font-size: 0.65rem; font-family: monospace; }
+    .lang-btn.active { background: var(--green-dark); color: var(--green); border-color: var(--green); }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--panel); border-top: 1px solid var(--border); display: flex; z-index: 100; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px; gap: 4px; cursor: pointer; background: transparent; border: none; color: var(--green-dim); font-family: monospace; font-size: 0.55rem; }
+    .nav-item.active { color: var(--green); }
+    .app-content { padding: 16px; padding-bottom: 80px; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .section-title { font-family: var(--font-display); font-size: 0.85rem; color: var(--green); }
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-value { font-family: var(--font-display); font-size: 1.5rem; color: var(--green); font-weight: bold; }
+    .stat-label { font-size: 0.55rem; color: var(--green-dim); }
+    .level-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 20px; }
+    .level-value { font-family: var(--font-display); font-size: 3rem; color: var(--green); }
+    .level-bar-wrap { background: var(--bg2); height: 8px; border-radius: 4px; margin: 16px 0; overflow: hidden; }
+    .level-bar { height: 100%; width: 0%; background: var(--green); border-radius: 4px; transition: width 0.3s; }
+    .product-list, .material-list { display: flex; flex-direction: column; gap: 10px; }
+    .product-card, .material-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; gap: 12px; }
+    .product-card.danger, .material-card.danger { border-left: 3px solid var(--red); }
+    .product-card.warn, .material-card.warn { border-left: 3px solid var(--amber); }
+    .product-photo { width: 50px; height: 50px; background: var(--bg2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .product-info { flex: 1; }
+    .product-name { font-family: var(--font-display); font-size: 0.85rem; font-weight: bold; }
+    .product-cat { display: inline-block; background: var(--green-dark); border: 1px solid var(--green-dim); font-size: 0.5rem; padding: 2px 6px; border-radius: 2px; margin-bottom: 4px; }
+    .product-meta { font-size: 0.6rem; color: var(--green-dim); }
+    .warning-text { color: var(--red); font-size: 0.55rem; }
+    .btn-icon { width: 32px; height: 32px; background: transparent; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .fab { position: fixed; bottom: 76px; right: 16px; width: 52px; height: 52px; background: var(--green-dark); border: 2px solid var(--green); border-radius: 50%; color: var(--green); font-size: 28px; cursor: pointer; z-index: 99; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 500; display: none; align-items: flex-end; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: 100%; max-height: 85vh; overflow-y: auto; padding: 20px; }
+    .modal-title { font-family: var(--font-display); font-size: 1rem; color: var(--green); margin-bottom: 20px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.6rem; color: var(--green-dim); margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; background: var(--panel); border: 1px solid var(--border); color: var(--text); font-family: monospace; padding: 10px; border-radius: 6px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+    .btn { flex: 1; padding: 12px; border-radius: 6px; font-family: monospace; cursor: pointer; border: 1px solid; }
+    .btn-primary { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--green-dim); }
+    .empty-state { text-align: center; padding: 40px; color: var(--green-dim); }
+    .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--green); padding: 10px 20px; border-radius: 4px; z-index: 2000; opacity: 0; transition: opacity 0.3s; white-space: nowrap; }
+    .toast.show { opacity: 1; }
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box { background: var(--bg2); border: 1px solid var(--red); border-radius: 12px; padding: 24px; width: 280px; text-align: center; }
+    .filter-tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px; }
+    .filter-tab { background: transparent; border: 1px solid var(--border); color: var(--green-dim); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.6rem; white-space: nowrap; }
+    .filter-tab.active { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+    .settings-block { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; cursor: pointer; }
+    .settings-title { font-weight: bold; margin-bottom: 4px; }
+    .deps-tag { background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 4px; padding: 4px 8px; font-size: 0.6rem; display: inline-block; margin: 2px; }
+    .person-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <div class="header-logo">K</div>
+    <div>
+      <div class="header-title">KUKADES</div>
+      <div class="header-subtitle" id="appSubtitle">PREPARADO PARA LO INESPERADO</div>
+    </div>
+  </div>
+  <div class="lang-selector">
+    <button class="lang-btn" data-lang="es">🇪🇸 ES</button>
+    <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+    <button class="lang-btn" data-lang="fr">🇫🇷 FR</button>
+    <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
+    <button class="lang-btn" data-lang="it">🇮🇹 IT</button>
+    <button class="lang-btn" data-lang="pt">🇵🇹 PT</button>
+  </div>
+</div>
+
+<div class="app-content">
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="section-header"><div class="section-title" id="dashboardTitle">// ESTADO GENERAL</div></div>
+    <div class="level-card"><div class="level-value" id="levelValue">0%</div><div class="level-bar-wrap"><div class="level-bar" id="levelBar"></div></div><div id="levelStatus">EVALUANDO...</div></div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="statProducts">0</div><div class="stat-label" id="statProductsLabel">PRODUCTOS</div></div>
+      <div class="stat-card"><div class="stat-value" id="statMaterials">0</div><div class="stat-label" id="statMaterialsLabel">MATERIALES</div></div>
+      <div class="stat-card"><div class="stat-value" id="statDeps">0</div><div class="stat-label" id="statDepsLabel">DEPENDENCIAS</div></div>
+      <div class="stat-card"><div class="stat-value" id="statDays">0</div><div class="stat-label" id="statDaysLabel">DÍAS AUTONOMÍA</div></div>
+    </div>
+    <div class="section-header"><div class="section-title" id="modulesTitle">// MÓDULOS</div></div>
+    <div style="display: grid; gap: 12px;">
+      <div class="settings-block" onclick="showScreen('despensa')"><div style="font-size: 1.2rem;">🥫</div><div class="settings-title" id="pantryTitle">DESPENSA</div><div style="font-size: 0.6rem;" id="pantryDesc">Alimentos y suministros</div></div>
+      <div class="settings-block" onclick="showScreen('materiales')"><div style="font-size: 1.2rem;">🔧</div><div class="settings-title" id="materialsTitle">MATERIALES</div><div style="font-size: 0.6rem;" id="materialsDesc">Equipamiento y herramientas</div></div>
+      <div class="settings-block" onclick="showScreen('personas')"><div style="font-size: 1.2rem;">👥</div><div class="settings-title" id="personsTitle">PERSONAS</div><div style="font-size: 0.6rem;" id="personsDesc">Perfiles y necesidades</div></div>
+      <div class="settings-block" onclick="showScreen('nutricion')"><div style="font-size: 1.2rem;">🥗</div><div class="settings-title" id="nutritionTitle">NUTRICIÓN</div><div style="font-size: 0.6rem;" id="nutritionDesc">Calorías y menús</div></div>
+      <div class="settings-block" onclick="showScreen('guias')"><div style="font-size: 1.2rem;">📖</div><div class="settings-title" id="guidesTitle">GUÍAS</div><div style="font-size: 0.6rem;" id="guidesDesc">Supervivencia</div></div>
+      <div class="settings-block" onclick="showScreen('ajustes')"><div style="font-size: 1.2rem;">⚙️</div><div class="settings-title" id="settingsTitle">AJUSTES</div><div style="font-size: 0.6rem;" id="settingsDesc">Configuración</div></div>
+    </div>
+  </div>
+
+  <!-- DESPENSA -->
+  <div class="screen" id="screen-despensa">
+    <div class="section-header"><div class="section-title" id="pantryScreenTitle">// DESPENSA</div><div class="section-badge" id="pantryCount">0 items</div></div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="pantryTotal">0</div><div class="stat-label" id="totalLabel">Total</div></div>
+      <div class="stat-card"><div class="stat-value" id="pantryWarn" style="color: var(--amber);">0</div><div class="stat-label" id="warningLabel">Aviso</div></div>
+      <div class="stat-card"><div class="stat-value" id="pantryDanger" style="color: var(--red);">0</div><div class="stat-label" id="expiredLabel">Caducados</div></div>
+      <div class="stat-card"><div class="stat-value" id="pantryLow">0</div><div class="stat-label" id="lowStockLabel">Stock bajo</div></div>
+    </div>
+    <div class="filter-tabs" id="productFilters"><button class="filter-tab active" data-filter="all" id="filterAll">TODOS</button><button class="filter-tab" data-filter="ALIMENTOS" id="filterFood">🥫 ALIMENTOS</button><button class="filter-tab" data-filter="AGUA" id="filterWater">💧 AGUA</button><button class="filter-tab" data-filter="MEDICINAS" id="filterMeds">💊 MEDICINAS</button></div>
+    <div id="productList" class="product-list"></div>
+  </div>
+
+  <!-- MATERIALES -->
+  <div class="screen" id="screen-materiales">
+    <div class="section-header"><div class="section-title" id="materialsScreenTitle">// MATERIALES</div><div class="section-badge" id="materialsCount">0 items</div></div>
+    <div class="filter-tabs" id="materialFilters"><button class="filter-tab active" data-filter="all" id="matFilterAll">TODOS</button><button class="filter-tab" data-filter="ILUMINACIÓN" id="matFilterLight">💡 ILUMINACIÓN</button><button class="filter-tab" data-filter="HERRAMIENTAS" id="matFilterTools">🔧 HERRAMIENTAS</button><button class="filter-tab" data-filter="ENERGÍA" id="matFilterEnergy">⚡ ENERGÍA</button></div>
+    <div id="materialList" class="product-list"></div>
+  </div>
+
+  <!-- PERSONAS -->
+  <div class="screen" id="screen-personas">
+    <div class="section-header"><div class="section-title" id="personsScreenTitle">// PERSONAS</div><div class="section-badge" id="personsCount">0</div></div>
+    <div id="personsList"></div>
+    <button class="btn btn-secondary" onclick="addPerson()" style="width:100%; margin-top:12px;" id="addPersonBtn">+ AÑADIR PERSONA</button>
+  </div>
+
+  <!-- NUTRICIÓN -->
+  <div class="screen" id="screen-nutricion">
+    <div class="section-header"><div class="section-title" id="nutritionScreenTitle">// NUTRICIÓN</div><div class="section-badge" id="nutritionBadge">0 KCAL</div></div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-value" id="nutTotal">0</div><div class="stat-label" id="totalKcalLabel">Kcal totales</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutDaily">0</div><div class="stat-label" id="dailyKcalLabel">Kcal/día</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutDays">0</div><div class="stat-label" id="autonomyDaysLabel">Días autonomía</div></div>
+      <div class="stat-card"><div class="stat-value" id="nutRation">100%</div><div class="stat-label" id="rationLabel">RACIÓN</div></div>
+    </div>
+    <div class="settings-block"><div class="settings-title" id="rationConfigTitle">⚙️ RACIONAMIENTO</div><select id="rationSelect" onchange="updateRation()" style="width:100%; background:var(--bg2); color:var(--text); border:1px solid var(--border); padding:8px;"><option value="100" id="rationNormal">Normal (100%)</option><option value="75" id="rationMild">Leve (75%)</option><option value="50" id="rationSevere">Severo (50%)</option><option value="33" id="rationSurvival">Supervivencia (33%)</option></select></div>
+    <div class="section-header"><div class="section-title" id="macrosTitle">// MACROS TOTALES</div></div>
+    <div class="stats-bar"><div class="stat-card"><div class="stat-value" id="macroProtein">0</div><div class="stat-label" id="proteinLabel">Proteínas</div></div><div class="stat-card"><div class="stat-value" id="macroFat">0</div><div class="stat-label" id="fatLabel">Grasas</div></div><div class="stat-card"><div class="stat-value" id="macroCarbs">0</div><div class="stat-label" id="carbsLabel">Carbos</div></div><div class="stat-card"><div class="stat-value" id="macroFiber">0</div><div class="stat-label" id="fiberLabel">Fibra</div></div></div>
+    <div id="menuContainer"></div>
+  </div>
+
+  <!-- GUÍAS -->
+  <div class="screen" id="screen-guias">
+    <div class="section-header"><div class="section-title" id="guidesScreenTitle">// GUÍAS</div></div>
+    <div style="display: grid; gap: 12px;">
+      <div class="settings-block" onclick="showGuide('fuego')"><div style="font-size: 1.2rem;">🔥</div><div class="settings-title" id="guideFireTitle">CÓMO HACER FUEGO</div><div style="font-size:0.6rem;" id="guideFireDesc">Métodos de ignición</div></div>
+      <div class="settings-block" onclick="showGuide('orientacion')"><div style="font-size: 1.2rem;">🧭</div><div class="settings-title" id="guideOrientTitle">ORIENTACIÓN</div><div style="font-size:0.6rem;" id="guideOrientDesc">Sin brújula</div></div>
+      <div class="settings-block" onclick="showGuide('primeros')"><div style="font-size: 1.2rem;">🩹</div><div class="settings-title" id="guideFirstAidTitle">PRIMEROS AUXILIOS</div><div style="font-size:0.6rem;" id="guideFirstAidDesc">Heridas y RCP</div></div>
+      <div class="settings-block" onclick="showGuide('codigo')"><div style="font-size: 1.2rem;">📻</div><div class="settings-title" id="guideMorseTitle">CÓDIGO MORSE</div><div style="font-size:0.6rem;" id="guideMorseDesc">Señales SOS</div></div>
+    </div>
+    <div id="guideContent" style="display:none; margin-top:16px;"></div>
+  </div>
+
+  <!-- AJUSTES -->
+  <div class="screen" id="screen-ajustes">
+    <div class="section-header"><div class="section-title" id="settingsScreenTitle">// AJUSTES</div></div>
+    <div class="settings-block"><div class="settings-title" id="fontSizeTitle">📐 TAMAÑO TEXTO</div><div><button class="filter-tab" onclick="setFontSize('small')" id="fontSmall">PEQUEÑO</button><button class="filter-tab" onclick="setFontSize('medium')" id="fontMedium">MEDIANO</button><button class="filter-tab" onclick="setFontSize('large')" id="fontLarge">GRANDE</button><button class="filter-tab" onclick="setFontSize('xlarge')" id="fontXLarge">MUY GRANDE</button></div></div>
+    <div class="settings-block"><div class="settings-title" id="accentColorTitle">🎨 COLOR PRINCIPAL</div><input type="color" id="colorPicker" value="#39ff14" onchange="setAccentColor(this.value)"></div>
+    <div class="settings-block"><div class="settings-title" id="alertsTitle">🔔 ALERTAS</div><div><button class="filter-tab" onclick="setWarnDays(30)" id="alert30">30 DÍAS</button><button class="filter-tab" onclick="setWarnDays(60)" id="alert60">60 DÍAS</button><button class="filter-tab" onclick="setWarnDays(90)" id="alert90">90 DÍAS</button></div></div>
+    <div class="settings-block"><div class="settings-title" id="dataTitle">💾 DATOS</div><button class="btn btn-secondary" onclick="exportData()" style="width:100%; margin-bottom:8px;" id="exportBtn">📤 EXPORTAR</button><button class="btn btn-secondary" onclick="resetAllData()" style="width:100%; background:rgba(255,34,34,0.1); border-color:var(--red); color:var(--red);" id="resetBtn">🗑️ RESETEAR TODO</button></div>
+  </div>
+</div>
+
+<button class="fab" id="fabBtn" onclick="openAddModal()">+</button>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showScreen('dashboard', this)" id="navHome">🏠 INICIO</button>
+  <button class="nav-item" onclick="showScreen('despensa', this)" id="navPantry">🥫 DESPENSA</button>
+  <button class="nav-item" onclick="showScreen('materiales', this)" id="navMaterials">🔧 MATERIALES</button>
+  <button class="nav-item" onclick="showScreen('ajustes', this)" id="navSettings">⚙️ AJUSTES</button>
+</nav>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="productModal"><div class="modal"><div class="modal-title" id="productModalTitle">AÑADIR PRODUCTO</div><div class="field"><label id="nameLabel">NOMBRE *</label><input type="text" id="productName" placeholder="Ej: Atún"></div><div class="field-row"><div class="field"><label id="categoryLabel">CATEGORÍA</label><select id="productCat"><option value="ALIMENTOS" id="catFood">ALIMENTOS</option><option value="AGUA" id="catWater">AGUA</option><option value="MEDICINAS" id="catMeds">MEDICINAS</option></select></div><div class="field"><label id="qtyLabel">CANTIDAD</label><input type="number" id="productQty" value="1"></div></div><div class="field-row"><div class="field"><label id="unitLabel">UNIDAD</label><select id="productUnit"><option value="uds">uds</option><option value="kg">kg</option><option value="L">L</option></select></div><div class="field"><label id="minStockLabel">STOCK MÍN.</label><input type="number" id="productMinQty"></div></div><div class="field-row"><div class="field"><label id="expiryLabel">CADUCIDAD</label><input type="date" id="productExp"></div><div class="field"><label id="locationLabel">UBICACIÓN</label><input type="text" id="productLoc"></div></div><div id="productNutritionBlock" style="display:none;"><button class="btn btn-secondary" onclick="autoFillNutrition()" style="width:100%; margin-bottom:12px;" id="autoFillBtn">🤖 RELLENAR CON IA</button><div class="field-row"><div class="field"><label id="netWeightLabel">PESO NETO (g)</label><input type="number" id="productNetWeight"></div><div class="field"><label id="kcalLabel">KCAL</label><input type="number" id="productKcal"></div></div><div class="field-row"><div class="field"><label id="proteinLabelModal">PROTEÍNAS</label><input type="number" id="productProtein" step="0.1"></div><div class="field"><label id="fatLabelModal">GRASAS</label><input type="number" id="productFat" step="0.1"></div></div><div class="field-row"><div class="field"><label id="carbsLabelModal">CARBOS</label><input type="number" id="productCarbs" step="0.1"></div><div class="field"><label id="fiberLabelModal">FIBRA</label><input type="number" id="productFiber" step="0.1"></div></div></div><div id="productMedicineBlock" style="display:none;"><div class="field"><label id="medForLabel">PARA QUÉ SIRVE</label><input type="text" id="productMedFor"></div><div class="field"><label id="medSideLabel">EFECTOS SECUNDARIOS</label><textarea id="productMedSide" rows="2"></textarea></div><div class="field"><label id="medContraLabel">CONTRAINDICACIONES</label><textarea id="productMedContra" rows="2"></textarea></div></div><div class="field"><label id="notesLabel">NOTAS</label><textarea id="productNotes" rows="2"></textarea></div><div class="btn-row"><button class="btn btn-secondary" onclick="closeModal()" id="cancelBtn">CANCELAR</button><button class="btn btn-primary" onclick="saveProduct()" id="saveBtn">GUARDAR</button></div></div></div>
+
+<div class="modal-overlay" id="materialModal"><div class="modal"><div class="modal-title" id="materialModalTitle">AÑADIR MATERIAL</div><div class="field"><label id="matNameLabel">NOMBRE *</label><input type="text" id="materialName" placeholder="Ej: Linterna"></div><div class="field-row"><div class="field"><label id="matCategoryLabel">CATEGORÍA</label><select id="materialCat"><option value="ILUMINACIÓN" id="matCatLight">ILUMINACIÓN</option><option value="HERRAMIENTAS" id="matCatTools">HERRAMIENTAS</option><option value="ENERGÍA" id="matCatEnergy">ENERGÍA</option></select></div><div class="field"><label id="matStatusLabel">ESTADO</label><select id="materialStatus"><option value="OPERATIVO" id="statusOp">OPERATIVO</option><option value="REVISAR" id="statusCheck">REVISAR</option><option value="AVERÍA" id="statusBroken">AVERÍA</option></select></div></div><div class="field-row"><div class="field"><label id="matQtyLabel">CANTIDAD</label><input type="number" id="materialQty" value="1"></div><div class="field"><label id="matLocationLabel">UBICACIÓN</label><input type="text" id="materialLoc"></div></div><div class="field"><label id="depsLabel">DEPENDENCIAS</label><div style="display:flex;gap:8px;"><input type="text" id="depSearch" placeholder="Buscar..." style="flex:1;" oninput="searchDeps(this.value)"><button class="btn btn-secondary" onclick="addCustomDep()" id="addDepBtn">➕</button></div><div id="depResults" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div><div id="selectedDeps"></div></div><div id="materialBatteryBlock" style="display:none;"><div class="field-row"><div class="field"><label id="lastChargeLabel">ÚLTIMA RECARGA</label><input type="date" id="materialLastCharge"></div><div class="field"><label id="chargeIntervalLabel">RECARGAR CADA (días)</label><input type="number" id="materialChargeInterval" value="90"></div></div><div class="field"><label id="batteryTypeLabel">TIPO BATERÍA</label><input type="text" id="materialBatteryType" placeholder="Ej: AAA, 18650"></div></div><div class="field"><label id="instructionsLabel">INSTRUCCIONES</label><textarea id="materialInstructions" rows="2"></textarea></div><div class="btn-row"><button class="btn btn-secondary" onclick="closeMatModal()" id="matCancelBtn">CANCELAR</button><button class="btn btn-primary" onclick="saveMaterial()" id="matSaveBtn">GUARDAR</button></div></div></div>
+
+<div class="modal-overlay" id="personModal"><div class="modal"><div class="modal-title" id="personModalTitle">AÑADIR PERSONA</div><div class="field"><label id="personNameLabel">NOMBRE</label><input type="text" id="personName"></div><div class="field"><label id="personAgeLabel">PERFIL</label><select id="personAge"><option value="child" id="personChild">👶 Niño</option><option value="adult" id="personAdult">🧑 Adulto</option><option value="senior" id="personSenior">👴 Anciano</option></select></div><div class="btn-row"><button class="btn btn-secondary" onclick="closePersonModal()" id="personCancelBtn">CANCELAR</button><button class="btn btn-primary" onclick="savePerson()" id="personSaveBtn">GUARDAR</button></div></div></div>
+
+<div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="modal-title" id="confirmTitle">⚠ CONFIRMAR</div><div id="confirmText">¿Estás seguro?</div><div class="btn-row"><button class="btn btn-secondary" onclick="closeConfirm()" id="confirmCancelBtn">CANCELAR</button><button class="btn btn-primary" id="confirmBtn" onclick="executeConfirm()" id="confirmAcceptBtn">ACEPTAR</button></div></div></div>
+
+<div class="toast" id="toast">Mensaje</div>
+
+<script>
+  // ============ TRADUCCIONES COMPLETAS 6 IDIOMAS ============
+  const translations = {
+    es: {
+      appSubtitle: 'PREPARADO PARA LO INESPERADO', dashboardTitle: '// ESTADO GENERAL', evaluating: 'EVALUANDO...',
+      products: 'PRODUCTOS', materials: 'MATERIALES', deps: 'DEPENDENCIAS', days: 'DÍAS AUTONOMÍA',
+      modulesTitle: '// MÓDULOS', pantryTitle: 'DESPENSA', pantryDesc: 'Alimentos y suministros',
+      materialsTitle: 'MATERIALES', materialsDesc: 'Equipamiento y herramientas', personsTitle: 'PERSONAS',
+      personsDesc: 'Perfiles y necesidades', nutritionTitle: 'NUTRICIÓN', nutritionDesc: 'Calorías y menús',
+      guidesTitle: 'GUÍAS', guidesDesc: 'Supervivencia', settingsTitle: 'AJUSTES', settingsDesc: 'Configuración',
+      optimal: '● ÓPTIMO', stable: '◐ ESTABLE', critical: '▼ CRÍTICO', addPerson: '+ AÑADIR PERSONA',
+      totalKcal: 'Kcal totales', dailyKcal: 'Kcal/día', ration: 'RACIÓN',
+      total: 'Total', warning: 'Aviso', expired: 'Caducados', lowStock: 'Stock bajo',
+      all: 'TODOS', food: '🥫 ALIMENTOS', water: '💧 AGUA', medicines: '💊 MEDICINAS',
+      lighting: '💡 ILUMINACIÓN', tools: '🔧 HERRAMIENTAS', energy: '⚡ ENERGÍA',
+      operational: 'OPERATIVO', check: 'REVISAR', broken: 'AVERÍA',
+      emptyProducts: '📦 No hay productos<br>Presiona + para añadir',
+      emptyMaterials: '🔧 No hay materiales<br>Presiona + para añadir',
+      emptyPersons: '👥 No hay personas<br>Presiona + AÑADIR PERSONA',
+      emptyNutrition: '🥗 Añade alimentos con datos nutricionales',
+      child: '👶 Niño', adult: '🧑 Adulto', senior: '👴 Anciano',
+      normal: 'Normal (100%)', mild: 'Leve (75%)', severe: 'Severo (50%)', survival: 'Supervivencia (33%)',
+      proteins: 'Proteínas', fats: 'Grasas', carbs: 'Carbohidratos', fiber: 'Fibra',
+      fire: '🔥 CÓMO HACER FUEGO', fireDesc: 'Métodos de ignición',
+      orient: '🧭 ORIENTACIÓN', orientDesc: 'Sin brújula',
+      firstAid: '🩹 PRIMEROS AUXILIOS', firstAidDesc: 'Heridas y RCP',
+      morse: '📻 CÓDIGO MORSE', morseDesc: 'Señales SOS',
+      fontSize: '📐 TAMAÑO TEXTO', small: 'PEQUEÑO', medium: 'MEDIANO', large: 'GRANDE', xlarge: 'MUY GRANDE',
+      accentColor: '🎨 COLOR PRINCIPAL', alerts: '🔔 ALERTAS', days30: '30 DÍAS', days60: '60 DÍAS', days90: '90 DÍAS',
+      data: '💾 DATOS', export: '📤 EXPORTAR', reset: '🗑️ RESETEAR TODO',
+      navHome: '🏠 INICIO', navPantry: '🥫 DESPENSA', navMaterials: '🔧 MATERIALES', navSettings: '⚙️ AJUSTES',
+      addProduct: 'AÑADIR PRODUCTO', editProduct: 'EDITAR PRODUCTO', addMaterial: 'AÑADIR MATERIAL', editMaterial: 'EDITAR MATERIAL',
+      name: 'NOMBRE *', category: 'CATEGORÍA', quantity: 'CANTIDAD', unit: 'UNIDAD', minStock: 'STOCK MÍN.',
+      expiry: 'CADUCIDAD', location: 'UBICACIÓN', notes: 'NOTAS',
+      autoFill: '🤖 RELLENAR CON IA', netWeight: 'PESO NETO (g)', kcal: 'KCAL',
+      protein: 'PROTEÍNAS', fat: 'GRASAS', carbs: 'CARBOS', fiber: 'FIBRA',
+      usedFor: 'PARA QUÉ SIRVE', sideEffects: 'EFECTOS SECUNDARIOS', contraindications: 'CONTRAINDICACIONES',
+      cancel: 'CANCELAR', save: 'GUARDAR',
+      dependencies: 'DEPENDENCIAS', addDep: '➕', searchDep: 'Buscar...',
+      lastCharge: 'ÚLTIMA RECARGA', chargeEvery: 'RECARGAR CADA (días)', batteryType: 'TIPO BATERÍA',
+      instructions: 'INSTRUCCIONES', status: 'ESTADO',
+      confirm: '⚠ CONFIRMAR', confirmMsg: '¿Estás seguro?', accept: 'ACEPTAR',
+      productAdded: '✅ Producto añadido', productUpdated: '✅ Producto actualizado', productDeleted: '🗑️ Producto eliminado',
+      materialAdded: '✅ Material añadido', materialUpdated: '✅ Material actualizado', materialDeleted: '🗑️ Material eliminado',
+      personAdded: '✅ Persona añadida', personUpdated: '✅ Persona actualizada', personDeleted: '🗑️ Persona eliminada',
+      nameRequired: '⚠ Nombre requerido', dataExported: '📦 Datos exportados', allReset: '🗑️ Todos los datos eliminados',
+      rationConfig: '⚙️ RACIONAMIENTO', macrosTotal: '// MACROS TOTALES'
+    },
+    en: {
+      appSubtitle: 'READY FOR THE UNEXPECTED', dashboardTitle: '// GENERAL STATUS', evaluating: 'EVALUATING...',
+      products: 'PRODUCTS', materials: 'GEAR', deps: 'DEPENDENCIES', days: 'AUTONOMY DAYS',
+      modulesTitle: '// MODULES', pantryTitle: 'PANTRY', pantryDesc: 'Food and supplies',
+      materialsTitle: 'GEAR', materialsDesc: 'Tools and equipment', personsTitle: 'PEOPLE',
+      personsDesc: 'Profiles and needs', nutritionTitle: 'NUTRITION', nutritionDesc: 'Calories and meals',
+      guidesTitle: 'GUIDES', guidesDesc: 'Survival', settingsTitle: 'SETTINGS', settingsDesc: 'Configuration',
+      optimal: '● OPTIMAL', stable: '◐ STABLE', critical: '▼ CRITICAL', addPerson: '+ ADD PERSON',
+      totalKcal: 'Total kcal', dailyKcal: 'Daily kcal', ration: 'RATION',
+      total: 'Total', warning: 'Warning', expired: 'Expired', lowStock: 'Low stock',
+      all: 'ALL', food: '🥫 FOOD', water: '💧 WATER', medicines: '💊 MEDICINES',
+      lighting: '💡 LIGHTING', tools: '🔧 TOOLS', energy: '⚡ ENERGY',
+      operational: 'OPERATIONAL', check: 'CHECK', broken: 'BROKEN',
+      emptyProducts: '📦 No products<br>Press + to add',
+      emptyMaterials: '🔧 No gear<br>Press + to add',
+      emptyPersons: '👥 No people<br>Press + ADD PERSON',
+      emptyNutrition: '🥗 Add foods with nutritional data',
+      child: '👶 Child', adult: '🧑 Adult', senior: '👴 Senior',
+      normal: 'Normal (100%)', mild: 'Mild (75%)', severe: 'Severe (50%)', survival: 'Survival (33%)',
+      proteins: 'Protein', fats: 'Fat', carbs: 'Carbs', fiber: 'Fiber',
+      fire: '🔥 HOW TO MAKE FIRE', fireDesc: 'Ignition methods',
+      orient: '🧭 ORIENTATION', orientDesc: 'Without compass',
+      firstAid: '🩹 FIRST AID', firstAidDesc: 'Wounds and CPR',
+      morse: '📻 MORSE CODE', morseDesc: 'SOS signals',
+      fontSize: '📐 FONT SIZE', small: 'SMALL', medium: 'MEDIUM', large: 'LARGE', xlarge: 'EXTRA LARGE',
+      accentColor: '🎨 ACCENT COLOR', alerts: '🔔 ALERTS', days30: '30 DAYS', days60: '60 DAYS', days90: '90 DAYS',
+      data: '💾 DATA', export: '📤 EXPORT', reset: '🗑️ RESET ALL',
+      navHome: '🏠 HOME', navPantry: '🥫 PANTRY', navMaterials: '🔧 GEAR', navSettings: '⚙️ SETTINGS',
+      addProduct: 'ADD PRODUCT', editProduct: 'EDIT PRODUCT', addMaterial: 'ADD GEAR', editMaterial: 'EDIT GEAR',
+      name: 'NAME *', category: 'CATEGORY', quantity: 'QUANTITY', unit: 'UNIT', minStock: 'MIN STOCK',
+      expiry: 'EXPIRY DATE', location: 'LOCATION', notes: 'NOTES',
+      autoFill: '🤖 AUTO-FILL WITH AI', netWeight: 'NET WEIGHT (g)', kcal: 'KCAL',
+      protein: 'PROTEIN', fat: 'FAT', carbs: 'CARBS', fiber: 'FIBER',
+      usedFor: 'USED FOR', sideEffects: 'SIDE EFFECTS', contraindications: 'CONTRAINDICATIONS',
+      cancel: 'CANCEL', save: 'SAVE',
+      dependencies: 'DEPENDENCIES', addDep: '➕', searchDep: 'Search...',
+      lastCharge: 'LAST CHARGE', chargeEvery: 'CHARGE EVERY (days)', batteryType: 'BATTERY TYPE',
+      instructions: 'INSTRUCTIONS', status: 'STATUS',
+      confirm: '⚠ CONFIRM', confirmMsg: 'Are you sure?', accept: 'ACCEPT',
+      productAdded: '✅ Product added', productUpdated: '✅ Product updated', productDeleted: '🗑️ Product deleted',
+      materialAdded: '✅ Gear added', materialUpdated: '✅ Gear updated', materialDeleted: '🗑️ Gear deleted',
+      personAdded: '✅ Person added', personUpdated: '✅ Person updated', personDeleted: '🗑️ Person deleted',
+      nameRequired: '⚠ Name required', dataExported: '📦 Data exported', allReset: '🗑️ All data deleted',
+      rationConfig: '⚙️ RATIONING', macrosTotal: '// TOTAL MACROS'
+    },
+    fr: {
+      appSubtitle: 'PRÊT POUR L\'IMPREVU', dashboardTitle: '// ÉTAT GÉNÉRAL', evaluating: 'ÉVALUATION...',
+      products: 'PRODUITS', materials: 'MATÉRIEL', deps: 'DÉPENDANCES', days: 'JOURS AUTONOMIE',
+      modulesTitle: '// MODULES', pantryTitle: 'GARDE-MANGER', pantryDesc: 'Aliments et fournitures',
+      materialsTitle: 'MATÉRIEL', materialsDesc: 'Outils et équipement', personsTitle: 'PERSONNES',
+      personsDesc: 'Profils et besoins', nutritionTitle: 'NUTRITION', nutritionDesc: 'Calories et repas',
+      guidesTitle: 'GUIDES', guidesDesc: 'Survie', settingsTitle: 'PARAMÈTRES', settingsDesc: 'Configuration',
+      optimal: '● OPTIMAL', stable: '◐ STABLE', critical: '▼ CRITIQUE', addPerson: '+ AJOUTER PERSONNE',
+      totalKcal: 'Kcal totales', dailyKcal: 'Kcal/jour', ration: 'RATION',
+      total: 'Total', warning: 'Alerte', expired: 'Expirés', lowStock: 'Stock bas',
+      all: 'TOUS', food: '🥫 ALIMENTS', water: '💧 EAU', medicines: '💊 MÉDICAMENTS',
+      lighting: '💡 ÉCLAIRAGE', tools: '🔧 OUTILS', energy: '⚡ ÉNERGIE',
+      operational: 'OPÉRATIONNEL', check: 'VÉRIFIER', broken: 'EN PANNE',
+      emptyProducts: '📦 Aucun produit<br>Appuyez sur + pour ajouter',
+      emptyMaterials: '🔧 Aucun matériel<br>Appuyez sur + pour ajouter',
+      emptyPersons: '👥 Aucune personne<br>Appuyez sur + AJOUTER PERSONNE',
+      emptyNutrition: '🥗 Ajoutez des aliments avec données nutritionnelles',
+      child: '👶 Enfant', adult: '🧑 Adulte', senior: '👴 Senior',
+      normal: 'Normal (100%)', mild: 'Léger (75%)', severe: 'Sévère (50%)', survival: 'Survie (33%)',
+      proteins: 'Protéines', fats: 'Lipides', carbs: 'Glucides', fiber: 'Fibres',
+      fire: '🔥 COMMENT FAIRE DU FEU', fireDesc: 'Méthodes d\'allumage',
+      orient: '🧭 ORIENTATION', orientDesc: 'Sans boussole',
+      firstAid: '🩹 PREMIERS SECOURS', firstAidDesc: 'Blessures et RCR',
+      morse: '📻 CODE MORSE', morseDesc: 'Signaux SOS',
+      fontSize: '📐 TAILLE DE POLICE', small: 'PETIT', medium: 'MOYEN', large: 'GRAND', xlarge: 'TRÈS GRAND',
+      accentColor: '🎨 COULEUR PRINCIPALE', alerts: '🔔 ALERTES', days30: '30 JOURS', days60: '60 JOURS', days90: '90 JOURS',
+      data: '💾 DONNÉES', export: '📤 EXPORTER', reset: '🗑️ TOUT RÉINITIALISER',
+      navHome: '🏠 ACCUEIL', navPantry: '🥫 GARDE-MANGER', navMaterials: '🔧 MATÉRIEL', navSettings: '⚙️ PARAMÈTRES',
+      addProduct: 'AJOUTER PRODUIT', editProduct: 'MODIFIER PRODUIT', addMaterial: 'AJOUTER MATÉRIEL', editMaterial: 'MODIFIER MATÉRIEL',
+      name: 'NOM *', category: 'CATÉGORIE', quantity: 'QUANTITÉ', unit: 'UNITÉ', minStock: 'STOCK MIN',
+      expiry: 'DATE D\'EXPIRATION', location: 'EMPLACEMENT', notes: 'NOTES',
+      autoFill: '🤖 REMPLISSAGE AUTO IA', netWeight: 'POIDS NET (g)', kcal: 'KCAL',
+      protein: 'PROTÉINES', fat: 'LIPIDES', carbs: 'GLUCIDES', fiber: 'FIBRES',
+      usedFor: 'UTILISÉ POUR', sideEffects: 'EFFETS SECONDAIRES', contraindications: 'CONTRE-INDICATIONS',
+      cancel: 'ANNULER', save: 'ENREGISTRER',
+      dependencies: 'DÉPENDANCES', addDep: '➕', searchDep: 'Rechercher...',
+      lastCharge: 'DERNIÈRE CHARGE', chargeEvery: 'CHARGER TOUS LES (jours)', batteryType: 'TYPE DE BATTERIE',
+      instructions: 'INSTRUCTIONS', status: 'STATUT',
+      confirm: '⚠ CONFIRMER', confirmMsg: 'Êtes-vous sûr ?', accept: 'ACCEPTER',
+      productAdded: '✅ Produit ajouté', productUpdated: '✅ Produit modifié', productDeleted: '🗑️ Produit supprimé',
+      materialAdded: '✅ Matériel ajouté', materialUpdated: '✅ Matériel modifié', materialDeleted: '🗑️ Matériel supprimé',
+      personAdded: '✅ Personne ajoutée', personUpdated: '✅ Personne modifiée', personDeleted: '🗑️ Personne supprimée',
+      nameRequired: '⚠ Nom requis', dataExported: '📦 Données exportées', allReset: '🗑️ Toutes les données supprimées',
+      rationConfig: '⚙️ RATIONNEMENT', macrosTotal: '// MACRONUTRIMENTS TOTAUX'
+    },
+    de: {
+      appSubtitle: 'BEREIT FÜR DAS UNERWARTETE', dashboardTitle: '// ALLGEMEINER STATUS', evaluating: 'AUSWERTUNG...',
+      products: 'PRODUKTE', materials: 'AUSRÜSTUNG', deps: 'ABHÄNGIGKEITEN', days: 'AUTONOMIETAGE',
+      modulesTitle: '// MODULE', pantryTitle: 'VORRAT', pantryDesc: 'Lebensmittel und Vorräte',
+      materialsTitle: 'AUSRÜSTUNG', materialsDesc: 'Werkzeuge und Ausrüstung', personsTitle: 'PERSONEN',
+      personsDesc: 'Profile und Bedarf', nutritionTitle: 'ERNÄHRUNG', nutritionDesc: 'Kalorien und Menüs',
+      guidesTitle: 'ANLEITUNGEN', guidesDesc: 'Überleben', settingsTitle: 'EINSTELLUNGEN', settingsDesc: 'Konfiguration',
+      optimal: '● OPTIMAL', stable: '◐ STABIL', critical: '▼ KRITISCH', addPerson: '+ PERSON HINZUFÜGEN',
+      totalKcal: 'Gesamt kcal', dailyKcal: 'Kcal/Tag', ration: 'RATION',
+      total: 'Gesamt', warning: 'Warnung', expired: 'Abgelaufen', lowStock: 'Niedriger Bestand',
+      all: 'ALLE', food: '🥫 LEBENSMITTEL', water: '💧 WASSER', medicines: '💊 MEDIKAMENTE',
+      lighting: '💡 BELEUCHTUNG', tools: '🔧 WERKZEUGE', energy: '⚡ ENERGIE',
+      operational: 'FUNKTIONSFÄHIG', check: 'PRÜFEN', broken: 'DEFEKT',
+      emptyProducts: '📦 Keine Produkte<br>Drücke + zum Hinzufügen',
+      emptyMaterials: '🔧 Keine Ausrüstung<br>Drücke + zum Hinzufügen',
+      emptyPersons: '👥 Keine Personen<br>Drücke + PERSON HINZUFÜGEN',
+      emptyNutrition: '🥗 Füge Lebensmittel mit Nährwerten hinzu',
+      child: '👶 Kind', adult: '🧑 Erwachsener', senior: '👴 Senior',
+      normal: 'Normal (100%)', mild: 'Leicht (75%)', severe: 'Stark (50%)', survival: 'Überleben (33%)',
+      proteins: 'Protein', fats: 'Fett', carbs: 'Kohlenhydrate', fiber: 'Ballaststoffe',
+      fire: '🔥 FEUER MACHEN', fireDesc: 'Zündmethoden',
+      orient: '🧭 ORIENTIERUNG', orientDesc: 'Ohne Kompass',
+      firstAid: '🩹 ERSTE HILFE', firstAidDesc: 'Wunden und CPR',
+      morse: '📻 MORSE CODE', morseDesc: 'SOS Signale',
+      fontSize: '📐 SCHRIFTGRÖSSE', small: 'KLEIN', medium: 'MITTEL', large: 'GROSS', xlarge: 'SEHR GROSS',
+      accentColor: '🎨 AKZENTFARBE', alerts: '🔔 ALARME', days30: '30 TAGE', days60: '60 TAGE', days90: '90 TAGE',
+      data: '💾 DATEN', export: '📤 EXPORTIEREN', reset: '🗑️ ALLES ZURÜCKSETZEN',
+      navHome: '🏠 START', navPantry: '🥫 VORRAT', navMaterials: '🔧 AUSRÜSTUNG', navSettings: '⚙️ EINSTELLUNGEN',
+      addProduct: 'PRODUKT HINZUFÜGEN', editProduct: 'PRODUKT BEARBEITEN', addMaterial: 'AUSRÜSTUNG HINZUFÜGEN', editMaterial: 'AUSRÜSTUNG BEARBEITEN',
+      name: 'NAME *', category: 'KATEGORIE', quantity: 'MENGE', unit: 'EINHEIT', minStock: 'MINDESTBESTAND',
+      expiry: 'VERFALLSDATUM', location: 'STANDORT', notes: 'NOTIZEN',
+      autoFill: '🤖 AUTO-AUSFÜLLUNG MIT KI', netWeight: 'NETTOGEWICHT (g)', kcal: 'KCAL',
+      protein: 'PROTEIN', fat: 'FETT', carbs: 'KOHLENHYDRATE', fiber: 'BALLASTSTOFFE',
+      usedFor: 'VERWENDET FÜR', sideEffects: 'NEBENWIRKUNGEN', contraindications: 'GEGENANZEIGEN',
+      cancel: 'ABBRECHEN', save: 'SPEICHERN',
+      dependencies: 'ABHÄNGIGKEITEN', addDep: '➕', searchDep: 'Suchen...',
+      lastCharge: 'LETZTE LADUNG', chargeEvery: 'LADEN ALLE (Tage)', batteryType: 'BATTERIETYP',
+      instructions: 'ANLEITUNGEN', status: 'STATUS',
+      confirm: '⚠ BESTÄTIGEN', confirmMsg: 'Sind Sie sicher?', accept: 'AKZEPTIEREN',
+      productAdded: '✅ Produkt hinzugefügt', productUpdated: '✅ Produkt aktualisiert', productDeleted: '🗑️ Produkt gelöscht',
+      materialAdded: '✅ Ausrüstung hinzugefügt', materialUpdated: '✅ Ausrüstung aktualisiert', materialDeleted: '🗑️ Ausrüstung gelöscht',
+      personAdded: '✅ Person hinzugefügt', personUpdated: '✅ Person aktualisiert', personDeleted: '🗑️ Person gelöscht',
+      nameRequired: '⚠ Name erforderlich', dataExported: '📦 Daten exportiert', allReset: '🗑️ Alle Daten gelöscht',
+      rationConfig: '⚙️ RATIONIERUNG', macrosTotal: '// GESAMTMAKRONÄHRSTOFFE'
+    },
+    it: {
+      appSubtitle: 'PRONTO PER L\'IMPREVISTO', dashboardTitle: '// STATO GENERALE', evaluating: 'VALUTAZIONE...',
+      products: 'PRODOTTI', materials: 'ATTREZZATURA', deps: 'DIPENDENZE', days: 'GIORNI AUTONOMIA',
+      modulesTitle: '// MODULI', pantryTitle: 'DISPENSA', pantryDesc: 'Cibo e forniture',
+      materialsTitle: 'ATTREZZATURA', materialsDesc: 'Strumenti e equipaggiamento', personsTitle: 'PERSONE',
+      personsDesc: 'Profili e bisogni', nutritionTitle: 'NUTRIZIONE', nutritionDesc: 'Calorie e menu',
+      guidesTitle: 'GUIDE', guidesDesc: 'Sopravvivenza', settingsTitle: 'IMPOSTAZIONI', settingsDesc: 'Configurazione',
+      optimal: '● OTTIMALE', stable: '◐ STABILE', critical: '▼ CRITICO', addPerson: '+ AGGIUNGI PERSONA',
+      totalKcal: 'Kcal totali', dailyKcal: 'Kcal/giorno', ration: 'RAZIONE',
+      total: 'Totale', warning: 'Avviso', expired: 'Scaduti', lowStock: 'Scorta bassa',
+      all: 'TUTTI', food: '🥫 CIBO', water: '💧 ACQUA', medicines: '💊 FARMACI',
+      lighting: '💡 ILLUMINAZIONE', tools: '🔧 UTENSILI', energy: '⚡ ENERGIA',
+      operational: 'OPERATIVO', check: 'VERIFICARE', broken: 'GUASTO',
+      emptyProducts: '📦 Nessun prodotto<br>Premi + per aggiungere',
+      emptyMaterials: '🔧 Nessuna attrezzatura<br>Premi + per aggiungere',
+      emptyPersons: '👥 Nessuna persona<br>Premi + AGGIUNGI PERSONA',
+      emptyNutrition: '🥗 Aggiungi cibi con dati nutrizionali',
+      child: '👶 Bambino', adult: '🧑 Adulto', senior: '👴 Anziano',
+      normal: 'Normale (100%)', mild: 'Leggero (75%)', severe: 'Severo (50%)', survival: 'Sopravvivenza (33%)',
+      proteins: 'Proteine', fats: 'Grassi', carbs: 'Carboidrati', fiber: 'Fibra',
+      fire: '🔥 COME FARE FUOCO', fireDesc: 'Metodi di accensione',
+      orient: '🧭 ORIENTAMENTO', orientDesc: 'Senza bussola',
+      firstAid: '🩹 PRIMO SOCCORSO', firstAidDesc: 'Ferite e RCP',
+      morse: '📻 CODICE MORSE', morseDesc: 'Segnali SOS',
+      fontSize: '📐 DIMENSIONE TESTO', small: 'PICCOLO', medium: 'MEDIO', large: 'GRANDE', xlarge: 'MOLTO GRANDE',
+      accentColor: '🎨 COLORE PRINCIPALE', alerts: '🔔 ALLERTE', days30: '30 GIORNI', days60: '60 GIORNI', days90: '90 GIORNI',
+      data: '💾 DATI', export: '📤 ESPORTA', reset: '🗑️ RESETTA TUTTO',
+      navHome: '🏠 HOME', navPantry: '🥫 DISPENSA', navMaterials: '🔧 ATTREZZATURA', navSettings: '⚙️ IMPOSTAZIONI',
+      addProduct: 'AGGIUNGI PRODOTTO', editProduct: 'MODIFICA PRODOTTO', addMaterial: 'AGGIUNGI ATTREZZATURA', editMaterial: 'MODIFICA ATTREZZATURA',
+      name: 'NOME *', category: 'CATEGORIA', quantity: 'QUANTITÀ', unit: 'UNITÀ', minStock: 'SCORTA MINIMA',
+      expiry: 'DATA SCADENZA', location: 'POSIZIONE', notes: 'NOTE',
+      autoFill: '🤖 RIEMPIMENTO AUTOMATICO IA', netWeight: 'PESO NETTO (g)', kcal: 'KCAL',
+      protein: 'PROTEINE', fat: 'GRASSI', carbs: 'CARBOIDRATI', fiber: 'FIBRA',
+      usedFor: 'USATO PER', sideEffects: 'EFFETTI COLLATERALI', contraindications: 'CONTROINDICAZIONI',
+      cancel: 'ANNULLA', save: 'SALVA',
+      dependencies: 'DIPENDENZE', addDep: '➕', searchDep: 'Cerca...',
+      lastCharge: 'ULTIMA RICARICA', chargeEvery: 'RICARICA OGNI (giorni)', batteryType: 'TIPO BATTERIA',
+      instructions: 'ISTRUZIONI', status: 'STATO',
+      confirm: '⚠ CONFERMA', confirmMsg: 'Sei sicuro?', accept: 'ACCETTA',
+      productAdded: '✅ Prodotto aggiunto', productUpdated: '✅ Prodotto aggiornato', productDeleted: '🗑️ Prodotto eliminato',
+      materialAdded: '✅ Attrezzatura aggiunta', materialUpdated: '✅ Attrezzatura aggiornata', materialDeleted: '🗑️ Attrezzatura eliminata',
+      personAdded: '✅ Persona aggiunta', personUpdated: '✅ Persona aggiornata', personDeleted: '🗑️ Persona eliminata',
+      nameRequired: '⚠ Nome richiesto', dataExported: '📦 Dati esportati', allReset: '🗑️ Tutti i dati eliminati',
+      rationConfig: '⚙️ CONFIGURAZIONE RAZIONAMENTO', macrosTotal: '// MACRONUTRIENTI TOTALI'
+    },
+    pt: {
+      appSubtitle: 'PRONTO PARA O INESPERADO', dashboardTitle: '// ESTADO GERAL', evaluating: 'AVALIANDO...',
+      products: 'PRODUTOS', materials: 'MATERIAIS', deps: 'DEPENDÊNCIAS', days: 'DIAS AUTONOMIA',
+      modulesTitle: '// MÓDULOS', pantryTitle: 'DESPENSA', pantryDesc: 'Alimentos e suprimentos',
+      materialsTitle: 'MATERIAIS', materialsDesc: 'Ferramentas e equipamentos', personsTitle: 'PESSOAS',
+      personsDesc: 'Perfis e necessidades', nutritionTitle: 'NUTRIÇÃO', nutritionDesc: 'Calorias e cardápios',
+      guidesTitle: 'GUIAS', guidesDesc: 'Sobrevivência', settingsTitle: 'CONFIGURAÇÕES', settingsDesc: 'Configuração',
+      optimal: '● ÓTIMO', stable: '◐ ESTÁVEL', critical: '▼ CRÍTICO', addPerson: '+ ADICIONAR PESSOA',
+      totalKcal: 'Kcal totais', dailyKcal: 'Kcal/dia', ration: 'RAÇÃO',
+      total: 'Total', warning: 'Aviso', expired: 'Vencidos', lowStock: 'Estoque baixo',
+      all: 'TODOS', food: '🥫 ALIMENTOS', water: '💧 ÁGUA', medicines: '💊 MEDICAMENTOS',
+      lighting: '💡 ILUMINAÇÃO', tools: '🔧 FERRAMENTAS', energy: '⚡ ENERGIA',
+      operational: 'OPERACIONAL', check: 'VERIFICAR', broken: 'AVARIA',
+      emptyProducts: '📦 Sem produtos<br>Pressione + para adicionar',
+      emptyMaterials: '🔧 Sem materiais<br>Pressione + para adicionar',
+      emptyPersons: '👥 Sem pessoas<br>Pressione + ADICIONAR PESSOA',
+      emptyNutrition: '🥗 Adicione alimentos com dados nutricionais',
+      child: '👶 Criança', adult: '🧑 Adulto', senior: '👴 Idoso',
+      normal: 'Normal (100%)', mild: 'Leve (75%)', severe: 'Severo (50%)', survival: 'Sobrevivência (33%)',
+      proteins: 'Proteínas', fats: 'Gorduras', carbs: 'Carboidratos', fiber: 'Fibras',
+      fire: '🔥 COMO FAZER FOGO', fireDesc: 'Métodos de ignição',
+      orient: '🧭 ORIENTAÇÃO', orientDesc: 'Sem bússola',
+      firstAid: '🩹 PRIMEIROS SOCORROS', firstAidDesc: 'Ferimentos e RCP',
+      morse: '📻 CÓDIGO MORSE', morseDesc: 'Sinais SOS',
+      fontSize: '📐 TAMANHO DO TEXTO', small: 'PEQUENO', medium: 'MÉDIO', large: 'GRANDE', xlarge: 'MUITO GRANDE',
+      accentColor: '🎨 COR PRINCIPAL', alerts: '🔔 ALERTAS', days30: '30 DIAS', days60: '60 DIAS', days90: '90 DIAS',
+      data: '💾 DADOS', export: '📤 EXPORTAR', reset: '🗑️ REINICIAR TUDO',
+      navHome: '🏠 INÍCIO', navPantry: '🥫 DESPENSA', navMaterials: '🔧 MATERIAIS', navSettings: '⚙️ CONFIGURAÇÕES',
+      addProduct: 'ADICIONAR PRODUTO', editProduct: 'EDITAR PRODUTO', addMaterial: 'ADICIONAR MATERIAL', editMaterial: 'EDITAR MATERIAL',
+      name: 'NOME *', category: 'CATEGORIA', quantity: 'QUANTIDADE', unit: 'UNIDADE', minStock: 'ESTOQUE MÍN.',
+      expiry: 'DATA VALIDADE', location: 'LOCALIZAÇÃO', notes: 'NOTAS',
+      autoFill: '🤖 PREENCHER COM IA', netWeight: 'PESO LÍQUIDO (g)', kcal: 'KCAL',
+      protein: 'PROTEÍNAS', fat: 'GORDURAS', carbs: 'CARBOIDRATOS', fiber: 'FIBRAS',
+      usedFor: 'USADO PARA', sideEffects: 'EFEITOS COLATERAIS', contraindications: 'CONTRAINDICAÇÕES',
+      cancel: 'CANCELAR', save: 'SALVAR',
+      dependencies: 'DEPENDÊNCIAS', addDep: '➕', searchDep: 'Buscar...',
+      lastCharge: 'ÚLTIMA CARGA', chargeEvery: 'CARREGAR A CADA (dias)', batteryType: 'TIPO DE BATERIA',
+      instructions: 'INSTRUÇÕES', status: 'ESTADO',
+      confirm: '⚠ CONFIRMAR', confirmMsg: 'Tem certeza?', accept: 'ACEITAR',
+      productAdded: '✅ Produto adicionado', productUpdated: '✅ Produto atualizado', productDeleted: '🗑️ Produto removido',
+      materialAdded: '✅ Material adicionado', materialUpdated: '✅ Material atualizado', materialDeleted: '🗑️ Material removido',
+      personAdded: '✅ Pessoa adicionada', personUpdated: '✅ Pessoa atualizada', personDeleted: '🗑️ Pessoa removida',
+      nameRequired: '⚠ Nome obrigatório', dataExported: '📦 Dados exportados', allReset: '🗑️ Todos os dados removidos',
+      rationConfig: '⚙️ CONFIGURAÇÃO DE RACIONAMENTO', macrosTotal: '// MACRONUTRIENTES TOTAIS'
+    }
+  };
+
+  let currentLang = localStorage.getItem('lang') || 'es';
+  let rationLevel = 100;
+  let products = [], materials = [], persons = [];
+  let editingProductId = null, editingMaterialId = null, editingPersonId = null;
+  let pendingAction = null;
+  let currentFilter = 'all', currentMatFilter = 'all';
+  let selectedDeps = [];
+  let warnDays = 60;
+
+  // Base de datos IA
+  const nutritionDB = {
+    'arroz': { kcal: 130, protein: 2.7, fat: 0.3, carbs: 28, fiber: 0.4 },
+    'lentejas': { kcal: 116, protein: 9, fat: 0.4, carbs: 20, fiber: 8 },
+    'atun': { kcal: 184, protein: 23, fat: 10, carbs: 0, fiber: 0 },
+    'pollo': { kcal: 165, protein: 31, fat: 3.6, carbs: 0, fiber: 0 },
+    'pan': { kcal: 265, protein: 9, fat: 3.2, carbs: 49, fiber: 2.7 },
+    'pasta': { kcal: 131, protein: 5, fat: 1.1, carbs: 25, fiber: 1.8 }
+  };
+
+  function t(key) { return translations[currentLang]?.[key] || translations.es[key] || key; }
+
+  function updateAllTexts() {
+    document.querySelectorAll('[id]').forEach(el => { if (translations[currentLang][el.id]) el.textContent = translations[currentLang][el.id]; });
+    document.getElementById('levelStatus').innerHTML = t('evaluating');
+    updateDashboard(); renderProducts(); renderMaterials(); renderPersons(); updateNutrition();
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+    updateAllTexts();
+    showToast('Idioma cambiado a ' + lang.toUpperCase());
+  }
+
+  function setFontSize(size) {
+    document.body.className = document.body.className.replace(/font-\w+/, '');
+    document.body.classList.add('font-' + size);
+    localStorage.setItem('fontSize', size);
+    showToast(t('fontSize') + ': ' + t(size));
+  }
+
+  function setAccentColor(color) {
+    document.documentElement.style.setProperty('--green', color);
+    localStorage.setItem('accentColor', color);
+  }
+
+  function setWarnDays(days) { warnDays = days; localStorage.setItem('warnDays', days); renderProducts(); showToast(t('alerts') + ': ' + days + ' ' + t('days')); }
+  function showToast(msg) { const tEl = document.getElementById('toast'); tEl.textContent = msg; tEl.classList.add('show'); setTimeout(() => tEl.classList.remove('show'), 2000); }
+  function getExpStatus(exp) { if (!exp) return 'ok'; const diff = Math.floor((new Date(exp) - new Date()) / 86400000); if (diff < 0) return 'danger'; if (diff <= warnDays) return 'warn'; return 'ok'; }
+  function getBatteryStatus(mat) { if (!mat.lastCharge || !mat.chargeInterval) return null; const days = Math.floor((new Date() - new Date(mat.lastCharge)) / 86400000); if (days > mat.chargeInterval) return { status: 'danger', msg: '🔴 ' + t('lastCharge') + ' ' + t('expired') }; if (days > mat.chargeInterval * 0.7) return { status: 'warn', msg: '🟡 ' + t('lastCharge') + ' ' + t('warning') }; return null; }
+  function checkDeps(mat) { if (!mat.deps) return []; return mat.deps.filter(d => { const dep = materials.find(m => m.id === d.id); return !dep || dep.qty < d.qty; }); }
+  function getTotalCalories() { return products.filter(p => p.cat === 'ALIMENTOS' && p.kcal && p.netWeight).reduce((s, p) => s + (p.kcal * (p.netWeight / 100) * p.qty), 0); }
+  function getMacros() { let m = { p:0, f:0, c:0, fb:0 }; products.filter(p => p.cat === 'ALIMENTOS').forEach(p => { if (p.netWeight && p.qty) { const factor = (p.netWeight * p.qty) / 100; m.p += (p.protein || 0) * factor; m.f += (p.fat || 0) * factor; m.c += (p.carbs || 0) * factor; m.fb += (p.fiber || 0) * factor; } }); return m; }
+  function getDailyNeeds() { return persons.reduce((s, p) => s + (p.age === 'child' ? 1800 : p.age === 'senior' ? 1900 : 2200), 0); }
+  function getAutonomy() { const total = getTotalCalories(); const daily = getDailyNeeds() * (rationLevel / 100); return daily > 0 ? Math.floor(total / daily) : 0; }
+
+  function updateDashboard() {
+    const totalP = products.length, totalM = materials.length, missingDeps = materials.reduce((s, m) => s + checkDeps(m).length, 0), days = getAutonomy();
+    let score = 100 - (products.filter(p => getExpStatus(p.exp) === 'danger').length / Math.max(totalP,1) * 30) - (missingDeps / Math.max(totalM,1) * 30);
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    document.getElementById('levelValue').textContent = score + '%';
+    document.getElementById('levelBar').style.width = score + '%';
+    document.getElementById('levelStatus').innerHTML = score >= 70 ? t('optimal') : (score >= 40 ? t('stable') : t('critical'));
+    document.getElementById('statProducts').textContent = totalP;
+    document.getElementById('statMaterials').textContent = totalM;
+    document.getElementById('statDeps').textContent = missingDeps;
+    document.getElementById('statDays').textContent = days;
+    updateNutrition();
+  }
+
+  function renderProducts() {
+    let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+    const expired = products.filter(p => getExpStatus(p.exp) === 'danger').length;
+    const warn = products.filter(p => getExpStatus(p.exp) === 'warn').length;
+    const low = products.filter(p => p.minQty && p.qty < p.minQty).length;
+    document.getElementById('pantryTotal').textContent = products.length;
+    document.getElementById('pantryWarn').textContent = warn;
+    document.getElementById('pantryDanger').textContent = expired;
+    document.getElementById('pantryLow').textContent = low;
+    document.getElementById('pantryCount').textContent = filtered.length + ' items';
+    const container = document.getElementById('productList');
+    if (filtered.length === 0) { container.innerHTML = `<div class="empty-state">${t('emptyProducts')}</div>`; return; }
+    container.innerHTML = filtered.map(p => `<div class="product-card ${getExpStatus(p.exp)}"><div class="product-photo">${p.cat === 'ALIMENTOS' ? '🥫' : p.cat === 'AGUA' ? '💧' : '💊'}</div><div class="product-info"><div class="product-cat">${p.cat}</div><div class="product-name">${p.name}</div><div class="product-meta">${p.qty} ${p.unit}${p.loc ? ` · 📍 ${p.loc}` : ''}</div><div class="warning-text">${getExpStatus(p.exp) === 'danger' ? '⛔ ' + t('expired') : getExpStatus(p.exp) === 'warn' ? '⚠️ ' + t('warning') : ''}</div></div><div><button class="btn-icon" onclick="editProduct(${p.id})">✏️</button><button class="btn-icon" onclick="deleteProduct(${p.id})">🗑️</button></div></div>`).join('');
+  }
+
+  function renderMaterials() {
+    let filtered = currentMatFilter === 'all' ? materials : materials.filter(m => m.cat === currentMatFilter);
+    document.getElementById('materialsCount').textContent = filtered.length + ' items';
+    const container = document.getElementById('materialList');
+    if (filtered.length === 0) { container.innerHTML = `<div class="empty-state">${t('emptyMaterials')}</div>`; return; }
+    container.innerHTML = filtered.map(m => { const batt = getBatteryStatus(m); const missing = checkDeps(m); let status = m.status === 'AVERÍA' ? 'danger' : (m.status === 'REVISAR' ? 'warn' : 'ok'); if (batt) status = batt.status; return `<div class="material-card ${status}"><div class="product-photo">${m.cat === 'ILUMINACIÓN' ? '💡' : '🔧'}</div><div class="product-info"><div class="product-cat">${m.cat}</div><div class="product-name">${m.name}</div><div class="product-meta">${m.qty} uds · ${t(m.status.toLowerCase())}${m.loc ? ` · 📍 ${m.loc}` : ''}</div>${batt ? `<div class="warning-text">${batt.msg}</div>` : ''}${missing.length ? `<div class="warning-text">⚠️ ${t('deps')}: ${missing.map(d => d.name).join(', ')}</div>` : ''}</div><div><button class="btn-icon" onclick="editMaterial(${m.id})">✏️</button><button class="btn-icon" onclick="deleteMaterial(${m.id})">🗑️</button></div></div>`; }).join('');
+  }
+
+  function renderPersons() {
+    document.getElementById('personsCount').textContent = persons.length + ' ' + (persons.length === 1 ? t('person') : t('persons'));
+    const container = document.getElementById('personsList');
+    if (persons.length === 0) { container.innerHTML = `<div class="empty-state">${t('emptyPersons')}</div>`; return; }
+    container.innerHTML = persons.map(p => `<div class="person-card"><div><strong>${p.name}</strong> · ${p.age === 'child' ? t('child') : p.age === 'senior' ? t('senior') : t('adult')} · ${p.age === 'child' ? 1800 : p.age === 'senior' ? 1900 : 2200} ${t('kcal')}/día</div><div style="margin-top:8px;"><button class="btn-icon" onclick="editPerson(${p.id})">✏️</button><button class="btn-icon" onclick="deletePerson(${p.id})">🗑️</button></div></div>`).join('');
+  }
+
+  function updateNutrition() {
+    const total = getTotalCalories();
+    const daily = getDailyNeeds() * (rationLevel / 100);
+    const days = getAutonomy();
+    const macros = getMacros();
+    document.getElementById('nutTotal').textContent = Math.round(total);
+    document.getElementById('nutDaily').textContent = Math.round(daily);
+    document.getElementById('nutDays').textContent = days;
+    document.getElementById('nutRation').textContent = rationLevel + '%';
+    document.getElementById('nutritionBadge').textContent = Math.round(total) + ' KCAL';
+    document.getElementById('macroProtein').textContent = Math.round(macros.p);
+    document.getElementById('macroFat').textContent = Math.round(macros.f);
+    document.getElementById('macroCarbs').textContent = Math.round(macros.c);
+    document.getElementById('macroFiber').textContent = Math.round(macros.fb);
+    generateMenu();
+  }
+
+  function generateMenu() {
+    const foods = products.filter(p => p.cat === 'ALIMENTOS' && p.kcal && p.netWeight);
+    if (foods.length === 0) { document.getElementById('menuContainer').innerHTML = `<div class="empty-state">${t('emptyNutrition')}</div>`; return; }
+    const daily = getDailyNeeds() * (rationLevel / 100);
+    const meals = [{ name: '🌅 ' + t('breakfast'), pct: 0.25 }, { name: '☀️ ' + t('lunch'), pct: 0.35 }, { name: '🌙 ' + t('dinner'), pct: 0.3 }, { name: '🍎 ' + t('snack'), pct: 0.1 }];
+    let html = '';
+    for (let meal of meals) { const kcal = daily * meal.pct; html += `<div class="settings-block"><div class="settings-title">${meal.name} · ~${Math.round(kcal)} ${t('kcal')}</div><div style="font-size:0.7rem;">${t('suggested')}</div></div>`; }
+    document.getElementById('menuContainer').innerHTML = html;
+  }
+
+  function updateRation() { rationLevel = parseInt(document.getElementById('rationSelect').value); localStorage.setItem('ration', rationLevel); updateNutrition(); updateDashboard(); }
+  function autoFillNutrition() { const name = document.getElementById('productName').value.toLowerCase().trim(); if (!name) { showToast(t('nameRequired')); return; } const found = nutritionDB[name] || Object.entries(nutritionDB).find(([k]) => name.includes(k))?.[1]; if (found) { document.getElementById('productNetWeight').value = 100; document.getElementById('productKcal').value = found.kcal; document.getElementById('productProtein').value = found.protein; document.getElementById('productFat').value = found.fat; document.getElementById('productCarbs').value = found.carbs; document.getElementById('productFiber').value = found.fiber; showToast('✅ ' + t('autoFill')); } else showToast('❌ ' + t('notFound')); }
+  function toggleProductFields() { const cat = document.getElementById('productCat').value; document.getElementById('productNutritionBlock').style.display = cat === 'ALIMENTOS' ? 'block' : 'none'; document.getElementById('productMedicineBlock').style.display = cat === 'MEDICINAS' ? 'block' : 'none'; }
+  function toggleMaterialFields() { const cat = document.getElementById('materialCat').value; document.getElementById('materialBatteryBlock').style.display = (cat === 'ENERGÍA' || cat === 'ILUMINACIÓN') ? 'block' : 'none'; }
+
+  function loadData() {
+    const savedP = localStorage.getItem('kukades_products'); products = savedP ? JSON.parse(savedP) : [{ id: 1, name: 'Agua', cat: 'AGUA', qty: 12, unit: 'L' }, { id: 2, name: 'Arroz', cat: 'ALIMENTOS', qty: 5, unit: 'kg', netWeight: 1000, kcal: 130, protein: 2.7, fat: 0.3, carbs: 28 }];
+    const savedM = localStorage.getItem('kukades_materials'); materials = savedM ? JSON.parse(savedM) : [{ id: 100, name: 'Linterna', cat: 'ILUMINACIÓN', status: 'OPERATIVO', qty: 2, deps: [{ id: 101, name: 'Pilas AAA', qty: 3 }] }, { id: 101, name: 'Pilas AAA', cat: 'ENERGÍA', status: 'OPERATIVO', qty: 12 }];
+    const savedPers = localStorage.getItem('kukades_persons'); persons = savedPers ? JSON.parse(savedPers) : [{ id: 200, name: 'Adulto', age: 'adult' }];
+    const savedWarn = localStorage.getItem('warnDays'); if (savedWarn) warnDays = parseInt(savedWarn);
+    const savedRation = localStorage.getItem('ration'); if (savedRation) rationLevel = parseInt(savedRation);
+    const fontSize = localStorage.getItem('fontSize'); if (fontSize) setFontSize(fontSize);
+    const accent = localStorage.getItem('accentColor'); if (accent) setAccentColor(accent);
+    document.getElementById('rationSelect').value = rationLevel;
+    document.getElementById('colorPicker').value = localStorage.getItem('accentColor') || '#39ff14';
+    renderProducts(); renderMaterials(); renderPersons(); updateDashboard();
+  }
+
+  function saveData() { localStorage.setItem('kukades_products', JSON.stringify(products)); localStorage.setItem('kukades_materials', JSON.stringify(materials)); localStorage.setItem('kukades_persons', JSON.stringify(persons)); localStorage.setItem('ration', rationLevel); localStorage.setItem('warnDays', warnDays); }
+
+  function openAddModal() {
+    if (document.getElementById('screen-despensa').classList.contains('active')) {
+      editingProductId = null; document.getElementById('productName').value = ''; document.getElementById('productCat').value = 'ALIMENTOS'; document.getElementById('productQty').value = '1'; document.getElementById('productUnit').value = 'uds'; document.getElementById('productMinQty').value = ''; document.getElementById('productExp').value = ''; document.getElementById('productLoc').value = ''; document.getElementById('productNotes').value = ''; document.getElementById('productNetWeight').value = ''; document.getElementById('productKcal').value = ''; document.getElementById('productProtein').value = ''; document.getElementById('productFat').value = ''; document.getElementById('productCarbs').value = ''; document.getElementById('productFiber').value = ''; document.getElementById('productMedFor').value = ''; document.getElementById('productMedSide').value = ''; document.getElementById('productMedContra').value = ''; toggleProductFields(); document.getElementById('productModal').classList.add('open');
+    } else if (document.getElementById('screen-materiales').classList.contains('active')) { openMatModal(); }
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('productName').value.trim();
+    if (!name) { showToast(t('nameRequired')); return; }
+    const product = { id: editingProductId || Date.now(), name, cat: document.getElementById('productCat').value, qty: parseFloat(document.getElementById('productQty').value) || 1, unit: document.getElementById('productUnit').value, minQty: document.getElementById('productMinQty').value ? parseFloat(document.getElementById('productMinQty').value) : null, exp: document.getElementById('productExp').value, loc: document.getElementById('productLoc').value, notes: document.getElementById('productNotes').value, netWeight: parseFloat(document.getElementById('productNetWeight').value) || null, kcal: parseFloat(document.getElementById('productKcal').value) || null, protein: parseFloat(document.getElementById('productProtein').value) || null, fat: parseFloat(document.getElementById('productFat').value) || null, carbs: parseFloat(document.getElementById('productCarbs').value) || null, fiber: parseFloat(document.getElementById('productFiber').value) || null, medFor: document.getElementById('productMedFor').value, medSide: document.getElementById('productMedSide').value, medContra: document.getElementById('productMedContra').value };
+    if (editingProductId) { const idx = products.findIndex(p => p.id === editingProductId); if (idx !== -1) products[idx] = product; showToast(t('productUpdated')); } else { products.push(product); showToast(t('productAdded')); }
+    saveData(); closeModal(); renderProducts(); updateDashboard();
+  }
+
+  function editProduct(id) { const p = products.find(p => p.id === id); if (!p) return; editingProductId = id; document.getElementById('productName').value = p.name; document.getElementById('productCat').value = p.cat; document.getElementById('productQty').value = p.qty; document.getElementById('productUnit').value = p.unit; document.getElementById('productMinQty').value = p.minQty || ''; document.getElementById('productExp').value = p.exp || ''; document.getElementById('productLoc').value = p.loc || ''; document.getElementById('productNotes').value = p.notes || ''; document.getElementById('productNetWeight').value = p.netWeight || ''; document.getElementById('productKcal').value = p.kcal || ''; document.getElementById('productProtein').value = p.protein || ''; document.getElementById('productFat').value = p.fat || ''; document.getElementById('productCarbs').value = p.carbs || ''; document.getElementById('productFiber').value = p.fiber || ''; document.getElementById('productMedFor').value = p.medFor || ''; document.getElementById('productMedSide').value = p.medSide || ''; document.getElementById('productMedContra').value = p.medContra || ''; toggleProductFields(); document.getElementById('productModal').classList.add('open'); }
+
+  function deleteProduct(id) { pendingAction = () => { products = products.filter(p => p.id !== id); saveData(); renderProducts(); updateDashboard(); showToast(t('productDeleted')); }; document.getElementById('confirmText').innerHTML = t('confirmMsg'); document.getElementById('confirmOverlay').classList.add('open'); }
+
+  function openMatModal(id = null) {
+    editingMaterialId = id; selectedDeps = [];
+    if (id) { const m = materials.find(x => x.id === id); if (m) { document.getElementById('materialName').value = m.name; document.getElementById('materialCat').value = m.cat; document.getElementById('materialStatus').value = m.status; document.getElementById('materialQty').value = m.qty; document.getElementById('materialLoc').value = m.loc || ''; document.getElementById('materialInstructions').value = m.instructions || ''; document.getElementById('materialLastCharge').value = m.lastCharge || ''; document.getElementById('materialChargeInterval').value = m.chargeInterval || '90'; document.getElementById('materialBatteryType').value = m.batteryType || ''; if (m.deps) selectedDeps = [...m.deps]; } } else { document.getElementById('materialName').value = ''; document.getElementById('materialCat').value = 'ILUMINACIÓN'; document.getElementById('materialStatus').value = 'OPERATIVO'; document.getElementById('materialQty').value = '1'; document.getElementById('materialLoc').value = ''; document.getElementById('materialInstructions').value = ''; document.getElementById('materialLastCharge').value = ''; document.getElementById('materialChargeInterval').value = '90'; document.getElementById('materialBatteryType').value = ''; }
+    renderSelectedDeps(); toggleMaterialFields(); document.getElementById('materialModal').classList.add('open');
+  }
+
+  function renderSelectedDeps() { document.getElementById('selectedDeps').innerHTML = selectedDeps.map((d, i) => `<span class="deps-tag">${d.name} x${d.qty}<span style="cursor:pointer; margin-left:6px;" onclick="removeDep(${i})">✕</span></span>`).join(''); }
+  function searchDeps(val) { if (!val.trim()) { document.getElementById('depResults').innerHTML = ''; return; } const matches = materials.filter(m => m.name.toLowerCase().includes(val.toLowerCase()) && !selectedDeps.some(d => d.id === m.id)).slice(0, 5); document.getElementById('depResults').innerHTML = matches.map(m => `<span class="deps-tag" onclick="addDep(${m.id}, '${m.name}')">${m.name}</span>`).join(''); }
+  function addDep(id, name) { selectedDeps.push({ id, name, qty: 1 }); renderSelectedDeps(); document.getElementById('depResults').innerHTML = ''; document.getElementById('depSearch').value = ''; }
+  function addCustomDep() { const name = prompt(t('addDep')); if (name) { const qty = prompt(t('quantity'), '1'); selectedDeps.push({ id: Date.now(), name, qty: parseInt(qty) || 1 }); renderSelectedDeps(); } }
+  function removeDep(idx) { selectedDeps.splice(idx, 1); renderSelectedDeps(); }
+
+  function saveMaterial() {
+    const name = document.getElementById('materialName').value.trim();
+    if (!name) { showToast(t('nameRequired')); return; }
+    const material = { id: editingMaterialId || Date.now(), name, cat: document.getElementById('materialCat').value, status: document.getElementById('materialStatus').value, qty: parseFloat(document.getElementById('materialQty').value) || 1, loc: document.getElementById('materialLoc').value, instructions: document.getElementById('materialInstructions').value, deps: selectedDeps, lastCharge: document.getElementById('materialLastCharge').value, chargeInterval: document.getElementById('materialChargeInterval').value, batteryType: document.getElementById('materialBatteryType').value };
+    if (editingMaterialId) { const idx = materials.findIndex(m => m.id === editingMaterialId); if (idx !== -1) materials[idx] = material; showToast(t('materialUpdated')); } else { materials.push(material); showToast(t('materialAdded')); }
+    saveData(); closeMatModal(); renderMaterials(); updateDashboard();
+  }
+
+  function editMaterial(id) { openMatModal(id); }
+  function deleteMaterial(id) { pendingAction = () => { materials = materials.filter(m => m.id !== id); saveData(); renderMaterials(); updateDashboard(); showToast(t('materialDeleted')); }; document.getElementById('confirmText').innerHTML = t('confirmMsg'); document.getElementById('confirmOverlay').classList.add('open'); }
+
+  function addPerson() { editingPersonId = null; document.getElementById('personName').value = ''; document.getElementById('personAge').value = 'adult'; document.getElementById('personModal').classList.add('open'); }
+  function editPerson(id) { const p = persons.find(x => x.id === id); if (!p) return; editingPersonId = id; document.getElementById('personName').value = p.name; document.getElementById('personAge').value = p.age; document.getElementById('personModal').classList.add('open'); }
+  function savePerson() { const name = document.getElementById('personName').value.trim(); if (!name) { showToast(t('nameRequired')); return; } const person = { id: editingPersonId || Date.now(), name, age: document.getElementById('personAge').value }; if (editingPersonId) { const idx = persons.findIndex(p => p.id === editingPersonId); if (idx !== -1) persons[idx] = person; showToast(t('personUpdated')); } else { persons.push(person); showToast(t('personAdded')); } saveData(); closePersonModal(); renderPersons(); updateDashboard(); }
+  function deletePerson(id) { pendingAction = () => { persons = persons.filter(p => p.id !== id); saveData(); renderPersons(); updateDashboard(); showToast(t('personDeleted')); }; document.getElementById('confirmText').innerHTML = t('confirmMsg'); document.getElementById('confirmOverlay').classList.add('open'); }
+
+  function exportData() { const data = { products, materials, persons, ration: rationLevel, warnDays }; const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `kukades-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showToast(t('dataExported')); }
+  function resetAllData() { pendingAction = () => { products = []; materials = []; persons = []; rationLevel = 100; warnDays = 60; saveData(); loadData(); updateDashboard(); showToast(t('allReset')); }; document.getElementById('confirmText').innerHTML = '⚠️ ' + t('confirmMsg'); document.getElementById('confirmOverlay').classList.add('open'); }
+
+  function showGuide(g) { const guides = { fuego: '🔥 <strong>' + t('fire') + '</strong><br><br>' + t('fireDesc') + ': Pedernal, arco de fricción, lupa, pilas y papel aluminio.', orientacion: '🧭 <strong>' + t('orient') + '</strong><br><br>' + t('orientDesc') + ': Sol (sombra al oeste por la mañana), Estrella Polar (norte), musgo en árboles.', primeros: '🩹 <strong>' + t('firstAid') + '</strong><br><br>' + t('firstAidDesc') + ': Limpiar heridas, desinfectar, cubrir. RCP: 30 compresiones, 2 insuflaciones.', codigo: '📻 <strong>' + t('morse') + '</strong><br><br>SOS: ... --- ...<br>A: .-  B: -...  C: -.-.' }; document.getElementById('guideContent').innerHTML = `<div class="settings-block">${guides[g]}</div><button class="btn btn-secondary" onclick="document.getElementById('guideContent').style.display='none'">${t('cancel')}</button>`; document.getElementById('guideContent').style.display = 'block'; }
+
+  function closeModal() { document.getElementById('productModal').classList.remove('open'); editingProductId = null; }
+  function closeMatModal() { document.getElementById('materialModal').classList.remove('open'); editingMaterialId = null; selectedDeps = []; }
+  function closePersonModal() { document.getElementById('personModal').classList.remove('open'); editingPersonId = null; }
+  function executeConfirm() { if (pendingAction) { pendingAction(); pendingAction = null; } closeConfirm(); }
+  function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+
+  function showScreen(screen, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen-${screen}`).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const fab = document.getElementById('fabBtn');
+    fab.style.display = (screen === 'despensa' || screen === 'materiales') ? 'flex' : 'none';
+    if (screen === 'despensa') renderProducts();
+    if (screen === 'materiales') renderMaterials();
+    if (screen === 'personas') renderPersons();
+    if (screen === 'nutricion') updateNutrition();
+  }
+
+  // Inicialización
+  loadData();
+  setLanguage(currentLang);
+  document.querySelectorAll('.lang-btn').forEach(btn => { btn.addEventListener('click', () => setLanguage(btn.dataset.lang)); });
+  document.querySelectorAll('#productFilters .filter-tab').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('#productFilters .filter-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); currentFilter = btn.dataset.filter; renderProducts(); }); });
+  document.querySelectorAll('#materialFilters .filter-tab').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('#materialFilters .filter-tab').forEach(b => b.classList.remove('active')); btn.classList.add('active'); currentMatFilter = btn.dataset.filter; renderMaterials(); }); });
+  document.getElementById('productCat').addEventListener('change', toggleProductFields);
+  document.getElementById('materialCat').addEventListener('change', toggleMaterialFields);
+
+  // Añadir traducciones que faltan
+  translations.es.breakfast = 'DESAYUNO'; translations.es.lunch = 'ALMUERZO'; translations.es.dinner = 'CENA'; translations.es.snack = 'SNACK'; translations.es.suggested = 'Basado en tus alimentos disponibles'; translations.es.kcal = 'kcal'; translations.es.person = 'persona'; translations.es.persons = 'personas'; translations.es.notFound = 'No encontrado';
+  translations.en.breakfast = 'BREAKFAST'; translations.en.lunch = 'LUNCH'; translations.en.dinner = 'DINNER'; translations.en.snack = 'SNACK'; translations.en.suggested = 'Based on your available food'; translations.en.kcal = 'kcal'; translations.en.person = 'person'; translations.en.persons = 'people'; translations.en.notFound = 'Not found';
+  translations.fr.breakfast = 'PETIT-DÉJEUNER'; translations.fr.lunch = 'DÉJEUNER'; translations.fr.dinner = 'DÎNER'; translations.fr.snack = 'COLLATION'; translations.fr.suggested = 'Basé sur vos aliments disponibles'; translations.fr.kcal = 'kcal'; translations.fr.person = 'personne'; translations.fr.persons = 'personnes'; translations.fr.notFound = 'Non trouvé';
+  translations.de.breakfast = 'FRÜHSTÜCK'; translations.de.lunch = 'MITTAGESSEN'; translations.de.dinner = 'ABENDESSEN'; translations.de.snack = 'SNACK'; translations.de.suggested = 'Basierend auf deinen verfügbaren Lebensmitteln'; translations.de.kcal = 'kcal'; translations.de.person = 'Person'; translations.de.persons = 'Personen'; translations.de.notFound = 'Nicht gefunden';
+  translations.it.breakfast = 'COLAZIONE'; translations.it.lunch = 'PRANZO'; translations.it.dinner = 'CENA'; translations.it.snack = 'SPUNTINO'; translations.it.suggested = 'Basato sui tuoi alimenti disponibili'; translations.it.kcal = 'kcal'; translations.it.person = 'persona'; translations.it.persons = 'persone'; translations.it.notFound = 'Non trovato';
+  translations.pt.breakfast = 'CAFÉ DA MANHÃ'; translations.pt.lunch = 'ALMOÇO'; translations.pt.dinner = 'JANTAR'; translations.pt.snack = 'LANCHE'; translations.pt.suggested = 'Baseado nos seus alimentos disponíveis'; translations.pt.kcal = 'kcal'; translations.pt.person = 'pessoa'; translations.pt.persons = 'pessoas'; translations.pt.notFound = 'Não encontrado';
+</script>
+</body>
+</html>
